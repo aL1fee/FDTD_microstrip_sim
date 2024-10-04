@@ -1,0 +1,1477 @@
+﻿// for release:
+// int WinMain(HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow)
+// Linker -> Linker, system, windows
+//
+//
+// === Physics sources for sims
+Caps & dielectrics: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/ba7ba4fb31a34a167dc98bf25904d38a_chap5capacitance.pdf
+the whole book: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/pages/readings/
+
+
+//
+// === C++ ===
+The statement int* x = 5; in C++ is problematic. Here’s why:
+Pointer Initialization: int* x declares x as a pointer to an integer.
+Assignment: = 5 attempts to assign the value 5 to the pointer x.
+However, this is incorrect because 5 is not a valid memory address. 
+Pointers should be assigned either the address of a variable (using the & operator) 
+or a dynamically allocated memory address (using new or malloc).
+
+Freeing up memory:
+Prevent Memory Leaks: If you don’t free memory that you’ve allocated, it remains occupied even if it’s no longer needed.
+Over time, this can lead to memory leaks, where the available memory is gradually consumed, 
+potentially causing your program to crash or slow down.
+	int* ptr = new int(10); // Allocate memory
+	// Use the memory
+	delete ptr; // Free the memory
+
+Time test:
+	auto testExecutionRenderLoopTime0 = std::chrono::high_resolution_clock::now();
+	auto testExecutionRenderLoopTime1 = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds> (testExecutionRenderLoopTime1 - testExecutionRenderLoopTime0);
+	std::cout << "Time test: " << duration.count() << std::endl;
+
+#do reserves for big arrays.
+#minimize array/vector reallocation
+#minimize array/vector copying
+#minimize vector usage
+
+OpenGL efficiency tests:
+	GLuint query;
+	glGenQueries(1, &query);
+	glBeginQuery(GL_TIME_ELAPSED, query);
+
+	// Your rendering code here
+
+	glEndQuery(GL_TIME_ELAPSED);
+	GLuint64 elapsed_time;
+	glGetQueryObjectui64v(query, GL_QUERY_RESULT, &elapsed_time);
+	std::cout << "Time elapsed: " << elapsed_time / 1000000.0 << " ms" << std::endl;
+
+
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
+//
+//
+// ==Earlier OpenGL notes==
+// OpenGL operates as a state 
+// A triangle contains the smallest number of verticies to represent one flat plane with a normal that's pointing in the same direction.
+// Because of that, GPUs tend to use triangles as their rendering primitive.
+// Rendering is the process by which a computer creates an image from models.
+// 
+// A shader is a program that runs on a GPU.  OpenGL includes all the compiler tools internally to take the source code of your shader and create the code that the GPU needs to execute.
+// It runs on a GPU because it is much faster.
+// Like everything in openGL, shaders work as state machines.
+// NOTE: shaders are usually called a lot of time for each vertex/pixel --> A lot of room for optimization!
+// Although there are several shaders, vertex and fragment shaders usually make up about 80-90% of a typical graphics application.
+// Vertex shaders. They get called for each vertex we want to render. The primary purpose of a vertex shader is to tell openGL where you want that vertex to be in the screenspace.
+//		It is also used to pass data from attributes into the next stage. 
+// Fragment (pixel) shaders. They get called for each pixel that needs to be rastarized (drawn on the screen - in the case of a triangle, the pixels between the verticies
+//		get filled in with a specific color so that the end user sees a clear triangle). The primary purpose of the fragment shader is to decide what color each pixel is supposed to be.
+// In the graphics pipeline, after the CPU makes certain calls, GPU takes the lead and runs a series of shader programs before we see the result rendered. 
+// A pixel is the smallest visible element on your display.The pixels in your system are stored
+//		in a framebuffer, which is a chunk of memory that the graphics hardware manages and feeds to your display device.
+// Attributes – Global variables that may change per vertex, that are passed from the OpenGL application to vertex shaders
+// 
+// There are vertex buffers (buffers that store vertices), index (element) buffers (ones that store indices of the vertices).
+// There are vertex arrays (an openGL special - doesn't exist in other rendering APIs). They are a way to bind vertex buffers with a certain specification/layout
+//		of those vertex buffers. Using vertex arrays helps to make the code easier when having lots of objects to render, by not requiring the programmer
+//		to explicitly specify the layout of a vertex buffer using glVertexAttribPointer command.
+//		Vertex array object contains a binding between vertex buffers and their respective specifications/layouts.
+//		Vertex array objects are mandatory. OpenGL compatibility profile creates VAOs by default. The core profile doesn't -- the programer has to do that.
+//		glVertexAttribPointer binds the vertex array with the currently bound vertex buffer.
+// Using a single VAO is considered faster, but is likely less convenient. OpenGL recommends using VAOs.
+// 
+// 
+// Uniforms are a way to get data from the CPU to the shaders (e.g. changing the color in the fragment shader dynamically rather than hardcoding it)
+// Uniforms are set per draw call (while attributes are set per vertex)
+// 
+// Rendering pipeline -  a sequence of processing stages for converting the data your application provides to OpenGL into a final rendered image
+//		1. Vertex Data
+//			OpenGL requires that all data be stored in buffer objects, which are just chunks of memory managed by OpenGL
+//			Drawing in OpenGL usually means transferring vertex data to the OpenGL server.Think of a vertex as a bundle of data values that are processed together.
+//		2. Vertex Shader
+//			For each vertex that is issued by a drawing command, a vertex shader will be called to process the data associated with that vertex.
+//		3. Tesselation Control Shader
+//			tessellation uses patches to describe an object’s shape and allows relatively simple collections of patch geometry to be tessellated
+//			to increase the number of geometric primitives, providing better - looking models
+//		4. Tesselation Evaluation Shader
+//			The tessellation shading stage can potentially use two shaders to manipulate the patch data and generate the final shape
+//		5. Geometry Shader
+//			Allows additional processing of individual geometric primitives, including creating new ones, before rasterization
+//		6. Primitive Setup
+//			Organizes the vertices into their associated geometric primitives in preparation for clipping and rasterization
+//		7. Culling and Clipping
+//			Only the primitives which are within the visual volume need to actually be rastered (drawn).Primitives which are completely outside the visual volume are discarded.
+//		8. Rasterization
+//			Determines which screen locations are covered by a particular piece of geometry (point, line, or triangle).Knowing those locations, 
+//			along with the input vertex data, the rasterizer linearly interpolates the data values for each varying variable in the 
+//			fragment shader and sends those values as inputs into your fragment shader. Consider a fragment a “candidate pixel,” in that pixels
+//			have a home in the framebuffer, while a fragment still can be rejected and never update its associated pixel location.
+//		9. Fragment Shader
+//			Determines the fragment’s final color(although the next stage, per - fragment operations, can modify the color one last time) 
+//			and potentially its depth value.  A fragment shader may also terminate processing a fragment if it determines the fragment
+//			shouldn’t be drawn; this process is called fragment discard
+//		If a fragment successfully makes it through all of the enabled tests, it may be written directly to the framebuffer, 
+//		updating the color(and possibly depth value) of its pixel, or if blending is enabled, the fragment’s color will be
+//		combined with the pixel’s current color to generate a new color that is written into the framebuffer.
+//
+// Abstaction:
+//		1. Vertex buffers
+//		2. Index (element) buffers
+//		3. Vertex array
+//		4. Render function
+//		5. Shaders
+//
+// A material is a sjader w/ a set of data (a shader with uniforms)
+// 
+// A texture map is an image applied (mapped) to the surface of a shape or polygon.
+//		1. We load an image
+//		2. We create a texture in OpenGL
+//		3. We bind that texture	when it's time to render
+//		4. We modify our shader to bind to that texture slot
+//		5. We sample that texture in our shader
+//		6. We see the texture when we load the shader
+//
+// The bottom left in OpenGL is (0,0). OpenGL expects our textures to start in the bottom left. Typically, when an image is loaded, it's stored from the top left to the bottom right.
+//
+
+	Double buffer. When an application draws in a single buffer the resulting image may
+display flickering issues. This is because the resulting output image is not drawn in an
+instant, but drawn pixel by pixel and usually from left to right and top to bottom. Because
+this image is not displayed at an instant to the user while still being rendered to, the result
+may contain artifacts. The front buffer contains the final output image that is shown at
+the screen, while all the rendering commands draw to the back buffer. As soon as all
+the rendering commands are finished we swap the back buffer to the front buffer so the
+image can be displayed without still being rendered to, removing all the aforementioned
+artifacts.
+
+	A frame - am iteration of the render loop.
+
+	The process of transforming 3D coordinates to 2D pixels is managed by the graphics pipeline of OpenGL.
+The graphics pipeline can be divided into two large parts: the first transforms your 3D coordinates
+into 2D coordinates and the second part transforms the 2D coordinates into actual colored pixels.
+
+	The graphics pipeline takes as input a set of 3D coordinates and transforms these to colored
+2D pixels on your screen. The graphics pipeline can be divided into several steps where each step
+requires the output of the previous step as its input. All of these steps are highly specialized (they
+have one specific function) and can easily be executed in parallel. Because of their parallel nature,
+graphics cards of today have thousands of small processing cores to quickly process your data within
+the graphics pipeline. The processing cores run small programs on the GPU for each step of the
+pipeline. These small programs are called shaders.
+
+	Shaders run on the GPU, saving us valuable CPU time. Shaders are written in the OpenGL Shading Language (GLSL).
+
+	Graphics pipeline:
+		0. Vertex Data[]
+			OpenGL requires that all data be stored in buffer objects, which are just chunks of memory managed by OpenGL.
+			Drawing in OpenGL usually means transferring vertex data to the OpenGL server.
+			Think of a vertex as a bundle of data values that are processed together.
+		*1. Vertex Shader (runs once per vertex) [*Required to be defined]
+			For each vertex that is issued by a drawing command, a vertex shader will be called to process the data associated with that vertex.
+		2. Shape assembly (Tessalation Control and Evaluation Shader)
+			Takes as input all the vertices from the vertex shader that form a primitive and assembles all the point(s) in the primitive shape given.
+		3. Geometry shader
+			Allows additional processing of individual geometric primitives, including creating new ones, before rasterization.
+		4. Tests and blending (+Culling and Clipping)
+			This stage checks the corresponding depth (and stencil) value (we’ll get to those later) of the fragment and uses those to 
+			check if the resulting fragment is in front or behind other objects and should be discarded accordingly. The stage also checks for 
+			alpha values (alpha values define the opacity of an object) and blends the objects accordingly.
+			Only the primitives which are within the visual volume need to actually be rastered (drawn).Primitives which are completely 
+			outside the visual volume are discarded.
+		*5. Fragment shader (runs once per pixel) [*Required to be defined]
+			The main purpose of the fragment shader is to calculate the final color of a pixel and this is 
+			usually the stage where all the advanced OpenGL effects occur. Usually the fragment shader contains 
+			data about the 3D scene that it can use to calculate the final pixel color (like lights, shadows, color of the light and so on)
+		6. Rasterization
+			Determines which screen locations are covered by a particular piece of geometry (point, line, or triangle).Knowing those locations, 
+			along with the input vertex data, the rasterizer linearly interpolates the data values for each varying variable in the fragment 
+			shader and sends those values as inputs into your fragment shader. Consider a fragment a “candidate pixel,” in that pixels have 
+			a home in the framebuffer, while a fragment still can be rejected and never update its associated pixel location.
+
+	As input to the graphics pipeline we pass in a list of three 3D coordinates that should form a
+triangle in an array here called Vertex Data; this vertex data is a collection of vertices. A vertex
+is a collection of data per 3D coordinate. This vertex’s data is represented using vertex attributes
+that can contain any data we’d like.
+
+	OpenGL only processes 3D coordinates when they're in a specific range between -1.0 and 1.0 on all 3 axes (x, y, and z). All coordinates
+within this so called normalized device coordinates range will end up visible on your screen (and all coordinates outside this region won’t).
+
+	Your NDC coordinates will then be transformed to screen-space coordinates via the
+viewport transform using the data you provided with glViewport. The resulting
+screen-space coordinates are then transformed to fragments as inputs to your fragment
+shader.
+
+	Vertex data is sent as input to the first process of the graphics pipeline: the vertex shader.
+This is done by creating memory on the GPU where we store the vertex data, configure how OpenGL should 
+interpret the memory and specify how to send the data to the graphics card. The vertex shader then 
+processes as much vertices as we tell it to from its memory.
+
+	Vertex Buffer Objects (VBO) can store a large number of vertices in the GPU's memory.
+Sending data to the graphics card from the CPU is relatively slow, so wherever we can we try to send
+as much data as possible at once. Once the data is in the graphics card’s memory the vertex shader has
+almost instant access to the vertices making it extremely fast.
+	VBO has a unique ID corresponding to that buffer.
+	OpenGL has many types of buffer objects and the buffer type of a vertex buffer object is GL_ARRAY_BUFFER. 
+
+	OpenGL allows us to bind to several buffers at once as long as they have a
+different buffer type. Once a certain buffer is bound, any buffer calls one makes 
+will be used to configure the currently bound buffer.
+
+	GLSL is the OpenGL Shading Language.
+		Each shader begins with a declaration of its version.
+		Next we declare all the input vertex attributes in the vertex shader with the in keyword.
+
+	A vector in GLSL has a max size of 4 and each of its values can be retrieved via vec.x, vec.y, vec.z and vec.w.
+vec.w is used for something called perspective division.
+
+	Colors in computer graphics are represented as an array of 4 values: the red, green, blue
+and alpha (opacity) component, commonly abbreviated to RGBA. When defining a color
+in OpenGL or GLSL we set the strength of each component to a value between 0.0 and
+1.0.
+
+	A shader program object is the final linked version of multiple shaders combined. To use the recently
+compiled shaders we have to link them to a shader program object and then activate this shader
+program when rendering objects. The activated shader program’s shaders will be used when we
+issue render calls.
+	When linking the shaders into a program it links the outputs of each shader to the inputs of the
+next shader. You'll get linking errors if your outputs and inputs do not match
+
+	OpenGL needs to be told how it should interpret the vertex data (per vertex attribute) using
+glVertexAttribPointer call.
+
+	Each vertex attribute takes its data from memory managed by a VBO and which VBO it
+takes its data from (you can have multiple VBOs) is determined by the VBO currently
+bound to GL_ARRAY_BUFFER when calling glVertexAttribPointer. Since
+the previously defined VBO is still bound before calling glVertexAttribPointer
+vertex attribute 0 is now associated with its vertex data.
+	Vertex attributes are disabled by default.
+
+	A vertex array object (VAO) can be bound just like a vertex buffer object and any
+subsequent vertex attribute calls from that point on will be stored inside the VAO. This has the
+advantage that when configuring vertex attribute pointers you only have to make those calls once
+and whenever we want to draw the object, we can just bind the corresponding VAO. This makes
+switching between different vertex data and attribute configurations as easy as binding a different
+VAO. All the state we just set is stored inside the VAO.
+	Vertex array object stores the following:
+		1. Calls to  glEnableVertexAttribArray or glDisableVertexAttribArray
+		2. Vertex attribute configurations via glVertexAttribPointer
+		3. Vertex buffer objects associated with vertex attributes by calls to glVertexAttribPointer.
+
+	Core OpenGL requires that we use a VAO so it knows what to do with our vertex inputs.
+
+	Element (index) buffer objects (EBO) is a buffer that stores indices that OpenGL uses to decide what 
+vertices to draw. That is called indexed drawing. We have to specify the unique vertices and the indices to
+draw them as a rectangle.
+
+	The glDrawElements function takes its indices from the EBO currently bound to the
+GL_ELEMENT_ARRAY_BUFFER target. This means we have to bind the corresponding EBO
+each time we want to render an object with indices which again is a bit cumbersome. It just so
+happens that a vertex array object also keeps track of element buffer object bindings. The last
+element buffer object that gets bound while a VAO is bound, is stored as the VAO’s element buffer
+object. Binding to a VAO then also automatically binds that EBO.
+	A VAO stores the glBindBuffer calls when the target is
+GL_ELEMENT_ARRAY_BUFFER. This also means it stores its unbind calls so
+make sure you don’t unbind the element array buffer before unbinding your VAO,
+otherwise it doesn’t have an EBO configured.
+
+	Shaders are little programs that rest on the GPU. The only communication they have is
+via their inputs and outputs.
+	GLSL is tailored for use with graphics and contains
+useful features specifically targeted at vector and matrix manipulation.
+	Shaders always begin with a version declaration, followed by a list of input and output variables,
+uniforms and its main function. Each shader’s entry point is at its main function where we process
+any input variables and output the results in its output variables.
+	A vertex attribute is every input variable to the vertex shader.
+	A vector in GLSL is a 1,2,3 or 4 component container for any of the basic types (int, flaot, double, uint, bool).
+	Vectors are a flexible datatype that we can use for all kinds of input and output.
+	Swizzling - you can use x, y, z, or w, referring to the first, second, third, and fourth components, respectively.
+	Vertex shader receives its input straight from the vertex data. To define how the 
+vertex data is organized we specify the input variables with location metadata so we
+can configure the vertex attributes on the CPU. This is often done as layout
+(location = 0). The vertex shader thus requires an extra layout specification for its inputs so
+we can link it with the vertex data.
+	The other exception is that the fragment shader requires a vec4 color output variable, since the
+fragment shaders needs to generate a final output color. If you fail to specify an output color in your
+fragment shader, the color buffer output for those fragments will be undefined (which usually means
+OpenGL will render them either black or white).
+	So if we want to send data from one shader to the other we’d have to declare an output in the
+sending shader and a similar input in the receiving shader. When the types and the names are equal
+on both sides OpenGL will link those variables together and then it is possible to send data between
+shaders (this is done when linking a program object).
+
+	Uniforms are a way to pass data from our application on the CPU to the shaders on the GPU.
+	Uniforms are global. Global, meaning that a uniform variable is unique per shader program object, and can be
+accessed from any shader at any stage in the shader program
+	Whatever you set the uniform value to, uniforms will keep their values until they’re either reset or updated.
+		!!!
+		!!!Note that finding the uniform location does not require you to use the shader program first, but updating a
+uniform does require you to first use the program (by calling glUseProgram), because it sets the
+uniform on the currently active shader program.
+
+	Fragment interpolation in the fragment shader. When rendering a triangle the rasterization stage usually
+results in a lot more fragments than vertices originally specified. The rasterizer then determines the
+positions of each of those fragments based on where they reside on the triangle shape. Based on
+these positions, it interpolates all the fragment shader’s input variables.
+
+	A texture is a 2D image (even 1D and 3D textures exist) used to add detail to an object; think of a texture as a piece of paper with a
+nice brick image (for example) on it neatly folded over your 3D house so it looks like your house
+has a stone exterior. Because we can insert a lot of detail in a single image, we can give the illusion
+the object is extremely detailed without having to specify extra vertices.
+	In order to map a texture to the triangle we need to tell each vertex of the triangle which part of
+the texture it corresponds to. Each vertex should thus have a texture coordinate associated with them
+that specifies what part of the texture image to sample from. Fragment interpolation then does the
+rest for the other fragments.
+	Texture coordinates range from 0 to 1 in the x and y axis (remember that we use 2D texture im￾ages).
+Retrieving the texture color using texture coordinates is called sampling. Texture coordinates
+start at (0,0) for the lower left corner of a texture image to (1,1) for the upper right corner of a
+texture image.
+	Texture sampling has a loose interpretation and can be done in many different ways. It is thus
+our job to tell OpenGL how it should sample its textures.
+
+	Texture coordinates do not depend on resolution but can be any floating point value, thus OpenGL
+has to figure out which texture pixel (also known as a texel ) to map the texture coordinate to. This
+becomes especially important if you have a very large object and a low resolution texture. 
+OpenGL has options for this texture filtering, two important ones: GL_NEAREST, GL_LINEAR.
+	When set to GL_NEAREST, OpenGL selects the texel that center is closest
+to the texture coordinate.
+	GL_LINEAR (also known as (bi)linear filtering) takes an interpolated value from the texture
+coordinate’s neighboring texels, approximating a color between the texels.
+	Texture filtering can be set for magnifying and minifying operations (when scaling up or
+downwards) so you could for example use nearest neighbor filtering when textures are scaled
+downwards and linear filtering for upscaled textures. We thus have to specify the filtering method
+for both options via glTexParameter*.
+
+	Mipmaps is a collection of texture images where each subsequent texture is twice as small compared
+to the previous one. The idea behind mipmaps should be easy to understand: after a certain distance threshold from the viewer,
+OpenGL will use a different mipmap texture that best suits the distance to the object. Because the
+object is far away, the smaller resolution will not be noticeable to the user. OpenGL is then able to
+sample the correct texels, and there’s less cache memory involved when sampling that part of the
+mipmaps.
+	Creating a collection of mipmapped textures for each texture image is cumbersome to do manu￾ally, but luckily OpenGL is able 
+to do all the work for us with a single call to glGenerateMipmaps after we’ve created a texture.
+
+	The first thing we need to do to actually use textures is to load them into our application. We need to convert the image 
+format into a large array of bytes. The stb_image.h image-loading library supports
+several popular formats and does all the hard work.
+
+	The fragment shader should also have access to the texture object, but how do we pass the
+texture object to the fragment shader? GLSL has a built-in data-type for texture objects called
+a sampler that takes as a postfix the texture type we want e.g. sampler1D, sampler3D or in
+our case sampler2D. We can then add a texture to the fragment shader by simply declaring a
+uniform sampler2D that we later assign our texture to.S
+	To sample the color of a texture we use GLSL’s built-in texture function that takes as its
+first argument a texture sampler and as its second argument the corresponding texture coordinates.
+The texture function then samples the corresponding color value using the texture parameters
+we set earlier. The output of this fragment shader is then the (filtered) color of the texture at the
+(interpolated) texture coordinate.
+	 Using glUniform1i we can actually assign a location value to
+the texture sampler so we can set multiple textures at once in a fragment shader. This location of
+a texture is more commonly known as a texture unit. The default texture unit for a texture is 0
+which is the default active texture unit.
+	The main purpose of texture units is to allow us to use more than 1 texture in our shaders. By
+assigning texture units to the samplers, we can bind to multiple textures at once as long as we
+activate the corresponding texture unit first. Just like glBindTexture we can activate texture
+units using glActiveTexture passing in the texture unit we’d like to use:
+		glActiveTexture(GL_TEXTURE0); // activate texture unit first
+		glBindTexture(GL_TEXTURE_2D, texture);
+	OpenGL should have a at least a minimum of 16 texture units for you to use which you
+can activate using GL_TEXTURE0 to GL_TEXTURE15.
+	We have to tell OpenGL to which texture unit each shader sampler belongs to by setting
+each sampler using glUniform1i. We only have to set this once, so we can do this before we
+enter the render loop. Don’t forget to activate the shader first!
+
+Transformations:
+	Dot product: v . k = |v| |k| cos(theta)
+		(allows to easily test if the two vectors are orthogonal or parallel to each other)
+	Cross product: a * b = |a| |b| sin(theta) n, where n is a unit vector || to a & b.
+		(takes two non-parallel vecs as input and produces a third vector that's orthogonal to both input vecs)
+	A matrix is a rectangular array of numbers, symbols and/or mathematical expressions. 
+		Each individual item in a matrix is called an element of the matrix. 
+		Matrices are indexed by (i,j) where i is the row and j is the column.
+	Matrix multiplication is a combination of normal multiplication and addition using 
+		the left-matrix’s rows with the right￾matrix’s columns. 
+	A vector is basically a Nx1 matrix where N is the vector’s number of components (also known as an
+		N-dimensional vector).
+	If we have a MxN matrix we can multiply this matrix with our Nx1 vector, since the columns
+		of the matrix are equal to the number of rows of the vector, thus matrix multiplication is defined.
+		It just so happens that there are lots of interesting 2D/3D transformations we can place inside a matrix, 
+		and multiplying that matrix with a vector then transforms that vector
+	In OpenGL we usually work with 4x4 transformation matrices for several reasons and one of them
+		is that most of the vectors are of size 4. The most simple transformation matrix that we can think of
+		is the identity matrix. The identity matrix is an NxN matrix with only 0s except on its diagonal.
+		This transformation matrix leaves a vector completely unharmed.
+	If a scalar is equal on all axes, it is a uniform scaling. Otherwise it's non-uniform scaling.
+	Translation is the process of adding another vector on top of the original vector to return a new
+		vector with a different position, thus moving the vector based on a translation vector. W
+	Homogeneous coordinates The w component of a vector is also known as a homoge￾neous coordinate. To get the 3D vector from a homogeneous vector we divide the x, y and
+		z coordinate by its w coordinate. We usually do not notice this since the w component is
+		1.0 most of the time. Using homogeneous coordinates has several advantages: it allows
+		us to do matrix translations on 3D vectors (without a w component we can’t translate
+		vectors) and in the next chapter we’ll use the w value to create 3D perspective. Also,
+		whenever the homogeneous coordinate is equal to 0, the vector is specifically known as a
+		direction vector since a vector with a w coordinate of 0 cannot be translated.
+	A rotation in 2D or 3D is represented with an angle. An angle could be in degrees or radians where a whole circle has 360 degrees or 2 PI2
+		radians.
+	Rotations in 3D are specified with an angle and a rotation axis. The angle specified will rotate
+		the object along the rotation axis given. Try to visualize this by spinning your head a certain degree
+		while continually looking down a single rotation axis. When rotating 2D vectors in a 3D world for
+		example, we set the rotation axis to the z-axis (try to visualize this).
+	Using trigonometry it is possible to transform vectors to newly rotated vectors given an angle.
+		This is usually done via a smart combination of the sine and cosine functions (commonly
+		abbreviated to sin and cos).
+	A rotation matrix is defined for each unit axis in 3D space where the angle is represented as the
+		theta symbol θ.
+	Using the rotation matrices we can transform our position vectors around one of the three unit
+		axes. To rotate around an arbitrary 3D axis we can combine all 3 them by first rotating around the
+		X-axis, then Y and then Z for example. However, this quickly introduces a problem called Gimbal
+		lock. We won’t discuss the details, but a better solution is to rotate around an arbitrary unit axis
+		e.g. (0.662,0.2,0.722) (note that this is a unit vector) right away instead of combining the
+		rotation matrices. Such a (verbose) matrix exists and is given below with (Rx,Ry,Rz) as the arbitrary
+		rotation axis
+	The true power from using matrices for transformations is that we can combine multiple transfor￾mations in a single matrix thanks to matrix-matrix multiplication
+	Note that we first do a translation and then a scale transformation when multiplying matrices.
+		Matrix multiplication is not commutative, which means their order is important. When multiplying
+		matrices the right-most matrix is first multiplied with the vector so you should read the multiplications
+		from right to left. It is advised to first do scaling operations, then rotations and lastly translations
+		when combining matrices otherwise they may (negatively) affect each other
+
+There is an easy-to-use and tailored-for-OpenGL mathematics library called GLM.
+GLM stands for OpenGL Mathematics and is a header-only library, which means that we only have
+	to include the proper header files and we’re done; no linking and compiling necessary. G
+
+	We can define an infinite amount of transformations and combine them all in a single matrix
+that we can re-use as often as we’d like. Using transformations like this in the vertex shader saves
+us the effort of re-defining the vertex data and saves us some processing time as well, since we
+don’t have to re-send our data all the time (which is quite slow); all we need to do is update the
+transformation uniform.
+
+In the last chapter we learned how we can use matrices to our advantage by transforming all vertices
+	with transformation matrices. OpenGL expects all the vertices, that we want to become visible, to
+	be in normalized device coordinates after each vertex shader run. That is, the x, y and z coordinates
+	of each vertex should be between -1.0 and 1.0; coordinates outside this range will not be visible.
+	What we usually do, is specify the coordinates in a range (or space) we determine ourselves and in
+	the vertex shader transform these coordinates to normalized device coordinates (NDC). These NDC
+	are then given to the rasterizer to transform them to 2D coordinates/pixels on your screen.
+Transforming coordinates to NDC is usually accomplished in a step-by-step fashion where we
+	transform an object’s vertices to several coordinate systems before finally transforming them to
+	NDC. The advantage of transforming them to several intermediate coordinate systems is that some
+	operations/calculations are easier in certain coordinate systems as will soon become apparent. There
+	are a total of 5 different coordinate systems that are of importance to us:
+		1. Local space (or Object space)
+			Local coordinates are the coordinates of your object relative to its local origin; they’re the
+			coordinates your object begins in.
+		2. World space
+			The next step is to transform the local coordinates to world-space coordinates which are
+			coordinates in respect of a larger world. These coordinates are relative to some global origin
+			of the world, together with many other objects also placed relative to this world’s origin.
+			The coordinates of your object are transformed from local to world space; this is accomplished with the model matrix.
+		3. View space (or eye space)
+			Next we transform the world coordinates to view-space coordinates in such a way that each
+			coordinate is as seen from the camera or viewer’s point of view.
+			These combined transformations are generally stored inside a view matrix that
+			transforms world coordinates to view space.
+		4. Clip space
+			After the coordinates are in view space we want to project them to clip coordinates. Clip
+			coordinates are processed to the -1.0 and 1.0 range and determine which vertices will end
+			up on the screen. Projection to clip-space coordinates can add perspective if using perspective
+			projection.
+			To transform vertex coordinates from view to clip-space we define a so called projection matrix
+			that specifies a range of coordinates e.g. -1000 and 1000 in each dimension. The projection
+			matrix then transforms coordinates within this specified range to normalized device coordinates
+			(-1.0, 1.0). All coordinates outside this range will not be mapped between -1.0 and 1.0 and
+			therefore be clipped. With this range we specified in the projection matrix, a coordinate of (1250,
+			500, 750) would not be visible, since the x coordinate is out of range and thus gets converted to a
+			coordinate higher than 1.0 in NDC (normalized device coordinates) and is therefore clipped.
+			This viewing box a projection matrix creates is called a frustum and each coordinate that ends
+			up inside this frustum will end up on the user’s screen. The total process to convert coordinates
+			within a specified range to NDC that can easily be mapped to 2D view-space coordinates is called
+			projection since the projection matrix projects 3D coordinates to the easy-to-map-to-2D normalized
+			device coordinates.
+			Once all the vertices are transformed to clip space a final operation called perspective division
+			is performed where we divide the x, y and z components of the position vectors by the vector’s
+			homogeneous w component; perspective division is what transforms the 4D clip space coordinates
+			to 3D normalized device coordinates. This step is performed automatically at the end of the vertex
+			shader step.
+			It is after this stage where the resulting coordinates are mapped to screen coordinates (using the
+			settings of glViewport) and turned into fragments.
+			The projection matrix to transform view coordinates to clip coordinates usually takes two differ￾ent forms, where each form defines its own unique frustum. We can either create an orthographic
+			projection matrix or a perspective projection matrix.
+				1. An orthographic projection matrix defines a cube-like frustum box that defines the clipping space
+					where each vertex outside this box is clipped. When creating an orthographic projection matrix we
+					specify the width, height and length of the visible frustum. All the coordinates inside this frustum
+					will end up within the NDC range after transformed by its matrix and thus won’t be clipped.
+					glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+				2. The projection matrix maps a given frustum range to clip space, but also manipulates the
+					w value of each vertex coordinate in such a way that the further away a vertex coordinate is from
+					the viewer, the higher this w component becomes. Once the coordinates are transformed to clip
+					space they are in the range -w to w (anything outside this range is clipped). OpenGL requires that
+					the visible coordinates fall between the range -1.0 and 1.0 as the final vertex shader output, thus
+					once the coordinates are in clip space, perspective division is applied to the clip space coordinates
+					glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)width /(float)height, 0.1f, 100.0f);
+		5. Screen space
+			And lastly we transform the clip coordinates to screen coordinates in a process we call
+			viewport transform that transforms the coordinates from -1.0 and 1.0 to the coordinate
+			range defined by glViewport. The resulting coordinates are then sent to the rasterizer to
+			turn them into fragments.
+
+	Those are all a different state at which our vertices will be transformed in before finally ending
+	up as fragments.
+	To transform the coordinates from one space to the next coordinate space we’ll use several transfor￾mation matrices of which the most important are the model, view and projection matrix. Our vertex
+	coordinates first start in local space as local coordinates and are then further processed to world
+	coordinates, view coordinates, clip coordinates and eventually end up as screen coordinates.
+
+	FOV - field of view.
+
+We create a transformation matrix for each of the aforementioned steps: model, view and projection
+matrix. A vertex coordinate is then transformed to clip coordinates as follows:
+
+	V_clip = M_proj * M_view * M_model * V_local
+
+	Note that the order of matrix multiplication is reversed (remember that we need to read matrix
+	multiplication from right to left). The resulting vertex should then be assigned to gl_Position
+	in the vertex shader and OpenGL will then automatically perform perspective division and clipping.
+
+	The output of the vertex shader requires the coordinates to be in clip-space
+	which is what we just did with the transformation matrices. OpenGL then performs
+	perspective division on the clip-space coordinates to transform them to normalized￾device coordinates. OpenGL then uses the parameters from glViewPort to map the
+	normalized-device coordinates to screen coordinates where each coordinate corresponds
+	to a point on your screen (in our case a 800x600 screen). This process is called the
+	viewport transform.
+
+	By convention, OpenGL is a right-handed system. What this basically says is that
+the positive x-axis is to your right, the positive y-axis is up and the positive z-axis is
+backwards. Think of your screen being the center of the 3 axes and the positive z-axis
+going through your screen towards you. 
+Note that in normalized device coordinates OpenGL actually uses a left-handed system (the projection matrix switches
+the handedness).
+
+	OpenGL stores all its depth information in a z-buffer, also known as a depth buffer. GLFW
+automatically creates such a buffer for you (just like it has a color-buffer that stores the colors of the
+output image). The depth is stored within each fragment (as the fragment’s z value) and whenever
+the fragment wants to output its color, OpenGL compares its depth values with the z-buffer. If the
+current fragment is behind the other fragment it is discarded, otherwise overwritten. This process is
+called depth testing and is done automatically by OpenGL.
+		However, if we want to make sure OpenGL actually performs the depth testing we first need to
+	tell OpenGL we want to enable depth testing; it is disabled by default. We can enable depth testing
+	using glEnable. The glEnable and glDisable functions allow us to enable/disable certain
+	functionality in OpenGL. That functionality is then enabled/disabled until another call is made to
+	disable/enable it. We cam enable depth testing by enabling GL_DEPTH_TEST: glEnable(GL_DEPTH_TEST);
+		Since we’re using a depth buffer we also want to clear the depth buffer before each render
+	iteration (otherwise the depth information of the previous frame stays in the buffer). Just like clearing
+	the color buffer, we can clear the depth buffer by specifying the DEPTH_BUFFER_BIT bit in the
+	glClear function: glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+Camera/View space
+	When we’re talking about camera/view space we’re talking about all the vertex coordinates as seen
+from the camera’s perspective as the origin of the scene: the view matrix transforms all the world
+coordinates into view coordinates that are relative to the camera’s position and direction. To define a
+camera we need its position in world space, the direction it’s looking at, a vector pointing to the right
+and a vector pointing upwards from the camera.
+	The camera position is a vector in world space that points to the camera’s position.
+	The next vector required is the camera’s direction e.g. at what direction it is pointing at.
+Subtracting the camera position vector from the scene’s origin vector thus results in the direction vector we want.
+For the view matrix’s coordinate system we want its z-axis to be positive and because by convention
+(in OpenGL) the camera points towards the negative z-axis we want to negate the direction vector. If
+we switch the subtraction order around we now get a vector pointing towards the camera’s positive
+z-axis.
+	The next vector that we need is a right vector that represents the positive x-axis of the camera space.
+To get the right vector we use a little trick by first specifying an up vector that points upwards (in
+world space). Then we do a cross product on the up vector and the direction vector from step 2.
+Since the result of a cross product is a vector perpendicular to both vectors, we will get a vector that
+points in the positive x-axis’s direction (if we would switch the cross product order we’d get a vector
+that points in the negative x-axis).
+	Now that we have both the x-axis vector and the z-axis vector, retrieving the vector that points to
+the camera’s positive y-axis is relatively easy: we take the cross product of the right and direction
+vector:glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight); With the help of the cross product and a few tricks we were able to create all the vectors that
+form the view/camera space. For the more mathematically inclined readers, this process is known as the Gram-Schmidt process1
+in linear algebra. Using these camera vectors we can now create a LookAt matrix that proves very useful for creating a camera.
+	
+	!Gram-Schmidt_process: en.wikipedia.org/wiki/Gram-Schmidt_process
+
+	A great thing about matrices is that if you define a coordinate space using 3 perpendicular (or
+non-linear) axes you can create a matrix with those 3 axes plus a translation vector and you can
+transform any vector to that coordinate space by multiplying it with this matrix. This is exactly what
+the LookAt matrix does and now that we have 3 perpendicular axes and a position vector to define
+the camera space we can create our own LookAt matrix.
+	Where R is the right vector, U is the up vector, D is the direction vector and P is the camera’s
+position vector. Note that the rotation (left matrix) and translation (right matrix) parts are inverted
+(transposed and negated respectively) since we want to rotate and translate the world in the opposite
+direction of where we want the camera to move. Using this LookAt matrix as our view matrix
+effectively transforms all the world coordinates to the view space we just defined. The LookAt
+matrix then does exactly what it says: it creates a view matrix that looks at a given target.
+
+	Graphics applications and games usually keep track of a deltatime variable that stores the time
+it took to render the last frame. We then multiply all velocities with this deltaTime value. The
+result is that when we have a large deltaTime in a frame, meaning that the last frame took longer
+than average, the velocity for that frame will also be a bit higher to balance it all out. When using
+this approach it does not matter if you have a very fast or slow pc, the velocity of the camera will be
+balanced out accordingly so each user will have the same experience.
+
+	Euler angles are 3 values that can represent any rotation in 3D, defined by Leonhard Euler somewhere
+in the 1700s. There are 3 Euler angles: pitch, yaw and roll.
+	The pitch is the angle that depicts how much we’re looking up or down as seen in the first image.
+The second image shows the yaw value which represents the magnitude we’re looking to the left or
+to the right. The roll represents how much we roll as mostly used in space-flight cameras. Each of
+the Euler angles are represented by a single value and with the combination of all 3 of them we can
+calculate any rotation vector in 3D.
+	For our camera system we only care about the yaw and pitch values so we won’t discuss the roll
+value here.
+	A formula to convert yaw and pitch values to a 3-dimensional direction vector that
+we can use for looking around:
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+	The yaw and pitch values are obtained from mouse (or controller/joystick) movement where hori￾zontal mouse-movement affects the yaw and vertical mouse-movement affects the pitch. The idea is
+to store the last frame’s mouse positions and calculate in the current frame how much the mouse
+values changed. The higher the horizontal or vertical difference, the more we update the pitch or
+yaw value and thus the more the camera should move.
+
+• OpenGL: a formal specification of a graphics API that defines the layout and output of each
+function.
+• GLAD: an extension loading library that loads and sets all OpenGL’s function pointers for us
+so we can use all (modern) OpenGL’s functions.
+• Viewport: the 2D window region where we render to.
+• Graphics Pipeline: the entire process vertices have to walk through before ending up
+as one or more pixels on the screen.
+• Shader: a small program that runs on the graphics card. Several stages of the graphics
+pipeline can use user-made shaders to replace existing functionality.
+• Vertex: a collection of data that represent a single point.
+• Normalized Device Coordinates: the coordinate system your vertices end up in
+after perspective division is performed on clip coordinates. All vertex positions in NDC
+between -1.0 and 1.0 will not be discarded or clipped and end up visible.
+• Vertex Buffer Object: a buffer object that allocates memory on the GPU and stores
+all the vertex data there for the graphics card to use.
+• Vertex Array Object: stores buffer and vertex attribute state information.
+• Element Buffer Object: a buffer object that stores indices on the GPU for indexed
+drawing.
+• Uniform: a special type of GLSL variable that is global (each shader in a shader program
+can access this uniform variable) and only has to be set once.
+• Texture: a special type of image used in shaders and usually wrapped around objects,
+giving the illusion an object is extremely detailed.
+• Texture Wrapping: defines the mode that specifies how OpenGL should sample textures
+when texture coordinates are outside the range: (0, 1).
+• Texture Filtering: defines the mode that specifies how OpenGL should sample the
+texture when there are several texels (texture pixels) to choose from. This usually occurs
+when a texture is magnified.
+• Mipmaps: stored smaller versions of a texture where the appropriate sized version is chosen
+based on the distance to the viewer.
+• stb_image: image loading library.
+• Texture Units: allows for multiple textures on a single shader program by binding
+multiple textures, each to a different texture unit.
+• Vector: a mathematical entity that defines directions and/or positions in any dimension.
+• Matrix: a rectangular array of mathematical expressions with useful transformation proper￾ties.
+• GLM: a mathematics library tailored for OpenGL.
+• Local Space: the space an object begins in. All coordinates relative to an object’s origin.
+• World Space: all coordinates relative to a global origin.
+• View Space: all coordinates as viewed from a camera’s perspective.
+• Clip Space: all coordinates as viewed from the camera’s perspective but with projection
+applied. This is the space the vertex coordinates should end up in, as output of the vertex shader. OpenGL does the rest (clipping/perspective division).
+• Screen Space: all coordinates as viewed from the screen. Coordinates range from 0 to
+screen width/height.
+• LookAt: a special type of view matrix that creates a coordinate system where all coordinates
+are rotated and translated in such a way that the user is looking at a given target from a given
+position.
+• Euler Angles: defined as yaw, pitch and roll that allow us to form any 3D direction
+vector from these 3 values
+
+GL_TRIANGLE_FAN is a drawing mode in OpenGL that allows you to create a series of connected triangles 
+sharing a common central vertex. This mode is particularly useful for drawing shapes like filled circles, polygons, and fans.
+
+
+
+============================================================================================================================================================
+OpenGL 
+============================================================================================================================================================
+Intro chapter
+============================================================================================================================================================
+
+Modern graphics programming is done using a graphics library. There are many graphics libraries in use today,
+but the most common library for platform ￾independent graphics programming is called OpenGL (Open Graphics Library).
+
+C++ is a general-purpose programming language.  Its design, and the fact that it is generally compiled to native machine code, make 
+it an excellent choice for systems that require high performance, such as 3D graphics computing. Another advantage of C++ is that the
+OpenGL call library is C based.
+
+Version 1.0 of OpenGL appeared in 1992 as an “open” alternative to vendor￾specific Application Programming Interfaces (APIs) for computer graphics. 
+Its specification and development was managed and controlled by the OpenGL Architecture Review Board (ARB), a then newly formed group of industry
+par￾ticipants. In 2006 the ARB transferred control of the OpenGL specification to the Khronos Group, a nonprofit consortium which manages not only the OpenGL 
+specification but a wide variety of other open industry standards.
+
+In 2004, version 2.0 introduced the OpenGL Shading Language (GLSL), allowing “shader programs” to be installed and run directly in graphics pipeline stages.
+
+OpenGL doesn’t actually draw to a computer screen. Rather, it renders to a frame buffer, and it is the job of the individual machine
+to then draw the con￾tents of the frame buffer onto a window on the screen. There are various libraries that support doing this. 
+
+OpenGL is organized around a set of base functions and an extension mecha￾nism used to support new functionality as technologies advance. Modern versions 
+of OpenGL, such as those found in version 4+ as we use in this book, require identifying the extensions available on the GPU. There are commands built into 
+core OpenGL for doing this, but they involve several rather convoluted lines of code that would need to be performed for each modern command used—and in 
+this book we use such commands constantly. Therefore, it has become standard practice to use an extension library 
+to take care of these details, and to make mod￾ern OpenGL commands available to the programmer directly.
+
+
+On the hardware side, OpenGL provides a multi-stage graphics pipeline that is partially programmable using a language called GLSL (OpenGL Shading Language).
+On the software side, OpenGL’s API is written in C, and thus the calls are directly compatible with C and C++. Stable language bindings (or “wrappers”) are 
+available for more than a dozen other popular languages (Java, Perl, Python, Visual Basic, Delphi, Haskell, Lisp, Ruby, etc.) with virtually equivalent performance. 
+
+GLSL is an example of a shader language. Shader languages are intended to run on a GPU, in the context of a graphics pipeline.
+
+Modern 3D graphics programming utilizes a pipeline, in which the process of converting a 3D scene to a 2D image is broken down into a series of steps. 
+OpenGL and DirectX both utilize similar pipelines.
+
+The simplified pipeline: the C++/OpenGL application sends graphics data into the vertex shader—processing proceeds through the pipeline, 
+and pixels emerge for display on the monitor.
+	1. Vertex shader
+	2. Tessellation shader
+	3. Geometry shader
+	4. Rasterization
+	5. Fragment shader
+	6. Pixel operations
+
+The vertex, tessellation, geometry, and fragment stages are programmable in GLSL. It is one of the responsibilities 
+of the C++/OpenGL appli￾cation to load GLSL programs into these shader stages, as follows:
+	1. It uses C++ to obtain the GLSL shader code, either from text files or hard￾coded as strings.
+	2. It then creates OpenGL shader objects and loads the GLSL shader code into them.
+	3. Finally, it uses OpenGL com￾mands to compile and link objects and install them on the GPU.
+
+In practice, it is usually necessary to provide GLSL code for at least the vertex and fragment stages, whereas the tessel￾lation and geometry stages are optional. 
+
+OpenGL gives us commands for install￾ing GLSL programs onto the programmable shader stages and compiling them. 
+Finally, OpenGL uses buffers for sending 3D models and other related graphics data down the pipeline.
+
+The term “context” refers to an OpenGL instance and its state information, which includes items such as the color buffer.
+
+GLFW windows are by default double-buffered. “Double buffering” means that there are two color buffers—one that is displayed, and one that is 
+being rendered to. After an entire frame is rendered, the buffers are swapped. Double buffering is used to reduce undesirable visual artifacts.
+
+OpenGL is capable of drawing only a few kinds of very simple things, such as points, lines, or triangles. These simple things 
+are called primitives, and for this reason, most 3D models are made up of lots and lots of primitives, usually triangles.
+
+Primitives are made up of vertices—for example, a triangle consists of three vertices. The vertices can come from a variety of sources—they can be read from 
+files and then loaded into buffers by the C++/OpenGL application, or they can be hardcoded in the C++ code or even in the GLSL code.
+
+Before taking the primitives, the C++/OpenGL application must compile and link appropriate GLSL vertex and fragment shader programs, and then load them 
+into the pipeline. 
+
+The C++/OpenGL application also is responsible for telling OpenGL to construct triangles. We do this by using the following OpenGL function:
+	glDrawArrays(GLenum mode, GLint first, GLsizei count);
+When glDrawArrays() is called, the GLSL code in the pipeline starts executing. 
+
+Regardless of where they originate, all of the vertices pass through the vertex shader. They do so one by one; that is, the shader is executed once per vertex. For 
+a large and complex model with a lot of vertices, the vertex shader may execute hundreds, thousands, or even millions of times, often in parallel.
+
+“GLuint” is a platform-independent shorthand for “unsigned int”, provided by OpenGL (many OpenGL constructs have integer refer￾ences). 
+
+glUseProgram() loads the program containing the two compiled shaders into the OpenGL pipeline stages (onto the GPU!). Note that 
+glUseProgram() doesn’t run the shaders, it just loads them onto the hardware.
+
+The vertices move through the pipeline to the rasterizer, where they are trans￾formed into pixel locations (or more accurately fragments).
+Eventually, these pixels (fragments) reach the fragment shader. The purpose of any fragment shader is to set the RGB color of a pixel to be 
+displayed. 
+
+When sets of data are prepared for sending down the pipeline, they are organized into buffers. Those buffers are in turn organized into Vertex 
+Array Objects (VAOs). OpenGL still requires that at least one VAO be created whenever shaders are being used, even if the application isn’t 
+using any buffers.
+
+Between vertex processing and pixel processing is the rasterization stage. It is there that primitives (such as points or triangles) 
+are converted into sets of pixels. The default size of an OpenGL “point” is one pixel, so that is why our single point was rendered as a 
+single pixel.
+
+The programmable tessellation stage is one of the most recent additions to OpenGL (in version 4.0). It provides a tessellator that 
+can generate a large number of triangles, typically as a grid, and also some tools to manipulate those triangles in a variety of ways. 
+
+Whereas the vertex shader gives the programmer the ability to manipulate one vertex at a time (i.e., “per￾vertex” processing), and the fragment shader 
+allows manipulating one pixel at a time (“per-fragment” processing), the geometry shader provides the capability to manipulate one primitive
+at a time—“per-primitive” processing.
+	Recalling that the most common primitive is the triangle, by the time we have reached the geometry stage, the pipeline must have completed grouping 
+	the vertices into triangles (a process called primitive assembly). The geometry shader then makes all three vertices in each triangle accessible to the programmer 
+	simultaneously.
+	There are a number of uses for per-primitive processing. The primitives could be altered, such as by stretching or shrinking them. Some of the primitives could 
+	be deleted, thus putting “holes” in the object being rendered—this is one way of turning a simple model into a more complex one.
+	The geometry shader also provides a mechanism for generating additional  primitives. Here too, this opens the door to many possibilities for turning simple 
+	models into more complex ones.
+	An interesting use for the geometry shader is for adding surface texture such as bumps or scales—even “hair” or “fur”—to an object.
+
+It might seem redundant to provide a per-primitive shader stage when the tes￾sellation stage(s) give the programmer access to all of the vertices in an entire 
+model simultaneously. The difference is that tessellation only offers this capability in very limited circumstances—specifically when the model is a grid of triangles 
+generated by the tessellator. It does not provide such simultaneous access to all the vertices of, say, an arbitrary model being sent in from C++ through a buffer.
+
+Ultimately, our 3D world of vertices, triangles, colors, and so on needs to be displayed on a 2D monitor. That 2D monitor screen is made up of a raster—
+a rectangular array of pixels.
+
+When a 3D object is rasterized, OpenGL converts the primitives in the object (usually triangles) into fragments. A fragment holds the information associated 
+with a pixel. Rasterization determines the locations of pixels that need to be drawn in order to produce the triangle specified by its three vertices.
+
+Rasterization starts by interpolating, pairwise, between the three vertices of the triangle. There are some options for doing this interpolation.
+
+As we will see in later chapters, the rasterizer can interpolate more than just pixels. Any variable that is output by the vertex shader and input by the fragment 
+shader will be interpolated based on the corresponding pixel position. We will use this capability to generate smooth color gradations, achieve realistic lighting, and 
+many more effects.
+
+Hidden surface removal, or HSR. OpenGL can perform a variety of HSR operations, depending on the effect we want in our 
+scene. And even though this phase is not programmable, it is extremely impor￾tant that we understand how it works. Not only will we need to configure it 
+properly, we will later need to carefully manipulate it when we add shadows to our scene.
+
+Hidden surface removal is accomplished by OpenGL through the cleverly coordinated use of two buffers: the color buffer and the depth buffer
+(sometimes called the Z-buffer). Both of these buffers are the same size as the raster—that is, there is an entry in each buffer for every pixel on the screen.
+
+As various objects are drawn in a scene, pixel colors are generated by the frag￾ment shader. The pixel colors are placed in the color buffer—it is the color buffer 
+that is ultimately written to the screen. When multiple objects occupy some of the same pixels in the color buffer, a determination must be made as to which pixel 
+color(s) are retained, based on which object is nearest the viewer.
+Hidden surface removal is done as follows:
+	1. Before a scene is rendered, the depth buffer is filled with values 
+		representing maximum depth.
+	2. As a pixel color is output by the fragment shader, its distance from the 
+		viewer is calculated.
+	3. If the computed distance is less than the distance stored in the depth 
+		buffer (for that pixel), then: (a) the pixel color replaces the color in the 
+		color buffer, and (b) the distance replaces the value in the depth buffer. 
+		Otherwise, the pixel is discarded.
+	This procedure is called the Z-buffer algorithm,
+
+The workflow for compiling and running GLSL code differs from standard coding, in that GLSL compilation happens at C++ runtime. Another complication 
+is that GLSL code doesn’t run on the CPU (it runs on the GPU), so the operating system cannot always catch OpenGL runtime errors. 
+This makes debugging dif￾ficult, because it is often hard to detect if a shader failed, and why.
+
+checkOpenGLError(), is useful for detecting both GLSL compila￾tion errors and OpenGL runtime errors, so it is highly recommended to use it 
+throughout a C++/OpenGL application during development. 
+	*printShaderLog - displays the contents of OpenGL’s log when GLSL compilation failed
+	*printProgramLog - displays the contents of OpenGL’s log when GLSL linking failed
+
+Another reason that it is important to use these tools is that a GLSL error does not cause the C++ program to stop. So unless the programmer takes steps to catch 
+errors at the point that they happen, debugging will be very difficult.
+
+There are other tricks for deducing the causes of runtime errors in shader code. A common result of shader runtime errors is for the output screen to be 
+completely blank, essentially with no output at all. This can happen even if the error is a very small typo in a shader, yet it can be difficult to tell at which stage of 
+the pipeline the error occurred. With no output at all, it’s like looking for a needle in a haystack.
+
+Each rendering of our scene is then called a frame, and the frequency of the calls to display() is the frame rate.
+Handling the rate of movement within the application logic can be controlled using the elapsed time since the previous frame 
+(this is the reason for including “currentTime” as a parameter on the display() function)
+
+As we proceed to drawing progressively more complex 3D scenes, it will be necessary to initial￾ize (clear) the depth buffer each frame, 
+especially for scenes that are animated, to ensure that depth comparisons aren’t affected by old depth data. 
+The command for clearing the depth buffer is essentially the same as for clearing the color buffer.
+
+There are more sophisticated ways to organize the code for animating a scene, especially with respect to managing threads. 
+
+Throughout this book, the reader may at times wish to know one or more of OpenGL’s upper limits. For example, the programmer might need to know 
+the maximum number of outputs that can be produced by the geometry shader, or the maximum size that can be specified for rendering a point. Many such 
+values are implementation-dependent, meaning that they can vary between differ￾ent machines. OpenGL provides a mechanism for retrieving such limits using the 
+glGet() command, which takes various forms depending on the type of the parameter being queried. For example, to find the maximum allowable point size, the follow￾ing call will place the minimum and maximum values (for your machine’s OpenGL 
+implementation) into the first two elements of the float array named “size”:
+	glGetFloatv(GL_POINT_SIZE_RANGE, size)
+Many such queries are possible. Consult the OpenGL reference [OP16] docu￾mentation for examples.
+
+============================================================================================================================================================
+Maths chapter
+============================================================================================================================================================
+
+It is important to know which coordinate system your graphics programming environment uses. For example, the majority of coordinate systems in OpenGL 
+are right-handed, whereas in Direct3D the majority are left-handed.
+
+It turns out to be much more useful to specify points using homogeneous notation, a representation first described in the early 
+1800s. Points in homogeneous notation contain four values. The first three corre￾spond to X, Y, and Z, and the fourth, W, is always a fixed nonzero value, usually 1. 
+Thus, we represent this point as (2, 8, -3, 1). As we will see shortly, homogeneous notation will make many of our graphics computations more efficient.
+
+A matrix is a rectangular array of values, and its elements are typically accessed by means of subscripts. The first subscript refers to the row number, and 
+the second subscript refers to the column number, with the subscripts starting at 0. Most of the matrices that we will use for 3D graphics computations are of size 4x4
+
+The transpose of a matrix is computed by interchanging its rows and columns. 
+
+There are various multiplication operations that can be done with matrices that are useful in 3D graphics. Matrix multiplication in general can be done either 
+left to right or right to left (note that since these operations are different, it follows that matrix multiplication is not commutative). 
+Most of the time we will use right￾to-left multiplication.
+
+In 3D graphics, multiplying a point by a matrix is in most cases done right to left, and produces a point.
+
+Matrix multiplication is frequently referred to as concatenation, because as will be seen, it is used to combine a set of matrix transforms into a single matrix. 
+This ability to combine matrix transforms is made possible because of the asso￾ciative property of matrix multiplication. 
+
+The inverse of a 4x4 matrix M is another 4x4 matrix, denoted M-1, that has the following property under matrix multiplication:
+M*(M-1) = (M-1)*M = identity matrix
+We won’t present the details of computing the inverse here. However, it is worth knowing that determining the inverse of a matrix can be computationally 
+expensive; fortunately, we will rarely need it. 
+
+In graphics, matrices are typically used for performing transforma￾tions on objects. For example, a matrix can be used to move a point from one 
+location to another. 
+
+A translation matrix is used to move items from one location to another. It consists of an identity matrix, with the X, Y, and Z movement(s) given in locations 
+A03, A13, A23. Figure 3.3 shows the form of a translation matrix and its effect when multiplied by a homogeneous point; the result is a new point “moved” by the trans￾late values
+
+A scale matrix is used to change the size of objects or move points toward or away from the origin. Although it may initially seem strange to scale a point, 
+objects in OpenGL are defined by groups of points. So, scaling an object involves expanding or contracting its set of points.
+
+The scale matrix transform consists of an identity matrix with the X, Y, and Zscale factors given in locations A00, A11, A22. Figure 3.4 shows the form of a scale 
+matrix and its effect when multiplied by a homogeneous point; the result is a new point modified by the scale values.
+
+Scaling can be used to switch coordinate systems. 
+
+Rotation is a bit more complex, because rotating an item in 3D space requires specifying 
+	(a) an axis of rotation and 
+	(b) a rotation amount in degrees or radians.
+
+In the mid-1700s, the mathematician Leonhard Euler showed that a rotation around any desired axis could be specified instead as a combination of rotations 
+around the X, Y, and Z axes [EU76]. These three rotation angles around the respec￾tive axes have come to be known as Euler angles. The discovery, known as Euler’s 
+Theorem, is very useful to us, because rotations around each of the three axes can be specified using matrix transforms.
+In practice, using Euler angles to rotate an item around an arbitrary line in 3D 
+space takes a couple of additional steps if the line doesn’t pass through the origin. 
+	In general:
+		1. Translate the axis of rotation so that it goes through the origin.
+		2. Rotate by appropriate Euler angles around X, Y, and Z.
+		3. Undo the translation of Step 1.
+
+Euler angles can cause certain artifacts in some 3D graphics applications. For that reason it is often advisable to use quaternions for computing rotations. 
+
+In 3D graphics, vectors are frequently represented as a single point in space, where the vector is the distance and direction from the origin to that point. 
+
+Many graphics systems do not distinguish between a point and a vector at all, such as in GLSL and GLM, which provide data types 
+vec3/vec4 that can be used to hold either points or vectors. 
+
+Throughout this book, our programs make heavy use of the dot product. The most important and fundamental use is for finding the angle between two vectors. 
+Consider two vectors V & W, and say we wish to find the angle θ separating them.
+	cos(theta) = v dot w / (mag(v) * mag(w))
+
+An important property of the cross product of two vectors, which we will make heavy use of throughout this book, is that it produces a vector that is normal
+(perpendicular) to the plane defined by the original two vectors.
+
+Any two non-collinear vectors define a plane. For example, consider two arbitrary vectors V and W . Since vectors can be moved without changing their 
+meaning, they can be moved so that their origins coincide. The direction of the resulting normal obeys the right-hand rule, wherein 
+curling the fingers of one’s right hand from V to W causes the thumb to point in the direction of the normal vector R.
+
+The ability to find normal vectors by using the cross product will become extremely useful later when we study lighting. In order to determine lighting 
+effects, we will need to know outward normals associated with the model we are rendering.
+
+The space in which a model is defined is called its local space, or model space. OpenGL documentation uses the term object space.
+
+Modeled objects are placed in a simulated world by deciding on the orientation and dimensions of that world, called world space.
+The matrix that positions and orients an object into world space is called a model matrix, or M.
+
+So far, the transform matrices we have seen all operate in 3D space. Ultimately, however, we will want to display our 3D space—or a portion of it—on a 2D moni￾tor. 
+In order to do this, we need to decide on a vantage point. Just as we see our real world through our eyes from a particular point in a particular direction, so too 
+must we establish a position and orientation as the window into our virtual world. This vantage point is called “view” or “eye” space, or the “synthetic camera.”
+
+Viewing involves: (a) placing the camera at some world location; (b) orienting the camera, which usually requires maintaining 
+its own set of orthogonal axes U/V/N; (c) defining a view volume; and (d) projecting objects within the volume onto a projection plane.
+
+OpenGL includes a camera that is permanently fixed at the origin (0,0,0) and faces down the negative Z-axis.
+
+In order to use the OpenGL camera, one of the things we need to do is simulate
+moving it to some desired location and orientation. This is done by figuring out 
+where our objects in the world are located relative to the desired camera position 
+(i.e., where they are located in “camera space,” as defined by the U, V, and N axes of 
+the camera as illustrated in Figure 3.12). Given a point at world space location PW,
+we need a transform to convert it to the equivalent point in camera space, making 
+it appear as though we are viewing it from the desired camera location Cw. We do 
+this by computing its camera space position PC. Knowing that the OpenGL camera 
+location is always at the fixed position (0,0,0), what transform would achieve this?
+The necessary transforms are determined as follows:
+	1. Translate PW by the negative of the desired camera location.
+	2. Rotate PW by the negative of the desired camera orientation Euler angles.
+
+We can build a single transform that does both the rotation and the translation 
+in one matrix, called the viewing transform matrix, or V. The matrix V is produced 
+by concatenating the two matrices T (a translation matrix containing the negative 
+of the desired camera location) and R (a rotation matrix containing the negative of 
+the desired camera orientation). 
+
+More commonly, the V matrix is concatenated with the model matrix M to 
+form a single model-view (MV) matrix: MV = V * M
+
+The advantage of this approach becomes clear when one considers that, in a 
+complex scene, we will need to perform this transformation not on just one point, 
+but on every vertex in the scene. By pre-computing MV, transforming each point 
+into view space will require us to do just one matrix multiplication per vertex, 
+rather than two. Later, we will see that we can extend this process to pre-computing 
+several matrix concatenations, reducing the per-vertex computations considerably.
+
+Projection matrices:  (a) perspective and (b) orthographic
+
+Perspective projection attempts to make a 2D picture appear 3D, by utilizing the 
+concept of perspective to mimic what we see when we look at the real world. Objects 
+that are close appear larger than objects that are far away, and in some cases, lines 
+that are parallel in 3D space are no longer parallel when drawn with perspective.
+
+We achieve this effect by using a matrix transform that converts parallel lines into appropriate non￾parallel lines. Such a matrix is called 
+a perspective matrix or perspective transform, and is built by defining the four parameters of a view volume. 
+Those parameters are 
+	(a) aspect ratio, 
+	(b) field of view, 
+	(c) projection plane or near clipping plane, and 
+	(d) far clipping plane.
+
+Only objects between the nearand far clipping planes are rendered. The near clipping plane also serves as 
+the plane on which objects are pro￾jected, and is generally positioned close to the eye or camera.
+The field of view is the vertical angle of viewable space. The aspect ratio is the 
+ratio width/height of the near and far clipping planes. The shape formed by these 
+elements and shown in Figure 3.15 is called a frustum.
+
+The perspective matrix is used to transform points in 3D space to their appro￾priate position on the near clipping plane, and it is built by first computing values 
+q, A, B, and C, and then using those values to construct the matrix.
+
+In orthographic projection, parallel lines remain parallel; that is, perspec￾tive isn’t employed. Instead, objects that are within the view volume are projected 
+directly, without any adjustment of their sizes due to their distances from the camera.
+An orthographic projection is a parallel projection in which all projections are at right angles with the projection plane. 
+An orthographic matrix is built by defin￾ing the following parameters: 
+	(a) the distance Znear from the camera to the projection plane, 
+	(b) the distance Zfar from the camera to the far clipping plane, and 
+	(c) values for L, R, T, and B, with L and R corresponding to the X coordinates of the left and right boundaries of the projection plane respectively,
+	and T and B corresponding to the Y coordinates of the top and bottom boundaries of the projection plane respectively. 
+
+The final transformation we will examine is the look-at matrix. This is handy when you wish to place the camera at one location and look toward a particular 
+other location. Of course, it would be possible to achieve this using the methods we have already seen, but it is such a common 
+operation that building one matrix transform to do it is often useful.
+
+A look-at transform still requires deciding on a camera orientation. We do this by specifying a vector approximating the general orientation desired (such as the 
+world Y axis). Typically, a sequence of cross products can be used to then generate a suitable set of forward, side, and up vectors for the desired camera orientation. 
+The computations:he camera location (eye), target location, and initial up vector Y , to build the look-at matrix
+
+The appropriate datatype to hold such a transformation matrix in GLSL is mat4.
+
+The syntax for initializing mat4 matrices in GLSL loads values by columns. The first four values are put into the first column, the next four into the next col￾umn, and so forth.
+
+Using OpenGL to render 3D images generally involves sending several datasets 
+through the OpenGL shader pipeline. For example, to draw a simple 3D object such 
+as a cube, you will need to at least send the following items:
+	• the vertices for the cube model
+	• some transformation matrices to control the appearance of the cube’s orientation in 3D space
+
+There are two ways of sending data through the OpenGL pipeline:
+	• through a buffer to a vertex attribute or
+	• directly to a uniform variable.
+
+For an object to be drawn, its vertices must be sent to the vertex shader. 
+Vertices are usually sent by putting them in a buffer on the C++ side and associ￾ating that buffer with a vertex attribute declared in the shader. There are several 
+steps to accomplish this, some of which only need to be done once, and some of which—if the scene is animated—must be done at every frame.
+
+Done once—typically in init():
+1. create a buffer
+2. copy the vertices into the buffer
+Done at each frame—typically in display():
+1. enable the buffer containing the vertices
+2. associate the buffer with a vertex attribute
+3. enable the vertex attribute
+4. use glDrawArrays(…) to draw the object
+
+Buffers are typically created all at once at the start of the program, either in 
+init() or in a function called by init(). In OpenGL, a buffer is contained in a Vertex 
+Buffer Object, or VBO, which is declared and instantiated in the C++/OpenGL 
+application. A scene may require many VBOs, so it is customary to generate and 
+then fill several of them in init() so that they are available whenever your program 
+needs to draw one or more of them
+
+A buffer interacts with a ver￾tex attribute in a specific way. When glDrawArrays() is executed, the data 
+in the buffer starts flowing, sequen￾tially from the beginning of the buf￾fer, through the vertex shader. As 
+described in Chapter 2, the vertex shader executes once per vertex. A ver￾tex in 3D space requires three values, 
+so an appropriate vertex attribute in the shader to receive these three values 
+would be of type vec3. Then, for each three values in the buffer, the shader is invoked.
+
+A related structure in OpenGL is called a Vertex Array Object, or VAO. VAOs 
+were introduced in version 3.0 of OpenGL and are provided as a way of organizing 
+buffers and making them easier to manipulate in complex scenes. OpenGL requires 
+that at least one VAO be created, and for our purposes one will be sufficient.
+
+The purpose of glBindVertexArrays() is to make the specified VAO “active” so that the generated buffers will be associated with that VAO.
+
+A buffer needs to have a corresponding vertex attribute variable declared in 
+the vertex shader. Vertex attributes are generally the first variables declared in a 
+shader. In our cube example, a vertex attribute to receive the cube vertices could 
+be declared in the vertex shader.
+
+The manner in which we load the vertices of a model into a buffer (VBO) 
+depends on where the model’s vertex values are stored. In Chapter 6, we will see 
+how models are commonly built in a modeling tool (such as Blender [BL20] or 
+Maya [MA16]), exported to a standard file format (such as .obj—also described in 
+Chapter 6), and imported into the C++/OpenGL application. We will also see how 
+a model’s vertices can be calculated on the fly or generated inside the pipeline 
+using a tessellation shader.
+
+For now, let’s say that we wish to draw a cube, and let’s presume that the verti￾ces of our cube are hardcoded in an array in the C++/OpenGL application. In that 
+case, we need to copy those values into one of our two buffers that we previously 
+generated. To do that, we need to (a) make that buffer (say, the 0th buffer) “active” 
+with the OpenGL glBindBuffer() command, and (b) use the glBufferData() command 
+to copy the array containing the vertices into the active buffer (the 0th VBO in this 
+case). Presuming that the vertices are stored in a float array named vPositions, the 
+following C++ code2 would copy those values into the 0th VBO:
+glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+glBufferData(GL_ARRAY_BUFFER, sizeof(vPositions), vPositions, GL_STATIC_DRAW);
+
+Next, we add code to display() that will cause the values in the buffer to be sent 
+to the vertex attribute in the shader. We do this with the following three steps: (a) 
+make that buffer “active” with the glBindBuffer() command as we did above, (b) 
+associate the active buffer with a vertex attribute in the shader, and (c) enable the 
+vertex attribute. The following lines of code accomplish these steps:
+glBindBuffer(GL_ARRAY_BUFFER, vbo[0]); // make the 0th buffer "active"
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // associate 0th attribute with buffer
+glEnableVertexAttribArray(0); // enable the 0th vertex attribute
+
+Now when we execute glDrawArrays(), data in the 0th VBO will be transmitted 
+to the vertex attribute that has a layout qualifier with location 0. This sends the 
+cube vertices to the shader.
+
+Rendering a scene so that it appears 3D requires building appropriate transfor￾mation matrices, such as those described in Chapter 3, and applying them to each 
+of the models’ vertices. It is most efficient to apply the required matrix operations 
+in the vertex shader, and it is customary to send these matrices from the C++/OpenGL application to the shader in a uniform variable.
+
+Sending data from a C++/OpenGL application to a uniform variable requires 
+the following steps: (a) acquire a reference to the uniform variable and (b) associ￾ate a pointer to the desired values with the acquired uniform reference. 
+
+It is important to understand how vertex attributes are processed in the 
+OpenGL pipeline, versus how uniform variables are processed. Recall that 
+immediately before the fragment shader is rasterization, where primitives (e.g., 
+triangles) defined by vertices are converted to fragments. Rasterization linearly 
+interpolates vertex attribute values so that the displayed pixels seamlessly connect 
+the modeled surfaces.
+By contrast, uniform variables behave like initialized constants and remain 
+unchanged across each vertex shader invocation (i.e., for each vertex sent from the 
+buffer). A uniform variable is not interpolated; it always contains the same value 
+regardless of the number of vertices.
+
+The interpolation done on vertex attributes by the rasterizer is useful in many 
+ways. Later, we will use rasterization to interpolate colors, texture coordinates, 
+and surface normals. It is important to understand that all values sent through a 
+buffer to a vertex attribute will be interpolated further down the pipeline.
+
+In the vertex shader, we apply the matrix transformations to the incoming vertex 
+(declared earlier as position), assigning the result to gl_Position: 
+gl_Position = proj_matrix * mv_matrix * position;
+
+The transformed vertices will then be 
+automatically output to the rasterizer, with 
+corresponding pixel locations ultimately sent 
+to the fragment shader.
+
+When specifying GL_TRIANGLESin the glDrawArrays() function, rasterization is 
+done per triangle. Interpolation starts along the lines connecting the vertices, at 
+a level of precision corresponding to the pixel display density. The pixels in the 
+interior space of the triangle are then filled by interpolating along the horizontal 
+lines connecting the edge pixels.
+
+A fundamental step in rendering an object in 3D is to create appropriate trans￾formation matrices and send them to uniform variables.
+We start by defining three matrices:
+1. a Model matrix
+2. a View matrix
+3. a Perspective matrix
+
+The Model matrix positions and orients the object in the world coordinate 
+space. Each model has its own model matrix, and that matrix would need to be 
+continuously rebuilt if the model moves.
+
+The View matrix moves and rotates the models in the world to simulate the 
+effect of a camera at a desired location. Recall from Chapter 2 that the OpenGL 
+camera exists at location (0,0,0) and faces down the negative Z axis. To simulate 
+the appearance of that camera being moved a certain way, we will need to move 
+the objects themselves in the opposite direction. For example, moving a camera 
+to the right would cause the objects in the scene to appear to move to the left; 
+although the OpenGL camera is fixed, we can make it appear as though we have 
+moved it to the right by moving the objects to the left.
+
+The Perspective matrix is a transform that provides the 3D effect according to 
+the desired frustum.
+
+It is also important to understand when to compute each type of matrix. 
+Matrices that never change can be built in init(), but those that change would need 
+to be built in display() so that they are rebuilt for each frame. Let’s assume that the 
+models are animated and the camera is movable. Then:
+	• A model matrix needs to be created for each model and at each frame.
+	• The view matrix needs to be created once per frame (because the camera 
+can be moved), but it is the same for all objects rendered during that 
+frame.
+	• The perspective matrix is created once (in init()), using the screen 
+window’s width and height (and desired frustum parameters), and 
+it usually remains unchanged unless the window is resized.
+
+Generating model and view transformation matrices then happens in the 
+display() function, as follows:
+1. Build the view matrix based on the desired camera location and orientation.
+2. For each model, do the following:
+ i. Build a model matrix based on the model’s location and orientation.
+ ii. Concatenate the model and view matrices into a single “MV” matrix.
+ iii. Send the MV and projection matrices to the corresponding shader 
+uniforms.
+
+Technically, it isn’t necessary to combine the model and view matrices into a 
+single matrix. That is, they could be sent to the vertex shader in individual, separate 
+matrices. However, there are certain advantages to combining them, while keeping 
+the perspective matrix separate. For example, in the vertex shader, each vertex in 
+the model is multiplied by the matrices. Since complex models may have hundreds 
+or even thousands of vertices, performance can be improved by pre-multiplying 
+the model and view matrices once before sending them to the vertex shader. Later, 
+we will see the need to keep the perspective matrix separate for lighting purposes.
+
+Display() enables the shaders by calling glUseProgram(), installing the 
+GLSL code on the GPU. Recall this doesn’t run the shader program, but it does 
+enable subsequent OpenGL calls to determine the shader’s vertex attribute and 
+uniform locations. The display() function next gets the uniform variable locations, 
+builds the perspective, view, and model matrices3, concatenates the view and 
+model matrices into a single MV matrix, and assigns the perspective and MV matri￾ces to their corresponding uniforms
+
+Multiple occurrences of the same model. Same vaos & vbo occuring at multiple locations simultaneously
+
+Instancing provides a mechanism for telling the graphics card to render mul￾tiple copies of an object using only a single C++/OpenGL call. This can result in a 
+significant performance benefit, particularly when there are thousands or millions of copies of the object being drawn—such as when rendering many flowers in a 
+field, or many zombies in an army.
+We start by changing the glDrawArrays() call in our C++/OpenGL application to glDrawArraysInstanced(). Now, we can ask OpenGL to draw as many copies as we 
+want. We can specify drawing 24 cubes as follows:
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 24);
+When using instancing, the vertex shader has access to a built-in variable gl_InstanceID, an integer that refers to which numeric instance of the 
+object is cur￾rently being processed.
+
+To render more than one model in a single scene, a simple approach is to use 
+a separate buffer for each model. Each model will need its own model matrix, and 
+thus a new model-view matrix will be generated for each model that we render. 
+There will also need to be separate calls to glDrawArrays() for each model. Thus 
+there will need to be changes both in init() and in display().
+
+Another consideration is whether or not we will need different shaders—or a 
+different rendering program—for each of the objects we wish to draw. As it turns 
+out, in many cases we can use the same shaders (and thus the same rendering 
+program) for the various objects we are drawing. We usually only need to employ 
+different rendering programs for the various objects if they are built of different 
+primitives (such as lines instead of triangles), or if there are complex lighting or 
+other effects involved.
+
+So far, the models we have rendered have each been constructed of a single set of 
+vertices. It is often desired, however, to build complex models by assembling smaller, 
+simple models. For example, a model of a “robot” could be created by separately draw￾ing 
+the head, body, legs, and arms, where each of those is a separate model. An object 
+built in this manner is often called a hierarchical model. The tricky part of building 
+hierarchical models is keeping track of all the model-view matrices and making sure 
+they stay perfectly coordinated—otherwise the robot might fly apart into pieces!
+
+Hierarchical models are useful not only for building complex objects—they 
+can also be used to generate complex scenes. For example, consider how our 
+planet Earth revolves around the sun, and in turn how the moon revolves around 
+the Earth. Such a scene is shown in Figure 4.11.5 Computing the moon’s actual 
+path through space could be complex. However, if we can combine the transforms 
+representing the two simple circular paths—the moon’s path around the Earth 
+and the Earth’s path around the sun—we avoid having to explicitly compute the 
+moon’s trajectory.
+It turns out that we can do this fairly easily with a matrix stack. A matrix stack 
+is, as its name implies, a stack of transformation matrices. As we will see, matrix 
+stacks make it easy to create and manage complex hierarchical objects and scenes, 
+where transforms can be built upon (and removed from) other transforms.
+
+OpenGL has a built-in matrix stack, but as part of the older fixed-function 
+(non-programmable) pipeline it has long been deprecated [OL16]. However, the 
+C++ Standard Template Library (STL) has a class called “stack” that is relatively 
+straightforward to adapt as a matrix stack, by using it to build a stack of mat4s. 
+As we will see, many of the model, view, and model-view matrices that would 
+normally be needed in a complex scene can be replaced by a single instance of 
+stack<glm::mat4>.
+
+The “*=” operator is overloaded in mat4 so that it 
+can be used to concatenate matrices. Therefore, we will typically use it in one of 
+the forms shown to add translations, rotations, and so on to the matrix at the top 
+of the matrix stack.
+
+Rather than building transforms by creating instances of mat4, we instead 
+use the push() command to create new matrices at the top of the stack. Desired 
+transforms are then applied as needed to the newly created matrix on the top of 
+the stack.
+
+The first matrix pushed on the stack is frequently the VIEW matrix. The matri￾ces above it are model-view matrices of increasing complexity; that is, they have 
+an increasing number of model transforms applied to them. These transforms can 
+either be applied directly or by first concatenating other matrices.
+
+In our planetary system example, the matrix positioned immediately above the 
+VIEW matrix would be the sun’s MV matrix. The matrix on top of that matrix would 
+be the earth’s MV matrix, which consists of a copy of the sun’s MV matrix with the 
+Earth’s model matrix transforms applied to it. That is, the Earth’s MV matrix is 
+built by incorporating the planet’s transforms into the sun’s transforms. Similarly, 
+the moon’s MV matrix sits on top of the planet’s MV matrix and is constructed by 
+applying the moon’s model matrix transforms to the planet’s MV matrix immedi￾ately below it.
+After rendering the moon, a second “moon” could be rendered by “popping” 
+the first moon’s matrix off of the stack (restoring the top of the stack to the planet’s 
+model-view matrix) and then repeating the process for the second moon.
+The basic approach is as follows:
+1. We declare our stack, giving it the name “mvStack”.
+2. When a new object is created relative to a parent object, call “mvStack
+.push(mvStack.top())”.
+3. Apply the new object’s desired transforms; i.e., multiply a desired trans￾form onto it.
+4. When an object or sub-object has finished being drawn, call “mvStack
+.pop()” to remove its model-view matrix from atop the matrix stack.
+
+Here is an overview of how a display() function using a matrix stack is typically 
+organized:
+	Setup		● Instantiate the matrix stack.
+	Camera		●  Push a new matrix onto the stack.
+		(this will instantiate an empty VIEW matrix).
+				● Apply transform(s) to the view matrix on the top of the stack.
+	Parent		●  Push a new matrix onto the stack (this will be the parent MV
+		matrix—for the first parent, it duplicates the view matrix).
+				●  Apply transforms to incorporate the parent’s M
+		matrix into the duplicated view matrix.
+				●  Send the topmost matrix (i.e., use "glm::value_ptr()") to the 
+		MV uniform variable in the vertex shader.
+				● Draw the parent object.
+	Child		●  Push a new matrix onto the stack. This will be the
+		child’s MV matrix, duplicating the parent MV matrix.
+				●  Apply transforms to incorporate the child’s M
+		matrix into the duplicated parent MV matrix.
+				●  Send the topmost matrix (i.e., use "glm::value_ptr()") to the 
+		MV uniform variable in the vertex shader.
+				● Draw the child object.
+	Cleanup		● Pop the child’s MV matrix off the stack.
+				● Pop the parent’s MV matrix off the stack.
+				● Pop the VIEW matrix off the stack
+
+
+Recall that when rendering multiple objects, OpenGL uses the Z-buffer algorithm
+(shown earlier in Figure 2.14) for performing hidden surface removal. Ordinarily, 
+this resolves which object surfaces are visible and rendered to the screen, versus 
+which surfaces lie behind other objects and thus should not be rendered, by choos￾ing a pixel’s color to be that of the corresponding fragment closest to the camera.
+However, there can be occasions when two object surfaces in a scene overlap and 
+lie in coincident planes, making it problematic for the Z-buffer algorithm to deter￾mine which of the two surfaces should 
+be rendered (since neither is “closest” to 
+the camera). When this happens, floating 
+point rounding errors can lead to some 
+portions of the rendered surface using the 
+color of one of the objects, and other por￾tions using the color of the other object. 
+This artifact is known as Z-fighting or
+depth-fighting, because the effect is the 
+result of rendered fragments “fighting” 
+over mutually corresponding pixel entries 
+in the Z-buffer. Figure 4.12 shows an 
+example of Z-fighting between two boxes 
+with overlapping coincident (top) faces.
+
+Situations like this often occur when creating terrain or shadows. 
+It is some￾times possible to predict Z-fighting in such instances, and a common way of cor￾recting 
+it in these cases is to move one object slightly, so that the surfaces are no 
+longer coplanar. We will see an example of this in Chapter 8.
+Z-fighting can also occur due to limited precision of the values in the depth 
+buffer. For each pixel processed by the Z-buffer algorithm, the accuracy of its 
+depth information is limited by the number of bits available for storing it in the 
+depth buffer. The greater the range between near and far clipping planes used to 
+build the perspective matrix, the more likely two objects’ points with similar (but 
+not equal) actual depths will be represented by the same numeric value in the 
+depth buffer. Therefore, it is up to the programmer to select near and far clipping 
+plane values to minimize the distance between the two planes, while still ensuring 
+that all objects essential to the scene lie within the viewing frustum.
+It is also important to understand that, due to the effect of the perspective 
+transform, changing the near clipping plane value can have a greater impact on 
+the likelihood of Z-fighting artifacts than making an equivalent change in the far 
+clipping plane. Therefore, it is advisable to avoid selecting a near clipping plane 
+that is too close to the eye.
+
+One important way of keeping overhead in the display() function to a minimum 
+is by avoiding any steps that require memory allocation. Obvious examples of 
+things to avoid thus would include:
+• instantiating objects
+• declaring variables
+
+The reader is encouraged to review the programs that we have developed so 
+far, and observe that virtually every variable used in the display() function was 
+declared, and its space allocated, before the display() function was ever actually 
+called. Declarations or instantiations almost never appear in display(). For example, 
+Program 4.1 included the following block of code early in its listing:
+	// allocate variables used in display() function, so that they won’t need to be allocated during rendering
+	GLuint mvLoc, projLoc;
+	int width, height;
+	float aspect;
+	glm::mat4 pMat, vMat, mMat, mvMat;
+
+There are other, more subtle examples. For example, function calls that con￾vert data from one type to another may in some cases instantiate and return the 
+newly converted data. It is thus important to understand the behaviors of any 
+library functions called from display(). The math library, GLM, was not specifi￾cally designed with speed in mind. As a result, some of the operations can lead 
+to dynamic allocation. We have tried to use GLM functions that operate directly 
+onto (or into) variables whose space has already been allocated, when possible. 
+The reader is encouraged to explore alternative methods when performance is 
+critical.
+
+Another way of improving rendering efficiency is to take advantage of 
+OpenGL’s ability to do back-face culling. When a 3D model is entirely “closed,” 
+meaning the interior is never visible (such as for the cube and for the pyramid), 
+then it turns out that those portions of the outer surface that are angled away from 
+the viewer will always be obscured by some other portion of the same model. That 
+is, those triangles that face away from the viewer cannot possibly be seen (they 
+would be overwritten by hidden surface removal anyway), and thus there is no 
+reason to rasterize or render them.
+
+We can ask OpenGL to identify and “cull” (not render) back-facing triangles 
+with the command glEnable(GL_CULL_FACE). We can also disable face culling 
+with glDisable(GL_CULL_FACE). By default, face culling is disabled, so if you want 
+OpenGL to cull back-facing triangles, you must enable it.
+
+When face culling is enabled, by default triangles are rendered only if they 
+are front-facing. Also by default a triangle is considered front-facing if its three 
+vertices progress in a counter-clockwise direction (based on the order that they 
+were defined in the buffer) as viewed from the OpenGL camera. Triangles whose 
+vertices progress in a clockwise direction (as viewed from the OpenGL cam￾era) 
+are back-facing, and are not rendered. This counter-clockwise definition of 
+“front-facing” is sometimes called the winding order, and can be set explicitly 
+using the function call glFrontFace(GL_CCW) for counter-clockwise (the default) 
+or glFrontFace(GL_CW) for clockwise. Similarly, whether it is the front-facing or 
+the back-facing triangles that are rendered can also be set explicitly. Actually, for 
+this purpose we specify which ones are not to be rendered—that is, which ones 
+are “culled.” We can specify that the back-facing triangles be culled (although this 
+would be unnecessary because it is the default) by calling glCullFace(GL_BACK). 
+Alternatively, we can specify instead that the front-facing triangles be culled, or 
+even that all of the triangles be culled, by replacing the parameter GL_BACK with 
+either GL_FRONT or GL_FRONT_AND_BACK respectively.
+
+As we will see in Chapter 6, 3D models are typically designed so that the 
+outer surface is constructed of triangles with the same winding order—most com￾monly 
+counter-clockwise—so that if culling is enabled, then by default the portion 
+of the model’s outer surface that faces the camera is rendered. Since by default 
+OpenGL assumes the winding order is counter-clockwise, if a model is designed 
+to be displayed with a clockwise winding order, it is up to the programmer to call 
+gl_FrontFace(GL_CW) to account for this if back-face culling is enabled.
+
+As we will see in Chapter 6, 3D models are typically designed so that the 
+outer surface is constructed of triangles with the same winding order—most 
+com￾monly counter-clockwise—so that if culling is enabled, then by default the portion 
+of the model’s outer surface that faces the camera is rendered. Since by default 
+OpenGL assumes the winding order is counter-clockwise, if a model is designed 
+to be displayed with a clockwise winding order, it is up to the programmer to call 
+gl_FrontFace(GL_CW) to account for this if back-face culling is enabled.
+
+Efficiency isn’t the only reason for doing face culling. In later chapters, we 
+will see other uses, such as for those circumstances when we want to see the inside
+of a 3D model, or when using transparency.
+
+----------------------------------------------------------------------------------------------------
+Camera:
+
+When we're talking about camera/view space we're talking about all the vertex coordinates as seen from the camera's perspective
+as the origin of the scene: the view matrix transforms all the world coordinates into view coordinates that are relative to the
+camera's position and direction. To define a camera we need its position in world space, the direction it's looking at, a vector
+pointing to the right and a vector pointing upwards from the camera.
+
+Currently we used a constant value for movement speed when walking around. In theory this seems fine, but in practice people's
+machines have different processing powers and the result of that is that some people are able to render much more frames than
+others each second. Whenever a user renders more frames than another user he also calls processInput more often. The result is
+that some people move really fast and some really slow depending on their setup. When shipping your application you want to
+make sure it runs the same on all kinds of hardware.
+
+Graphics applications and games usually keep track of a deltatime variable that stores the time it took to render the last frame.
+We then multiply all velocities with this deltaTime value. The result is that when we have a large deltaTime in a frame, meaning
+that the last frame took longer than average, the velocity for that frame will also be a bit higher to balance it all out. When
+using this approach it does not matter if you have a very fast or slow pc, the velocity of the camera will be balanced out accordingly
+so each user will have the same experience.
+
+	
+
+
+
+
+
+
+
+
+
+

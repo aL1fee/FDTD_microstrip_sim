@@ -1,0 +1,38 @@
+Plan:
+
+#build a coordinate system
+#do a camera
+#do ok frame timing
+#do simple solidworks-like camera
+#memory leaks
+
+
+*do imgui for the first app GUI
+*do correct window resizing
+*do .frag and .vert shader files rather than .shader
+
+*make custom polygons with defined sizes
+
+*implement a hierarchy data structure to store elements & its properties of a scene
+
+
+
+
+*shaders: https://github.com/benburrill/picoputt/tree/main
+
+
+*incorporate matrix stack calls when calculating model,view,proj matrices as specified in the book
+
+
+
+
+
+
+
+
+------
+future:
+------
+* implement elaborate solidworks camera
+* use qt to create a comprehensive GUI (like FreeCAD, ParaView ones)
+* memory leaks

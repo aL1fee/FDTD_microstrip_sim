@@ -1,0 +1,88 @@
+﻿Concepts:
+
+* OpenGL - Open Graphics Library
+* OpenGL Shading Language (GLSL)
+* a shader language
+* frame buffer
+* an extension library for OpenGL
+* graphics pipeline
+* Vertex shader (once per vertex)
+* Tessellation shader
+* Geometry shader
+* Rasterization
+* Fragment shader (once per pixel)
+* Pixel operations
+* OpenGL context
+* Double buffering
+* primitives
+* triangle primitive types (GL_TRIANGLES, GL_POINTS, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES_ADJACENCY, GL_TRIANGLE_STRIP_ADJACENCY)
+* line primitive types (GL_LINES, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES_ADJACENCY, GL_LINE_STRIP_ADJACENCY)
+* point primitive types (GL_POINTS)
+* patch primitive types (GL_PATCHES)
+* GL platform-independent shorthands (ex. GLuint)
+* interpolation in rasterization (linearly interpolates ALL vertex attribute values so that the displayed pixels seamlessly connect the modeled surfaces)
+* Hidden surface removal, or HSR
+* Depth-buffer (Z-buffer)
+* Z-buffer algorithm
+* a frame
+* framerate
+* homogeneous coordinates
+* identity matrix
+* transpose of a matrix
+* matrix multiplication (associative, not commutative)
+* inverse of a matrix
+* translation matrix
+* scale matrix
+* rotation matrix
+* Euler angles for rotations
+* quaternions for rotations (allow to rotate about multiple axes simultaneously, unlike matrix rotation)
+* dot product
+* cross product (& the right-hand rule)
+* local space (aka model space, object space)
+* world space
+* model matrix (positions and orients an object into world space)
+* view space (aka eye space, synthetic camera)
+* view volume
+* projection plane
+* camera space
+* viewing transform matrix (negative of camera rot angles * negative of camera loc * world point)
+* model-view (MV) matrix (Pc = MV * Pm = V * M * Pm)
+* Perspective Projection Matrix
+* aspect ratio (the ratio width/height of the near and far clipping planes)
+* field of view (vertical angle of viewable space)
+* projection plane (aka near clipping plane)
+* far clipping plane
+* frustum (the shape formed by the above four elements)
+* Orthographic Projection Matrix
+* Znear (dist from the camera to the projection plane)
+* Zfar (dist from the camera to the far clipping plane)
+* values L, R, T, and B (left, right, top, bottom boundaries of the projection plane)
+* MVP = projection * view * model
+* look-at matrix
+* camera controller code
+* gimbal lock (the loss of one degree of freedom in a multi-dimensional mechanism at certain alignments of the axes)
+* vertex buffer
+* vertex attribute
+* vertex buffer object (VBO)
+* vertex array object (VAO) (OpenGL requires at least once to be created)
+* uniform variable
+* instancing (rendering mul￾tiple copies of an object using only a single C++/OpenGL call; use gl_InstanceID to differentiate between instances)
+* hierarchical model
+* matrix stack (a stack of transformation matrices -  transforms can be built upon (and removed from) other transforms)
+* Z-fighting (aka depth-fighting) (happens when object surfaces in a scene overlap and lie in coincident planes)
+* minimizing dynamic memory allocation in the rendering loop (instantiating objects, declaring variables,  in some cases converting data from one type to another)
+* back-face culling (triangles whose vertices progress in a clockwise direction are back-facing, and are not rendered)
+* winding order (of a triangle’s vertices determines whether the triangle is considered front-facing or back-facing)
+* uniform block
+* shader storage block
+* 3 Euler angles: pitch, yaw and roll
+
+
+
+
+
+
+
+
+
+	
