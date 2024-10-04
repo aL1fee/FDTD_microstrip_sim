@@ -5,10 +5,21 @@ Plan:
 #do ok frame timing
 #do simple solidworks-like camera
 #memory leaks
+#start imgui for the first app GUI
 
 
-*do imgui for the first app GUI
+
+
+*threading:
+	1. Main thread: window creation, event processing, high-level application logic
+	2. Rendering Thread: renders the scene using OpenGL
+	3. Worker Threads: physics updates, math calculations, asset loading
+
+
+*place openGL context correctly
+*make the scroll pointing to the mouse; not the front vector
 *do correct window resizing
+
 *do .frag and .vert shader files rather than .shader
 
 *make custom polygons with defined sizes

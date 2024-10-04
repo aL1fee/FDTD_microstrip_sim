@@ -67,13 +67,18 @@ void Renderer::updateFrameBackgroundColor() const
 void Renderer::run() const
 {
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetWindowSizeCallback(window, window_reshape_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	gui->init();
 
+	//glfwSetWindowRefreshCallback(window, window_refresh_callback);
+	//glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+
 	const int numVAOs = 1;
 	const int numVBOs = 2;
+
 
 
 	float cameraX, cameraY, cameraZ;
@@ -147,7 +152,6 @@ void Renderer::run() const
 	pMat = glm::perspective(glm::radians(cam->getZoom()), aspect, 0.1f, 100.0f);
 	std::cout << "aspect: " << aspect << std::endl;
 
-	glfwSetWindowSizeCallback(window, window_reshape_callback);
 
 
 
@@ -175,6 +179,8 @@ void Renderer::run() const
 	int frameNum = 0;
 
 	while (!glfwWindowShouldClose(window)) {
+		std::cout << "EHEYE" << std::endl;
+		std::cout << "asdasd" << std::endl;
 		glFinish();
 		auto testExecutionRenderLoopTime0 = std::chrono::high_resolution_clock::now();
 		GLuint query;
