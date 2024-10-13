@@ -90,6 +90,9 @@ unsigned int Shader::createShader(const string& vertexShader, const string& frag
 Shader::Shader(const string& filepath, unsigned int id)
 	: _Filepath(filepath), _RendererID(id)
 {
+	if (filepath == "-1") {
+		return;
+	}
 	ShaderProgramSource source = parseShader(filepath);
 	_RendererID = createShader(source.vertexSource, source.FragmentSource);
 }
@@ -107,6 +110,12 @@ void Shader::bind() const
 void Shader::unbind() const
 {
 	glUseProgram(0);
+}
+
+void Shader::printShader()
+{
+	std::cout << "Shader filepath: " << _Filepath << std::endl;
+	std::cout << "Shader id: " << _RendererID << std::endl;
 }
 
 unsigned int Shader::getUniformLocation(const string& name)

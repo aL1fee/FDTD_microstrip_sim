@@ -6,17 +6,16 @@ Plan:
 #do simple solidworks-like camera
 #memory leaks
 #start imgui for the first app GUI
-
-
-
-
-*threading:
+#threading:
 	1. Main thread: window creation, event processing, high-level application logic
 	2. Rendering Thread: renders the scene using OpenGL
 	3. Worker Threads: physics updates, math calculations, asset loading
+#placing openGL context semi-correctly
 
 
-*place openGL context correctly
+*draw simple polygons w/ properties
+
+
 *make the scroll pointing to the mouse; not the front vector
 *do correct window resizing
 
@@ -35,8 +34,10 @@ Plan:
 *incorporate matrix stack calls when calculating model,view,proj matrices as specified in the book
 
 
-
-
+==Unsolved issues:
+1. glfwpollevents doesn't run when resizing/dragging the window. As a result, key releases are not registered during resizing/dragging.
+2. placing openGL context correctly
+3. Worker Threads: physics updates, math calculations, asset loading
 
 
 

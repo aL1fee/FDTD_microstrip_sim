@@ -135,12 +135,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Geometry\Cuboid.h" />
+    <ClInclude Include="src\Geometry\Geometry.h" />
     <ClInclude Include="src\GUI\GUI.h" />
-    <ClInclude Include="src\Input.h" />
+    <ClInclude Include="src\GUI\StatusWindow.h" />
+    <ClInclude Include="src\Input\Input.h" />
+    <ClInclude Include="src\Input\InputBuffer.h" />
     <ClInclude Include="src\Macros.h" />
+    <ClInclude Include="src\Physics\Carrier_PO.h" />
     <ClInclude Include="src\Physics\CoordinateSystem.h" />
+    <ClInclude Include="src\Physics\PhysicalObject.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Scene\Camera.h" />
+    <ClInclude Include="src\Scene\MainScene.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Setup\Shader.h" />
     <ClInclude Include="src\Utility.h" />
@@ -158,12 +165,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c" />
+    <ClCompile Include="src\Geometry\Cuboid.cpp" />
     <ClCompile Include="src\GUI\GUI.cpp" />
-    <ClCompile Include="src\Input.cpp" />
+    <ClCompile Include="src\GUI\StatusWindow.cpp" />
+    <ClCompile Include="src\Input\Input.cpp" />
+    <ClCompile Include="src\Input\InputBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Physics\Carrier_PO.cpp" />
     <ClCompile Include="src\Physics\CoordinateSystem.cpp" />
+    <ClCompile Include="src\Physics\PhysicalObject.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
+    <ClCompile Include="src\Scene\MainScene.cpp" />
+    <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Setup\Shader.cpp" />
     <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui.cpp" />

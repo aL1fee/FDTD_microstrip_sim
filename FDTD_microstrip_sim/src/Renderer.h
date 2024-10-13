@@ -6,6 +6,10 @@
 #include <vector>
 #include <stack>
 
+#include <thread>
+#include <mutex>
+
+
 #include <glm.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -18,10 +22,20 @@
 #include "Utility.h"
 #include "Macros.h"
 
-#include "Input.h"
+#include "Input/Input.h"
 
 #include "Physics/CoordinateSystem.h"
 #include "Scene/Camera.h"
+#include "Scene/Camera.h"
+#include "Scene/MainScene.h"
+
+
+void window_size_callback(GLFWwindow* window, int width, int height);
+
+void end_resize(GLFWwindow* window);
+
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 class Renderer
 {
@@ -31,6 +45,11 @@ private:
 	GUI* gui;
 
 	void updateDeltaTime() const;
+
+
+	void testPerformanceStart() const;
+	void testPerformanceStop() const;
+
 
 
 
@@ -44,7 +63,7 @@ public:
 
 	void run() const;
 
-
+	void render() const;
 
 
 

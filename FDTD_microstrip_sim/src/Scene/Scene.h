@@ -1,18 +1,38 @@
 #pragma once
 
+#include <iostream>
+//#include <vector>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+#include <gtx/string_cast.hpp>
+
+#include "../GUI/GUI.h"
+#include "../Input/Input.h"
+
+#include "../Macros.h"
+
+#include "../Setup/Shader.h"
+
+extern Camera* cam;
+extern bool _projMatrixChanged;
+
 class Scene
 {
-private:
-
+protected:
+	GLFWwindow* window;
+	GUI* gui;
+	Input* input;
+	float aspect;
 
 
 public:
+	Scene(GLFWwindow* w, GUI* g, Input* in);
 
-
-
-
-
-
-
-
+	virtual void init() = 0;
+	virtual void render() = 0;
 };

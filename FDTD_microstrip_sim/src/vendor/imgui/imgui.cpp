@@ -2130,8 +2130,7 @@ static const ImU32 GCrc32LookupTable[256] =
 
 // Known size hash
 // It is ok to call ImHashData on a string with known length but the ### operator won't be supported.
-// FIXME-OPT: Replace with e.g. FNV1a hash? CRC32 pretty much 
-// omly access 1KB. Need to do proper measurements.
+// FIXME-OPT: Replace with e.g. FNV1a hash? CRC32 pretty much randomly access 1KB. Need to do proper measurements.
 ImGuiID ImHashData(const void* data_p, size_t data_size, ImGuiID seed)
 {
     ImU32 crc = ~seed;

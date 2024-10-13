@@ -52,6 +52,31 @@ OpenGL efficiency tests:
 
 
 
+threads:
+Do not
+Use 2 threads that run more or less lock-step, implementing a single-threaded behavior with several threads. This has the same level of parallelism (zero) but adds overhead for context switches and synchronization. Plus, the logic is harder to grok.
+Use sleep to control the frame rate. Never. If someone tells you to, hit them.
+First, not all monitors run at 60Hz. Second, two timers ticking at the same rate running side by side will always eventually get out of sync (drop two pingpong balls on a table from the same height, and listen). Third, sleep is by design neither accurate nor reliable. Granularity may be as bad as 15.6ms (in fact, the default on Windows[1]), and a frame is only 16.6ms at 60fps, which leaves a mere 1ms for everything else. Plus, it's hard to get 16.6 to be a multiple of 15.6...
+Also, sleep is allowed to (and will sometimes!) return only after 30 or 50 or 100 ms, or an even longer time.
+Use std::mutex to notify another thread. This is not what it's for.
+Assume that TaskManager is any good at telling you what's going on, especially judging from a number like "25% CPU", which could be spent in your code, or within the usermode driver, or somewhere else.
+Have one thread per high level component (there are of course some exceptions).
+Create threads at "random times", ad hoc, per task. Creating threads can be surprisingly expensive and they can take a surprisingly long time before they are acutally doing what you told them (especially if you have a lot of DLLs loaded!).
+Do
+Use multithreading to have things run asynchronously as much as you can. Speed is not the main idea of threading, but doing things in parallel (so even if they take longer alltogether, the sum of all is still less).
+Use vertical sync to limit the frame rate. That is the only correct (and non-failing) way to do it. If the user overrides you in the display driver's control panel ("force off"), then so be it. After all it's his computer, not yours.
+If you need to "tick" something at regular intervals, use a timer. Timers have the advantage of having a much better accuracy and reliability as compared to sleep[2]. Also, a recurring timer accounts for time correctly (including time that passes in between) whereas sleeping for 16.6ms (or 16.6ms minus measured_time_elapsed) doesn't.
+Run physics simulations that involve numeric integration at a fixed time step (or your equations will explode!), interpolate graphics between steps (this may be an excuse for a separate per-component-thread, but it can also be done without).
+Use std::mutex to have only one thread access a resource at a time ("mutually exclude"), and to comply with the weird semantics of std::condition_variable.
+Avoid having threads compete for resources. Lock as little as necessary (but none less!) and hold locks only as long as absolutely necessary.
+Do share read-only data between threads (no cache issues, and no locking necessary), but do not concurrently modify data (needs sync and kills the cache). That includes modifying data that is nearby a location someone else might read.
+Use std::condition_variable to block another thread until some condition is true. The semantics of std::condition_variable with that extra mutex are admittedly pretty weird and twisted (mostly for historic reasons inherited from POSIX threads), but a condition variable is the correct primitive to use for what you want.
+In case you find std::condition_variable too weird to be comfortable with it, you can as well simply use a Windows event (slightly slower) instead or, if you are courageous, build your own simple event around NtKeyedEvents (involves scary low level stuff). As you use DirectX, you're already bound to Windows anyway, so loss of portability shouldn't a biggie.
+Break work into reasonably-sized tasks that are run by a fixed-size worker thread pool (no more than one per core, not counting hyperthreaded cores). Let finishing tasks enqueue dependent tasks (free, automatic synchronization). Make tasks that have at least a few hundred non-trivial operations each (or one lenghty blocking operation like a disk read). Prefer cache-contiguous access.
+Create all threads at program start.
+Take advantage of asynchronous functions that the OS or the graphics API offers for better/additional parallelism, not only on the program level but also on the hardware (think PCIe transfers, CPU-GPU parallelism, disk DMA, etc.).
+10,000 other things that I've forgotten to mention.
+
 
 
 

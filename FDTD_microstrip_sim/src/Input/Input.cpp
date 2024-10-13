@@ -11,14 +11,30 @@ float _lastY = INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT / 2.0f;
 Input::Input(GLFWwindow* w)
 {
 	window = w;
+    potentialPressedGLFWButtons = new std::vector<int>();
+    inputBuffer = new InputBuffer();
 }
 
 void Input::processInput()
 {
+    extern bool _resizing;
+    //if (_resizing) {
+    //    std::cout << "hgey" << std::endl;
+    //    return;
+    //}
     extern float _deltaTime;
     extern bool _cameraTranslationalMotionOn;
     _cameraTranslationalMotionOn = false;
     const float cameraSpeed = 0.05f; // adjust accordingly
+    //if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE) {
+    //    std::cout << "a" << std::endl;
+    //}
+    //if (_resizing) {
+    //    return;
+    //}
+
+
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cam->moveForward(_deltaTime);
     }
@@ -42,12 +58,24 @@ void Input::processInput()
     }
 }
 
+
+int screenWidth;
+int screenHeight;
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     extern bool _mouseRightButtonPressed;
     extern bool _cameraTranslationalMotionOn;
     float posXF = static_cast<float>(xpos);
     float posYF = static_cast<float>(ypos);
+
+    glfwGetWindowSize(window, &screenWidth, &screenHeight);
+
+    if (posXF < INITIAL_OPENGL_CONTEXT_POSITION_X || posYF < INITIAL_OPENGL_CONTEXT_POSITION_Y || posYF > (screenHeight - 160)) {
+        _firstMouseMovement = true;
+        return;
+    }
+
     if (_firstMouseMovement) 
     {
         _lastX = posXF;
@@ -80,5 +108,20 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     } else {
         _mouseRightButtonPressed = false;
     }
+
+    extern bool _mouseLeftButtonPressed;
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        _mouseLeftButtonPressed = true;
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+        std::cout << "Here: " << mouseX << ", " << mouseY << std::endl;
+
+    } else {
+        _mouseLeftButtonPressed = false;
+    }
+
+
+
+
 }
 

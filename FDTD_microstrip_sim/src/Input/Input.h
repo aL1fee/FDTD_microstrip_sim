@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 
 #include <GLFW/glfw3.h>
 //#include <glad/glad.h>
@@ -9,9 +10,10 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-#include "Macros.h"
+#include "../Macros.h"
 
-#include "Scene/Camera.h"
+#include "../Scene/Camera.h"
+#include "InputBuffer.h"
 
 //void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 //void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -29,7 +31,8 @@ class Input
 {
 private:
 	GLFWwindow* window;
-
+	std::vector<int>* potentialPressedGLFWButtons;
+	InputBuffer* inputBuffer;
 
 
 

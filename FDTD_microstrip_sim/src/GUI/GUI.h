@@ -14,10 +14,13 @@
 #include "../vendor/imgui/imgui_impl_glfw.h"
 #include "../vendor/imgui/imgui_impl_opengl3.h"
 
+#include "StatusWindow.h"
+
 class GUI
 {
 private:
 	GLFWwindow* window;
+	StatusWindow* statusWindow;
 	
 	float firstRightPanelMinimized;
 

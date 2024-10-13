@@ -3,6 +3,7 @@
 GUI::GUI(GLFWwindow* w)
 {
 	window = w;
+	statusWindow = new StatusWindow("...");
 	firstRightPanelMinimized = true;
 	customFont = nullptr;
 }
@@ -77,10 +78,15 @@ void GUI::buildMenuUpperPanel()
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu("x"))
+		if (ImGui::BeginMenu("Add"))
 		{
-			if (ImGui::MenuItem("Open", "Ctrl+O")) { /* Open action */ }
-			if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Save action */ }
+			if (ImGui::MenuItem("Cuboid"))
+			{
+				std::string s = "Please choose point 1";
+				statusWindow->setMessage(s);
+
+
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("y"))
@@ -168,8 +174,7 @@ void GUI::buildLeftPanel()
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.976f, 0.976f, 0.976f, 1.0f));
 
 	ImGui::Begin("LeftPanel", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-
+		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 	ImGui::End();
 	ImGui::PopStyleColor();
 
@@ -267,10 +272,13 @@ void GUI::buildLowerPanel() {
 	ImGui::Begin("LowerPanel", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 
-	ImGui::Text("Debug window");
-	ImGui::Text("> Loading..");
-	ImGui::Text("> Loading..");
-	ImGui::Text("> Loading..");
+
+	ImGui::Text("Status window:");
+	ImGui::Text(statusWindow->getMessage().c_str());
+
+	//ImGui::Text("> Loading..");
+	//ImGui::Text("> Loading..");
+	//ImGui::Text("> Loading..");
 
 	ImGui::End();
 	ImGui::PopStyleColor();

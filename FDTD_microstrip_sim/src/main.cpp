@@ -7,6 +7,8 @@
 #include "Renderer.h"
 #include "GUI/GUI.h"
 
+Renderer* renderer;
+
 static bool glfwInitialize() 
 {
 	glfwInit();
@@ -55,10 +57,12 @@ int main() {
 	}
 
 	glViewport(0, 0, FULL_SCREEN_SIZE_X, FULL_SCREEN_SIZE_Y);
+	//glViewport(INITIAL_OPENGL_CONTEXT_POSITION_X, INITIAL_OPENGL_CONTEXT_POSITION_Y,
+	//	INITIAL_OPENGL_CONTEXT_SCREEN_WIDTH, INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT);
 
 
 	GUI* gui = new GUI(window);
-	Renderer* renderer = new Renderer(window, gui);
+	renderer = new Renderer(window, gui);
 
 	renderer->run();
 

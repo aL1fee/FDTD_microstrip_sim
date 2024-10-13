@@ -7,6 +7,7 @@ void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight)
 	//_aspectRatio = (float)newWidth / (float)newHeight; // new width&height provided by the callback
 	// //glViewport(0, 0, newWidth, newHeight);
 	//pMat = glm::perspective(1.0472f, _aspectRatio, 0.1f, 1000.0f);
+
 }
 
 void Utility::checkGLError(const char* function)
