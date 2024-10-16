@@ -16,6 +16,8 @@
 
 #include "StatusWindow.h"
 
+#include "../Scene/MainScene.h"
+
 class GUI
 {
 private:

@@ -18,6 +18,35 @@ void Utility::checkGLError(const char* function)
 	}
 }
 
-//void window_refresh_callback(GLFWwindow* window) {
-//	glfwSwapBuffers(window);
-//}
+
+glm::vec3 Utility::screenToNDC(GLFWwindow* window, float x, float y, float z)
+{
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    //std::cout << "WIDTH: " << width << std::endl;
+    //std::cout << "HEIGHT: " << height << std::endl;
+    return glm::vec3((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height, z);
+}
+
+glm::vec4 Utility::NDCToHCC(glm::vec3 v)
+{
+    return glm::vec4(v.x, v.y, -1.0f, 1.0f);
+}
+
+glm::vec4 Utility::clipToEyeC(glm::vec4 v)
+{
+    extern MainScene* _scene_main;;
+    glm::vec4 rayEye = glm::inverse(_scene_main->getProjMatrix()) * v;
+    //rayEye /= rayEye.w;
+    return glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+}
+
+
+glm::vec3 Utility::eyeToWorldC(glm::vec4 v)
+{
+    extern MainScene* _scene_main;
+    glm::vec3 rayWorld = glm::vec3(glm::inverse(_scene_main->getViewMatrix()) * v);
+    return glm::normalize(rayWorld);
+}
+
+

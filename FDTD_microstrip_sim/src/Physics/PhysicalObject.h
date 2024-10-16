@@ -17,14 +17,13 @@
 class PhysicalObject
 {
 protected:
-
 	glm::vec3 color;
 	float permittivity;
+	bool isActivelyDrawn;
 
 public:
+	PhysicalObject();
 	PhysicalObject(glm::vec3 c, float p);
-
-
 
 
 

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 //#include <glad/glad.h>
 
 #include <glm.hpp>
@@ -12,8 +12,11 @@
 
 #include "../Macros.h"
 
+#include "../Scene/MainScene.h"
 #include "../Scene/Camera.h"
 #include "InputBuffer.h"
+
+#include "../Utility.h"
 
 //void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 //void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -33,7 +36,6 @@ private:
 	GLFWwindow* window;
 	std::vector<int>* potentialPressedGLFWButtons;
 	InputBuffer* inputBuffer;
-
 
 
 public:

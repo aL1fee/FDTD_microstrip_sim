@@ -6,6 +6,8 @@
 #include <vector>
 #include <stack>
 
+#include <windows.h>
+
 #include <thread>
 #include <mutex>
 
@@ -25,7 +27,6 @@
 #include "Input/Input.h"
 
 #include "Physics/CoordinateSystem.h"
-#include "Scene/Camera.h"
 #include "Scene/Camera.h"
 #include "Scene/MainScene.h"
 

@@ -18,13 +18,18 @@ void MainScene::init()
 	glfwGetFramebufferSize(window, &width, &height);
 	aspect = (float)width / (float)height;
 	projMatrix = glm::perspective(glm::radians(cam->getZoom()), aspect, 0.1f, 100.0f);
+
+	testingLine = new TestingLine();
 }
 
 void MainScene::render()
 {
 	shader_csys.bind();
 	if (_projMatrixChanged) {
-		projMatrix = glm::perspective(glm::radians(cam->getZoom()), aspect, 0.1f, 100.0f);
+		//int w, h;
+		//glfwGetFramebufferSize(window, &w, &h);
+		//aspect = (float)w / (float)h;
+		projMatrix = (glm::perspective(glm::radians(cam->getZoom()), aspect, 0.1f, 1000.0f));
 		glUniformMatrix4fv(projCamLoc, 1, GL_FALSE, glm::value_ptr(projMatrix));
 		_projMatrixChanged = false;
 	}
@@ -34,9 +39,29 @@ void MainScene::render()
 		_viewMatrixChanged = false;
 	}
 
+	shader_csys.setUniform3f("color", 0.0f, 0.0f, 1.0f);
+	testingLine->build();
+	testingLine->draw();
+
 	shader_csys.setUniform3f("color", mainGridColor.x, mainGridColor.y, mainGridColor.z);
 	csys.drawMain();
 	shader_csys.setUniform3f("color", helperGridColor.x, helperGridColor.y, helperGridColor.z);
 	csys.drawHelper();
 	shader_csys.unbind();
+
+
+
+
+}
+
+void MainScene::addCarrier(std::string& s)
+{
+	int i = 0;
+	s = "Please choose point 0";
+	Carrier_PO* carrierPO = new Carrier_PO();
+	physicalObjectBuffer->push_back(carrierPO);
+
+
+
+
 }

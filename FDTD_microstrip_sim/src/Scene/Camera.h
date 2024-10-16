@@ -52,6 +52,7 @@ public:
 	void moveLeft(float dt);
 
 	glm::vec3 getPos() const { return cameraPos; }
+	glm::vec3 getFront() const { return cameraFront; }
 	float getZoom() const { return zoom; }
 
 	void processMouseRotation(float offsetX, float offsetY);

@@ -56,7 +56,12 @@ int main() {
 		return -1;
 	}
 
-	glViewport(0, 0, FULL_SCREEN_SIZE_X, FULL_SCREEN_SIZE_Y);
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	glViewport(0, 0, width, height);
+	//glViewport(0, 0, FULL_SCREEN_SIZE_X, FULL_SCREEN_SIZE_Y);
+	 
+	
 	//glViewport(INITIAL_OPENGL_CONTEXT_POSITION_X, INITIAL_OPENGL_CONTEXT_POSITION_Y,
 	//	INITIAL_OPENGL_CONTEXT_SCREEN_WIDTH, INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT);
 

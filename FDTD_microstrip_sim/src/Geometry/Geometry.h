@@ -18,9 +18,12 @@ class Geometry
 {
 protected:
 	glm::vec3 origin;
-	float length; //x
-	float width; //z
-	float height; //y
+	//float length; //x
+	//float width; //z
+	//float height; //y
+
+	std::vector<glm::vec3>* vertices;
+	std::vector<unsigned int>* VAOs;
 
 public:
 	virtual std::vector<glm::vec3>* build() = 0;

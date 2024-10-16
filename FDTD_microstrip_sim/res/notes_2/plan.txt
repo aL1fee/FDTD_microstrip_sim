@@ -13,7 +13,14 @@ Plan:
 #placing openGL context semi-correctly
 
 
+
+
+*ray casting
 *draw simple polygons w/ properties
+
+
+
+*address cpu usage & v-sync https://stackoverflow.com/questions/30381064/how-to-reduce-opengl-cpu-usage-and-or-how-to-use-opengl-properly
 
 
 *make the scroll pointing to the mouse; not the front vector
@@ -48,3 +55,6 @@ future:
 * implement elaborate solidworks camera
 * use qt to create a comprehensive GUI (like FreeCAD, ParaView ones)
 * memory leaks
+
+
+ray casting for mouse object picking https://antongerdelan.net/opengl/raycasting.html#:~:text=It%20can%20be%20useful%20to%20click%20on%2C%20or,any%20objects.%20This%20is%20usually%20called%20ray%20casting.

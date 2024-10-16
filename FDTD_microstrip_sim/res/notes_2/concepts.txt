@@ -76,12 +76,16 @@
 * uniform block
 * shader storage block
 * 3 Euler angles: pitch, yaw and roll
+* 
 
 
 
 
 
 
+
+
+https://stackoverflow.com/questions/625799/resolve-build-errors-due-to-circular-dependency-amongst-classes#:~:text=Declaration%20Definition%20The%20difference%20is
 
 
 

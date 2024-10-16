@@ -15,8 +15,12 @@ bool _viewMatrixChanged = true;
 
 bool _resizing = false;
 
+int _preserveLeftClickNum = 0;
+bool _acceptingLeftClickBufferInput = false;
+
 std::mutex mtx;
 
+//MainScene* _scene_main = nullptr;
 MainScene* _scene_main;
 
 //std::vector<glm::vec3> activeInputBuffer 
@@ -48,7 +52,7 @@ void end_resize(GLFWwindow* window) {
 
 void Renderer::updateDeltaTime() const
 {
-	float currentFrame = glfwGetTime();
+	float currentFrame = (float) glfwGetTime();
 	_deltaTime = currentFrame - _lastFrame;
 	_lastFrame = currentFrame;
 }
@@ -121,14 +125,21 @@ std::atomic<bool> threadSwitch(false);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-
 	if (!threadSwitch.load()) {
+		//int width, height;
+		//glfwGetWindowSize(window, &width, &height);
+		//std::cout << "HEYWIDTH: " << width << std::endl;
+		//std::cout << "HEYHEIGHT: " << height << std::endl;
+		//glViewport(10, 10, 10, 10);
+
+		//_projMatrixChanged = true;
+		std::cout << "aaa" << std::endl;
 		_resizing = true;
 		threadSwitch.store(true);
 	}
 
 }
-
+	
 void window_size_callback(GLFWwindow* window, int width, int height) {
 	//if (threadSwitch.load()) {
 	//	threadSwitch.store(false);
@@ -182,9 +193,12 @@ void Renderer::run() const
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
+	glfwSwapInterval(1);
+
 	gui->init();
-	_scene_main = new MainScene(window, gui, input);
-	
+	//_scene_main = new MainScene(window, gui, input);
+	//_scene_main = new MainScene(window, input);
+	_scene_main = new MainScene(window);
 
 	glfwMakeContextCurrent(nullptr); // Release context from main thread
 	std::thread renderThread(&Renderer::render, this);
@@ -196,13 +210,13 @@ void Renderer::run() const
 			_resizing = false;
 			threadSwitch.store(true);
 		}
-		
-		//if (!threadSwitch) {
-		//}
-		//threadSwitch = true;
-		//std::lock_guard<std::mutex> lock(mtx);
-		//glfwPollEvents();
-		//std::lock_guard<std::mutex> unlock(mtx);
+		//
+		////if (!threadSwitch) {
+		////}
+		////threadSwitch = true;
+		////std::lock_guard<std::mutex> lock(mtx);
+		////glfwPollEvents();
+		////std::lock_guard<std::mutex> unlock(mtx);
 
 	}
 	renderThread.join();
@@ -217,10 +231,21 @@ void Renderer::render() const
 	glfwMakeContextCurrent(window);
 	while (!glfwWindowShouldClose(window)) {
 		if (threadSwitch.load()) {
-			//std::cout << "debug 1" << std::endl;
-			//std::cout << "debug 2" << std::endl;
-
-			testPerformanceStart();
+			if (_resizing) {
+				//int width, height;
+				//glfwGetWindowSize(window, &width, &height);
+				//std::cout << "HEYWIDTH: " << width << std::endl;
+				//std::cout << "HEYHEIGHT: " << height << std::endl;
+				//float aspect = 1.3f;
+				//if ((float) width / height <= 1.3) {
+				//	aspect = 1.3f;
+				//	glViewport(0, 0, aspect * height, height);
+				//}
+				//else {
+				//	glViewport(0, 0, width, height);
+				//}
+			}
+			//testPerformanceStart();
 
 			updateDeltaTime();
 			updateFrameBackgroundColor();
@@ -236,7 +261,7 @@ void Renderer::render() const
 
 			glfwSwapBuffers(window);
 
-			testPerformanceStop();
+			//testPerformanceStop();
 
 			double currentTime = glfwGetTime();
 			nbFrames++;

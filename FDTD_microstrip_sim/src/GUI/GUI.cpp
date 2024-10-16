@@ -74,15 +74,22 @@ void GUI::buildMenuUpperPanel()
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.9607f, 0.9607f, 0.9607f, 1.0f));
 
+	extern MainScene* _scene_main;
+
+
 	ImGui::Begin("UpperMenuBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu("Add"))
 		{
-			if (ImGui::MenuItem("Cuboid"))
+			if (ImGui::MenuItem("Carrier"))
 			{
-				std::string s = "Please choose point 1";
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
+
+				std::string s = "> Choose points to build a carrier";
+				_scene_main->addCarrier(s);
 				statusWindow->setMessage(s);
 
 

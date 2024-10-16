@@ -145,6 +145,7 @@
     <ClInclude Include="src\Physics\Carrier_PO.h" />
     <ClInclude Include="src\Physics\CoordinateSystem.h" />
     <ClInclude Include="src\Physics\PhysicalObject.h" />
+    <ClInclude Include="src\Physics\TestingLine.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Scene\MainScene.h" />
@@ -174,6 +175,7 @@
     <ClCompile Include="src\Physics\Carrier_PO.cpp" />
     <ClCompile Include="src\Physics\CoordinateSystem.cpp" />
     <ClCompile Include="src\Physics\PhysicalObject.cpp" />
+    <ClCompile Include="src\Physics\TestingLine.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\MainScene.cpp" />
