@@ -18,6 +18,11 @@ bool _resizing = false;
 int _preserveLeftClickNum = 0;
 bool _acceptingLeftClickBufferInput = false;
 
+int _initialWindowWidth = 0;
+int _initialWindowHeight = 0;
+int _currentWindowWidth = 0;
+int _currentWindowHeight = 0;
+
 std::mutex mtx;
 
 //MainScene* _scene_main = nullptr;
@@ -133,7 +138,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 		//glViewport(10, 10, 10, 10);
 
 		//_projMatrixChanged = true;
-		std::cout << "aaa" << std::endl;
+
+		//glViewport(0, 0, width, height);
+
+
+		glfwGetWindowSize(window, &_currentWindowWidth, &_currentWindowHeight);
 		_resizing = true;
 		threadSwitch.store(true);
 	}
@@ -223,6 +232,23 @@ void Renderer::run() const
 
 }
 
+void Renderer::centeredViewportResize() const {
+	int width, height;
+	int lowerLeftCornerOfViewportX = 0, lowerLeftCornerOfViewportY = 0;
+	glfwGetWindowSize(window, &width, &height);
+	int newWidth = width;
+	int newHeight = height;
+	if (width > height * _aspectRatio) {
+		newWidth = height * _aspectRatio;
+		lowerLeftCornerOfViewportX = static_cast<int>((width - newWidth) / 2.0f);
+	}
+	if (height > width / _aspectRatio) {
+		newHeight = width / _aspectRatio;
+		lowerLeftCornerOfViewportY = static_cast<int>((height - newHeight) / 2.0f);
+	}
+	glViewport(lowerLeftCornerOfViewportX, lowerLeftCornerOfViewportY, newWidth, newHeight);
+}
+
 void Renderer::render() const
 {
 	double lastTime = glfwGetTime();
@@ -232,18 +258,12 @@ void Renderer::render() const
 	while (!glfwWindowShouldClose(window)) {
 		if (threadSwitch.load()) {
 			if (_resizing) {
-				//int width, height;
-				//glfwGetWindowSize(window, &width, &height);
-				//std::cout << "HEYWIDTH: " << width << std::endl;
-				//std::cout << "HEYHEIGHT: " << height << std::endl;
-				//float aspect = 1.3f;
-				//if ((float) width / height <= 1.3) {
-				//	aspect = 1.3f;
-				//	glViewport(0, 0, aspect * height, height);
-				//}
-				//else {
-				//	glViewport(0, 0, width, height);
-				//}
+				//centeredViewportResize();
+				//_projMatrixChanged = true;
+				//std::cout << "currentWidth: " << _currentWindowWidth << std::endl;
+				//std::cout << "currentHeight: " << _currentWindowHeight << std::endl;
+				//glViewport(0, 0, _currentWindowWidth, _currentWindowHeight);
+
 			}
 			//testPerformanceStart();
 

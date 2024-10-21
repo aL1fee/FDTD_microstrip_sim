@@ -83,6 +83,27 @@ Take advantage of asynchronous functions that the OS or the graphics API offers 
 
 
 
+
+You've got two good answers already but they may be hard to understand for a beginner so I'll tell you why do we really need glViewport function.
+
+In typical rendering it may seem to have no sense - you just create some window or render target and draw on it, right? I'd say that 95+% of apps works that way.
+
+But let's say your're writing an app like 3DS MAX, where you have you window split into 4 distinct renderings. You remember your current split position and you manage Mouse events, so when you hover over the split bar you may change mouse cursor to resizing one, etc. When you drag your split bar you remember its new position and so on.
+
+When you want to render your 3D views you cal glViewport with position and size of your first 3D-subwindow and run typical GL commands to draw here. OpenGL will automatically scale the rendering so it fits into the given viewport. You do the same for the rest of your viewports and at the end you get one window with few different renderings, each with its own parameters. This way you can have as many distinct renderings on single window/render target as you want.
+
+Why it didn't work on one machine?
+
+GPUs and their drivers have a lot of implementation details and differences so in general you need to get used to such issues. One simple example: In GLSL shader you can create a 2D zero vector like that: vec2(0.0,0.0), you may try also to write one value: vec2(0.0) and with this code some drivers will treat it as previous version while others will return error and render nothing. Bear in mind that drivers from two vendors will differ more that two versions of the same driver, so it's a good idea to test your code on nVidia, ATI and Intel GPUs. In this very case I suspect that in nVidia drivers, when you don't set the vieport by yourself they assume you want to use entire render target, while Intel drivers don't do that.
+
+
+
+
+
+
+
+
+
 //
 //
 //

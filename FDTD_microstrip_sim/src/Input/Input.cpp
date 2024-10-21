@@ -2,6 +2,11 @@
 
 extern Camera* cam;
 
+extern int _initialWindowWidth;
+extern int _initialWindowHeight;
+extern int _currentWindowWidth;
+extern int _currentWindowHeight;
+
 bool _firstMouseMovement = true;
 float _lastX = INITIAL_OPENGL_CONTEXT_SCREEN_WIDTH / 2.0f;
 float _lastY = INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT / 2.0f;
@@ -66,14 +71,23 @@ void Input::processInput()
         extern int _preserveLeftClickNum;
 
 
+       float inputX = static_cast<float>(mouseX * _currentWindowWidth / _initialWindowWidth);
+       float inputY = static_cast<float>(mouseY * _currentWindowHeight / _initialWindowHeight);
+
+       //std::cout << "Y: " << inputY << std::endl;
+
+
+
+
+
         glm::vec3 rayNDC = Utility::screenToNDC(window, mouseX, mouseY, 1.0f);
+
+        std::cout << "ndcx: " << rayNDC.x << "; ndcy: " << rayNDC.y << std::endl;
+
         glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
         glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
         glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
 
-        //std::cout << "X: " << rayWorld.x << std::endl;
-        //std::cout << "Y: " << rayWorld.y << std::endl;
-        //std::cout << "Z: " << rayWorld.z << std::endl;
 
         extern MainScene* _scene_main;
         _scene_main->getTestingLine()->addPoint(cam->getPos() + rayWorld);

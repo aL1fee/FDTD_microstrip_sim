@@ -51,7 +51,7 @@ private:
 	void testPerformanceStart() const;
 	void testPerformanceStop() const;
 
-
+	void centeredViewportResize() const;
 
 
 public:

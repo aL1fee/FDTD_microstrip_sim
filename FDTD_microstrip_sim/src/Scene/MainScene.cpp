@@ -29,7 +29,7 @@ void MainScene::render()
 		//int w, h;
 		//glfwGetFramebufferSize(window, &w, &h);
 		//aspect = (float)w / (float)h;
-		projMatrix = (glm::perspective(glm::radians(cam->getZoom()), aspect, 0.1f, 1000.0f));
+		projMatrix = glm::perspective(glm::radians(cam->getZoom()), aspect, 0.1f, 100.0f);
 		glUniformMatrix4fv(projCamLoc, 1, GL_FALSE, glm::value_ptr(projMatrix));
 		_projMatrixChanged = false;
 	}

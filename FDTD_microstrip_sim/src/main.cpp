@@ -56,13 +56,28 @@ int main() {
 		return -1;
 	}
 
+
+	extern int _initialWindowWidth;
+	extern int _initialWindowHeight;
+	extern int _currentWindowWidth;
+	extern int _currentWindowHeight;
 	int width, height;
-	glfwGetWindowSize(window, &width, &height);
-	glViewport(0, 0, width, height);
+	glfwGetWindowSize(window, &_initialWindowWidth, &_initialWindowHeight);
+	_currentWindowWidth = _initialWindowWidth;
+	_currentWindowHeight = _initialWindowHeight;
+	glViewport(0, 0, _initialWindowWidth, _initialWindowHeight);
+	extern float _aspectRatio;
+
+	_aspectRatio = (float) _initialWindowWidth / _initialWindowHeight;
+	std::cout << "AR: " << _aspectRatio << std::endl;
+	std::cout << "width: " << _initialWindowWidth << std::endl;
+	std::cout << "height: " << _initialWindowHeight << std::endl;
+
+
 	//glViewport(0, 0, FULL_SCREEN_SIZE_X, FULL_SCREEN_SIZE_Y);
 	 
 	
-	//glViewport(INITIAL_OPENGL_CONTEXT_POSITION_X, INITIAL_OPENGL_CONTEXT_POSITION_Y,
+	//glView port(INITIAL_OPENGL_CONTEXT_POSITION_X, INITIAL_OPENGL_CONTEXT_POSITION_Y,
 	//	INITIAL_OPENGL_CONTEXT_SCREEN_WIDTH, INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT);
 
 

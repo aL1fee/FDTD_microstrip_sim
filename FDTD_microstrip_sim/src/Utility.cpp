@@ -23,9 +23,13 @@ glm::vec3 Utility::screenToNDC(GLFWwindow* window, float x, float y, float z)
 {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
-    //std::cout << "WIDTH: " << width << std::endl;
-    //std::cout << "HEIGHT: " << height << std::endl;
-    return glm::vec3((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height, z);
+    extern int _initialWindowWidth;
+    extern int _initialWindowHeight;
+    float y_delta_ndc_scaled = (float) height / _initialWindowHeight * 2.0f;
+    return glm::vec3(((float) width / _initialWindowWidth) * (2.0f * x) / width - 1.0f, 
+        -1.0f + (height - y) * y_delta_ndc_scaled / height,
+        z);
+    //return glm::vec3((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height, z);
 }
 
 glm::vec4 Utility::NDCToHCC(glm::vec3 v)
