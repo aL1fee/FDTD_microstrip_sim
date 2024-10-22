@@ -83,6 +83,13 @@ void GUI::buildMenuUpperPanel()
 	{
 		if (ImGui::BeginMenu("Add"))
 		{
+			if (ImGui::MenuItem("Testing line"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				extern bool _mouseLeftButtonExpected;
+				_mouseLeftButtonExpected = true;
+
+			}
 			if (ImGui::MenuItem("Carrier"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
@@ -95,6 +102,11 @@ void GUI::buildMenuUpperPanel()
 
 			}
 			ImGui::EndMenu();
+
+
+
+
+
 		}
 		if (ImGui::BeginMenu("y"))
 		{

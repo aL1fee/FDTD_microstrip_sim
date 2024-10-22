@@ -19,18 +19,23 @@
 #include "PhysicalObject.h"
 #include "../Geometry/Geometry.h"
 
+#include "../Data Structures/VertexVectorDS.h"
+
 class TestingLine : public Geometry
 {
 protected:
 	void buildVertices();
 	void buildVAOs();
 
+	int builtUntilIndex;
+
 public:
 	TestingLine();
 
-	std::vector<glm::vec3>* build() override;
+	void build() override;
 	void draw() const;
 	void addPoint(glm::vec3 v);
+	void terminateLine();
 
 
 };

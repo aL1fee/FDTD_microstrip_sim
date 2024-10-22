@@ -13,6 +13,8 @@
 #include "glm.hpp"
 #include <gtx/string_cast.hpp>
 
+#include "../Data Structures/VAOVectorDS.h"
+#include "../Data Structures/VertexVectorDS.h"
 
 class Geometry 
 {
@@ -22,11 +24,11 @@ protected:
 	//float width; //z
 	//float height; //y
 
-	std::vector<glm::vec3>* vertices;
-	std::vector<unsigned int>* VAOs;
+	VertexVectorDS* vertices;
+	VAOVectorDS* VAOs;
 
 public:
-	virtual std::vector<glm::vec3>* build() = 0;
+	virtual void build() = 0;
 
 
 

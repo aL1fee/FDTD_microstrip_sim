@@ -22,6 +22,8 @@ Input::Input(GLFWwindow* w)
 
 void Input::processInput()
 {
+    extern bool _mouseLeftButtonPressed;
+    extern bool _mouseLeftButtonExpected;
     extern bool _resizing;
     //if (_resizing) {
     //    std::cout << "hgey" << std::endl;
@@ -61,39 +63,29 @@ void Input::processInput()
             _cameraTranslationalMotionOn = false;
         }
     }
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    extern MainScene* _scene_main;
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _mouseLeftButtonExpected)
     {
-        extern bool _mouseLeftButtonPressed;
         _mouseLeftButtonPressed = true;
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
         //std::cout << "Here: " << mouseX << ", " << mouseY << std::endl;
         extern int _preserveLeftClickNum;
 
-
-       float inputX = static_cast<float>(mouseX * _currentWindowWidth / _initialWindowWidth);
-       float inputY = static_cast<float>(mouseY * _currentWindowHeight / _initialWindowHeight);
-
-       //std::cout << "Y: " << inputY << std::endl;
-
-
-
-
-
         glm::vec3 rayNDC = Utility::screenToNDC(window, mouseX, mouseY, 1.0f);
-
-        std::cout << "ndcx: " << rayNDC.x << "; ndcy: " << rayNDC.y << std::endl;
-
         glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
         glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
         glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
 
 
-        extern MainScene* _scene_main;
         _scene_main->getTestingLine()->addPoint(cam->getPos() + rayWorld);
-
     }
-
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _mouseLeftButtonPressed)
+    {
+        _scene_main->getTestingLine()->terminateLine();
+        _mouseLeftButtonExpected = false;
+        _mouseLeftButtonPressed = false;
+    }
 
 }
 
@@ -148,38 +140,38 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         _mouseRightButtonPressed = false;
     }
 
-    extern bool _mouseLeftButtonPressed;
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        //_mouseLeftButtonPressed = true;
-        //double mouseX, mouseY;
-        //glfwGetCursorPos(window, &mouseX, &mouseY);
-        ////std::cout << "Here: " << mouseX << ", " << mouseY << std::endl;
-        extern int _preserveLeftClickNum;
+    //extern bool _mouseLeftButtonPressed;
+    //if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    //    //_mouseLeftButtonPressed = true;
+    //    //double mouseX, mouseY;
+    //    //glfwGetCursorPos(window, &mouseX, &mouseY);
+    //    ////std::cout << "Here: " << mouseX << ", " << mouseY << std::endl;
+    //    extern int _preserveLeftClickNum;
 
 
-        //glm::vec3 rayNDC = Utility::screenToNDC(window, mouseX, mouseY, 1.0f);
-        //glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
-        //glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
-        //glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+    //    //glm::vec3 rayNDC = Utility::screenToNDC(window, mouseX, mouseY, 1.0f);
+    //    //glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+    //    //glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+    //    //glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
 
-        //std::cout << "X: " << rayWorld.x << std::endl;
-        //std::cout << "Y: " << rayWorld.y << std::endl;
-        //std::cout << "Z: " << rayWorld.z << std::endl;
+    //    //std::cout << "X: " << rayWorld.x << std::endl;
+    //    //std::cout << "Y: " << rayWorld.y << std::endl;
+    //    //std::cout << "Z: " << rayWorld.z << std::endl;
 
-        //extern MainScene* _scene_main;
-        //_scene_main->getTestingLine()->addPoint(rayWorld);
-
-
+    //    //extern MainScene* _scene_main;
+    //    //_scene_main->getTestingLine()->addPoint(rayWorld);
 
 
-        if (_preserveLeftClickNum > 0) {
-            _preserveLeftClickNum--;
 
-        }
 
-    } else {
-        _mouseLeftButtonPressed = false;
-    }
+    //    if (_preserveLeftClickNum > 0) {
+    //        _preserveLeftClickNum--;
+
+    //    }
+
+    //} else {
+    //    _mouseLeftButtonPressed = false;
+    //}
 
 
 

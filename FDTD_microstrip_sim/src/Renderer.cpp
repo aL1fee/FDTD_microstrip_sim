@@ -7,6 +7,7 @@ float _aspectRatio = INITIAL_ASPECT_RATIO;
 backgroundColor _activeColor = GREY;
 
 bool _mouseRightButtonPressed = false;
+bool _mouseLeftButtonExpected = false;
 extern bool _mouseLeftButtonPressed = false;
 bool _cameraTranslationalMotionOn = false;
 
@@ -239,11 +240,11 @@ void Renderer::centeredViewportResize() const {
 	int newWidth = width;
 	int newHeight = height;
 	if (width > height * _aspectRatio) {
-		newWidth = height * _aspectRatio;
+		newWidth = static_cast<int>(height * _aspectRatio);
 		lowerLeftCornerOfViewportX = static_cast<int>((width - newWidth) / 2.0f);
 	}
 	if (height > width / _aspectRatio) {
-		newHeight = width / _aspectRatio;
+		newHeight = static_cast<int>(width / _aspectRatio);
 		lowerLeftCornerOfViewportY = static_cast<int>((height - newHeight) / 2.0f);
 	}
 	glViewport(lowerLeftCornerOfViewportX, lowerLeftCornerOfViewportY, newWidth, newHeight);

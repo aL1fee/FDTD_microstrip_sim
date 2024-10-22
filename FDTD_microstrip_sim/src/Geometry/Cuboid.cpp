@@ -6,8 +6,8 @@ Cuboid::Cuboid()
     length = 0;
     width = 0;
     height = 0;
-    vertices = new std::vector<glm::vec3>();
-    VAOs = new std::vector<unsigned int>();
+    vertices = new VertexVectorDS();
+    VAOs = new VAOVectorDS();
 }
 
 Cuboid::Cuboid(glm::vec3 o, float l, float w, float h)
@@ -18,7 +18,7 @@ Cuboid::Cuboid(glm::vec3 o, float l, float w, float h)
     height = h;
 }
 
-std::vector<glm::vec3>* Cuboid::build()
+void Cuboid::build()
 {
-    return nullptr;
+
 }

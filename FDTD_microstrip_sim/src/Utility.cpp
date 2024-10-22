@@ -18,7 +18,7 @@ void Utility::checkGLError(const char* function)
 	}
 }
 
-
+// handling resizing by shortening the displayed NDC when resized down from the full-screen mode
 glm::vec3 Utility::screenToNDC(GLFWwindow* window, float x, float y, float z)
 {
     int width, height;

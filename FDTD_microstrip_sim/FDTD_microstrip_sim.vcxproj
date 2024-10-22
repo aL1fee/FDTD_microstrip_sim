@@ -135,6 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Data Structures\VAOVectorDS.h" />
+    <ClInclude Include="src\Data Structures\VertexVectorDS.h" />
     <ClInclude Include="src\Geometry\Cuboid.h" />
     <ClInclude Include="src\Geometry\Geometry.h" />
     <ClInclude Include="src\GUI\GUI.h" />
@@ -166,6 +168,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c" />
+    <ClCompile Include="src\Data Structures\VAOVectorDS.cpp" />
+    <ClCompile Include="src\Data Structures\VertexVectorDS.cpp" />
     <ClCompile Include="src\Geometry\Cuboid.cpp" />
     <ClCompile Include="src\GUI\GUI.cpp" />
     <ClCompile Include="src\GUI\StatusWindow.cpp" />
