@@ -12,6 +12,7 @@ class MainScene : public Scene
 private:
 	CoordinateSystem csys;
 	Shader shader_csys;
+	Shader shader_carrier;
 
 	GLuint viewCamLoc;
 	GLuint projCamLoc;
@@ -24,6 +25,7 @@ private:
 	glm::mat4 projMatrix;
 
 	std::vector<PhysicalObject*>* physicalObjectBuffer;
+	std::vector<Carrier_PO*>* tempCarrierBuffer;
 
 	TestingLine* testingLine;
 
@@ -39,7 +41,8 @@ public:
 	//	physicalObjectBuffer = new std::vector<PhysicalObject*>();
 	//	init();
 	//}
-	MainScene(GLFWwindow* w) : Scene(w), shader_csys("res/shaders/coordinate_system.shader", 0), csys(0.0f, 0.0f), viewCamLoc(0), projCamLoc(0), colCsysLoc(0),
+	MainScene(GLFWwindow* w) : Scene(w), shader_csys("res/shaders/coordinate_system.shader", 0), shader_carrier("res/shaders/carrier.shader", 1),
+		csys(0.0f, 0.0f), viewCamLoc(0), projCamLoc(0), colCsysLoc(0),
 		mainGridColor(1.0f, 1.0f, 1.0f), helperGridColor(0.5f, 0.5f, 0.5f), viewMatrix(1.0f), projMatrix(1.0f) {
 		physicalObjectBuffer = new std::vector<PhysicalObject*>();
 		init();

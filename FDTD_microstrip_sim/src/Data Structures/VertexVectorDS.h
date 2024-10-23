@@ -19,6 +19,8 @@ public:
 	VertexVectorDS();
 	~VertexVectorDS();
 
+	void clear();
+
 	void pushToExistingArray(glm::vec3 v);
 	void pushToNewArray(glm::vec3 v);
 	void pushToIndArray(int i, glm::vec3 v);
@@ -28,6 +30,7 @@ public:
 
 	int getSize() const;
 
+	glm::vec3 peekAtLast() const;
 
 
 };

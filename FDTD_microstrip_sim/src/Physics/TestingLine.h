@@ -10,9 +10,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "glm.hpp"
 #include <gtx/string_cast.hpp>
 
@@ -33,7 +30,7 @@ public:
 	TestingLine();
 
 	void build() override;
-	void draw() const;
+	void draw() override;
 	void addPoint(glm::vec3 v);
 	void terminateLine();
 

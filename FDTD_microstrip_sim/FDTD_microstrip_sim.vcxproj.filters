@@ -202,6 +202,7 @@
     <None Include="res\shaders\cube.shader" />
     <None Include="res\shaders\help.shader" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
+    <None Include="res\shaders\carrier.shader" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />

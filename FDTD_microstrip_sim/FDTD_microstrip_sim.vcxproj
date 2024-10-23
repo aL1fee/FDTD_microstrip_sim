@@ -202,6 +202,7 @@
     <Text Include="res\notes_2\plan.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\shaders\carrier.shader" />
     <None Include="res\shaders\coordinate_system.shader" />
     <None Include="res\shaders\cube.shader" />
     <None Include="res\shaders\help.shader" />

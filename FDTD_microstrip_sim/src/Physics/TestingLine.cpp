@@ -36,7 +36,7 @@ void TestingLine::build()
     buildVAOs();
 }
 
-void TestingLine::draw() const
+void TestingLine::draw()
 {
     for (int i = 0; i < VAOs->getSize(); i++) {
         glBindVertexArray(VAOs->at(i));

@@ -12,11 +12,23 @@ Plan:
 	3. Worker Threads: physics updates, math calculations, asset loading
 #placing openGL context semi-correctly
 #do aspect ratio w/ correct drawing line (future ray casting) mouse pointing.
+#do more basic vertex/vao data structures and improve line drawing algorithm
 
 
 
-*ray casting
-*draw simple polygons w/ properties
+
+*build cuboid carriers and substrates w/ properties
+
+#address depth
+
+
+*ability to translate cuboids and modify their properties
+
+
+
+*ray casting at x-z plane
+*draw custom polygons w/ properties
+
 
 
 

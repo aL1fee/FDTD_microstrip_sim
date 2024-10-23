@@ -13,6 +13,8 @@
 #include "glm.hpp"
 #include <gtx/string_cast.hpp>
 
+#include "../Geometry/Geometry.h"
+
 
 class PhysicalObject
 {
@@ -25,7 +27,7 @@ public:
 	PhysicalObject();
 	PhysicalObject(glm::vec3 c, float p);
 
-
+	glm::vec3 getColor() const { return color; }
 
 
 };

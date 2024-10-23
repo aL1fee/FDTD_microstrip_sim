@@ -14,6 +14,15 @@ VertexVectorDS::~VertexVectorDS()
 	delete data;
 }
 
+void VertexVectorDS::clear()
+{
+	std::cout << "size: " << data->size() << std::endl;
+	for (int i = 0; i < data->size(); i++) {
+		delete data->at(i);
+	}
+	data->clear();
+}
+
 void VertexVectorDS::pushToExistingArray(glm::vec3 v)
 {
 	if (getSize() == 0) {
@@ -40,9 +49,11 @@ void VertexVectorDS::pushToIndArray(int i, glm::vec3 v)
 
 void VertexVectorDS::allocateNewArray()
 {
-	std::vector<glm::vec3>* vec = new std::vector<glm::vec3>();
-	data->push_back(vec);
-	lastIndex++;
+	if (getSize() != 0) {
+		std::vector<glm::vec3>* vec = new std::vector<glm::vec3>();
+		data->push_back(vec);
+		lastIndex++;
+	}
 }
 
 std::vector<glm::vec3>* VertexVectorDS::at(int i) const
@@ -53,4 +64,9 @@ std::vector<glm::vec3>* VertexVectorDS::at(int i) const
 int VertexVectorDS::getSize() const
 {
 	return data->size();
+}
+
+glm::vec3 VertexVectorDS::peekAtLast() const
+{
+	return data->at(getSize() - 1)->at(data->at(getSize() - 1)->size() - 1);
 }

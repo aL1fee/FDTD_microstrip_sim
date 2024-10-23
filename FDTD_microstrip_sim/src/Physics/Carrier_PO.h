@@ -10,8 +10,9 @@ private:
 
 public:
 	Carrier_PO();
-	Carrier_PO(glm::vec3 o, float l, float w, float h, glm::vec3 c, float p) : Cuboid(o, l, w, h), PhysicalObject(c, p) {
-		init();
+	Carrier_PO(glm::vec3 o, float l, float w, float h, glm::vec3 c, float p) : Cuboid(o, l, w, h, c), PhysicalObject(c, p) {
+		//init();
+		build();
 	}
 
 

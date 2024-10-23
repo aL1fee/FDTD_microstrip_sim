@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "glm.hpp"
 #include <gtx/string_cast.hpp>
 
@@ -20,15 +23,13 @@ class Geometry
 {
 protected:
 	glm::vec3 origin;
-	//float length; //x
-	//float width; //z
-	//float height; //y
 
 	VertexVectorDS* vertices;
 	VAOVectorDS* VAOs;
 
 public:
 	virtual void build() = 0;
+	virtual void draw() = 0;
 
 
 
