@@ -140,6 +140,7 @@
     <ClInclude Include="src\Geometry\Cuboid.h" />
     <ClInclude Include="src\Geometry\Geometry.h" />
     <ClInclude Include="src\GUI\GUI.h" />
+    <ClInclude Include="src\GUI\PropertyWindow.h" />
     <ClInclude Include="src\GUI\StatusWindow.h" />
     <ClInclude Include="src\Input\Input.h" />
     <ClInclude Include="src\Input\InputBuffer.h" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\Data Structures\VertexVectorDS.cpp" />
     <ClCompile Include="src\Geometry\Cuboid.cpp" />
     <ClCompile Include="src\GUI\GUI.cpp" />
+    <ClCompile Include="src\GUI\PropertyWindow.cpp" />
     <ClCompile Include="src\GUI\StatusWindow.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\Input\InputBuffer.cpp" />

@@ -45,6 +45,12 @@ void TestingLine::draw()
     }
 }
 
+//TODO
+bool TestingLine::intersectionCheck(glm::vec3 v)
+{
+    return false;
+}
+
 void TestingLine::addPoint(glm::vec3 v)
 {
     vertices->pushToExistingArray(v);
@@ -52,8 +58,10 @@ void TestingLine::addPoint(glm::vec3 v)
 
 void TestingLine::terminateLine()
 {
-    vertices->allocateNewArray();
-    builtUntilIndex++;
+    if (vertices->getSize() != 0) {
+        vertices->allocateNewArray();
+        builtUntilIndex++;
+    }
 }
 
 

@@ -1,5 +1,7 @@
 #include "GUI.h"
 
+extern MainScene* _scene_main;
+
 GUI::GUI(GLFWwindow* w)
 {
 	window = w;
@@ -74,9 +76,6 @@ void GUI::buildMenuUpperPanel()
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.9607f, 0.9607f, 0.9607f, 1.0f));
 
-	extern MainScene* _scene_main;
-
-
 	ImGui::Begin("UpperMenuBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
@@ -86,8 +85,8 @@ void GUI::buildMenuUpperPanel()
 			if (ImGui::MenuItem("Testing line"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
-				extern bool _mouseLeftButtonExpected;
-				_mouseLeftButtonExpected = true;
+				extern bool _testingLineExpected;
+				_testingLineExpected = true;
 
 			}
 			if (ImGui::MenuItem("Carrier"))
@@ -102,16 +101,19 @@ void GUI::buildMenuUpperPanel()
 
 			}
 			ImGui::EndMenu();
-
-
-
-
-
 		}
-		if (ImGui::BeginMenu("y"))
+		if (ImGui::BeginMenu("Select"))
 		{
-			if (ImGui::MenuItem("Undo", "Ctrl+Z")) { /* Undo action */ }
-			if (ImGui::MenuItem("Redo", "Ctrl+Y")) { /* Redo action */ }
+			if (ImGui::MenuItem("Generate a ray"))
+			{
+				extern bool _rayExpected;
+				_rayExpected = true;
+			}
+			if (ImGui::MenuItem("Select an object"))
+			{
+				extern bool _selectingObjectExpected;
+				_selectingObjectExpected = true;
+			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
@@ -238,29 +240,54 @@ void GUI::buildLeftPanel()
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 
-	ImGui::Begin("Property window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+	ImGui::Begin("Property window", nullptr, ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove);
+	// removed ImGuiWindowFlags_NoTitleBar
 
-	if (ImGui::BeginTable("PropertiesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
-		// Setup columns
-		ImGui::TableSetupColumn("Property");
-		ImGui::TableSetupColumn("Value");
-		ImGui::TableHeadersRow();
+	extern bool _propertyWindowOn;
+	if (_propertyWindowOn)
+	{
+		extern bool _rebuildObjects;
+		_rebuildObjects = false;
+		if (ImGui::BeginTable("PropertiesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+			// Setup columns
+			ImGui::TableSetupColumn("Property");
+			ImGui::TableSetupColumn("Value");
+			ImGui::TableHeadersRow();
 
-		// Example properties
-		const char* properties[] = { "Width", "Height", "Depth" };
-		static float values[] = { 100.0f, 200.0f, 300.0f };
+			// Example properties
+			//const char* properties[] = { "Width", "Height", "Depth" };
+			//static float values[] = { 100.0f, 200.0f, 300.0f };
+			PropertyWindow* propertyWindow = _scene_main->getPropertyWindow();
+			std::map<std::string, float>* properties = propertyWindow->getProperties();
 
-		for (int row = 0; row < IM_ARRAYSIZE(properties); row++) {
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			ImGui::Text("%s", properties[row]);
-			ImGui::TableSetColumnIndex(1);
-			ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
-			ImGui::InputFloat(("##value" + std::to_string(row)).c_str(), &values[row], 0.0f, 0.0f, "%.2f");
+			for (auto it = properties->begin(); it != properties->end(); ++it) {
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("%s", it->first.c_str());
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
+				float& propertyValue = it->second;
+				if (ImGui::InputFloat(("##value" + it->first).c_str(), &(propertyValue), 0.0f, 0.0f, "%.2f")) {
+					// TODO only rebuild the object which property had been updated
+					_rebuildObjects = true;
+					std::cout << "One of the properties has been updated!" << std::endl;
+				}
+			}
+
+
+
+			//for (int row = 0; row < IM_ARRAYSIZE(properties); row++) {
+			//	ImGui::TableNextRow();
+			//	ImGui::TableSetColumnIndex(0);
+			//	ImGui::Text("%s", properties[row]);
+			//	ImGui::TableSetColumnIndex(1);
+			//	ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
+			//	ImGui::InputFloat(("##value" + std::to_string(row)).c_str(), &values[row], 0.0f, 0.0f, "%.2f");
+			//}
+
+			ImGui::EndTable();
 		}
-
-		ImGui::EndTable();
 	}
 
 	ImGui::End();

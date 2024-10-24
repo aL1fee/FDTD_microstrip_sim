@@ -6,10 +6,15 @@ long testExecTimeCount = 0;
 float _aspectRatio = INITIAL_ASPECT_RATIO;
 backgroundColor _activeColor = GREY;
 
+bool _testingLinePressed = false;
+bool _testingLineExpected = false;
+bool _selectingObjectExpected = false;
+bool _selectingObjectPressed = false;
 bool _mouseRightButtonPressed = false;
-bool _mouseLeftButtonExpected = false;
-extern bool _mouseLeftButtonPressed = false;
 bool _cameraTranslationalMotionOn = false;
+
+bool _rayExpected = false;
+
 
 bool _projMatrixChanged = true;
 bool _viewMatrixChanged = true;
@@ -19,10 +24,15 @@ bool _resizing = false;
 int _preserveLeftClickNum = 0;
 bool _acceptingLeftClickBufferInput = false;
 
+
 int _initialWindowWidth = 0;
 int _initialWindowHeight = 0;
 int _currentWindowWidth = 0;
 int _currentWindowHeight = 0;
+
+bool _propertyWindowOn = false;
+bool _rebuildObjects = false;
+
 
 std::mutex mtx;
 

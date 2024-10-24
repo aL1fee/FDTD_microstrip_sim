@@ -105,6 +105,9 @@
     <ClInclude Include="src\Data Structures\VAOVectorDS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\GUI\PropertyWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Physics\CoordinateSystem.cpp">
@@ -189,6 +192,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Data Structures\VAOVectorDS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GUI\PropertyWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

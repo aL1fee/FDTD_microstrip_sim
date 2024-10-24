@@ -13,6 +13,13 @@ float _lastY = INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT / 2.0f;
 //float _lastX = 1.0f;
 //float _lastY = 1.0f;
 
+extern bool _testingLinePressed;
+extern bool _testingLineExpected;
+extern bool _selectingObjectExpected;
+extern bool _selectingObjectPressed;
+extern bool _resizing;
+extern bool _rayExpected;
+
 Input::Input(GLFWwindow* w)
 {
 	window = w;
@@ -22,9 +29,6 @@ Input::Input(GLFWwindow* w)
 
 void Input::processInput()
 {
-    extern bool _mouseLeftButtonPressed;
-    extern bool _mouseLeftButtonExpected;
-    extern bool _resizing;
     //if (_resizing) {
     //    std::cout << "hgey" << std::endl;
     //    return;
@@ -64,9 +68,9 @@ void Input::processInput()
         }
     }
     extern MainScene* _scene_main;
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _mouseLeftButtonExpected)
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _testingLineExpected)
     {
-        _mouseLeftButtonPressed = true;
+        _testingLinePressed = true;
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
         //std::cout << "Here: " << mouseX << ", " << mouseY << std::endl;
@@ -80,12 +84,41 @@ void Input::processInput()
 
         _scene_main->getTestingLine()->addPoint(cam->getPos() + rayWorld);
     }
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _mouseLeftButtonPressed)
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _testingLinePressed)
     {
         _scene_main->getTestingLine()->terminateLine();
-        _mouseLeftButtonExpected = false;
-        _mouseLeftButtonPressed = false;
+        _testingLineExpected = false;
+        _testingLinePressed = false;
     }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _rayExpected)
+    {
+        _rayExpected = false;
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        glm::vec3 rayNDC = Utility::screenToNDC(window, mouseX, mouseY, 1.0f);
+        glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+        glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+        glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+
+        _scene_main->generateRay(cam->getPos(), rayWorld);
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _selectingObjectExpected)
+    {
+        _selectingObjectExpected = false;
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        glm::vec3 rayNDC = Utility::screenToNDC(window, mouseX, mouseY, 1.0f);
+        glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+        glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+        glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+
+        _scene_main->selectObject(cam->getPos(), rayWorld);
+    }
+
+
+
 
 }
 

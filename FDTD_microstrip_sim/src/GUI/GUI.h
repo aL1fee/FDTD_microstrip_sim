@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -15,6 +16,7 @@
 #include "../vendor/imgui/imgui_impl_opengl3.h"
 
 #include "StatusWindow.h"
+#include "PropertyWindow.h"
 
 #include "../Scene/MainScene.h"
 

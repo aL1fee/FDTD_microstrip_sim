@@ -17,17 +17,21 @@ Plan:
 
 
 
+*ray casting at objects
+
 *build cuboid carriers and substrates w/ properties
 
 #address depth
 
-
 *ability to translate cuboids and modify their properties
-
-
 
 *ray casting at x-z plane
 *draw custom polygons w/ properties
+
+#apply textures to carriers, substrates, traces
+
+#implement wires
+
 
 
 

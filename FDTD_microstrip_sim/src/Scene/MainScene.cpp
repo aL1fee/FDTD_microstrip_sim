@@ -1,5 +1,7 @@
 #include "MainScene.h"
 
+extern bool _rebuildObjects;
+
 void MainScene::init()
 {
 	csys = CoordinateSystem(20.0f, 0.6f);
@@ -22,6 +24,8 @@ void MainScene::init()
 	testingLine = new TestingLine();
 
 	tempCarrierBuffer = new std::vector<Carrier_PO*>();
+
+	propertyWindow = new PropertyWindow();
 }
 
 void MainScene::render()
@@ -64,6 +68,9 @@ void MainScene::render()
 
 	shader_carrier.bind();
 	for (Carrier_PO* obj : *tempCarrierBuffer) {
+		if (_rebuildObjects) {
+			obj->build();
+		}
 		obj->draw();
 	}
 	shader_carrier.unbind();
@@ -82,4 +89,33 @@ void MainScene::addCarrier(std::string& s)
 	Carrier_PO* carrierPO = new Carrier_PO(glm::vec3(0.0f), 4.0f, 1.0f, 0.6f, glm::vec3(.85f, .85f, .85f), 2.0f);
 	//physicalObjectBuffer->push_back(carrierPO);
 	tempCarrierBuffer->push_back(carrierPO);
+}
+
+void MainScene::generateRay(glm::vec3 pos, glm::vec3 dir)
+{
+	testingLine->terminateLine();
+	testingLine->addPoint(pos);
+	testingLine->addPoint(pos + dir * 20.0f);
+}
+
+// hardcoding just the carriers for now
+// TODO inefficient ray picking
+void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
+{
+	glm::vec3 rayPos = pos;
+	float count = 0.0f;
+	while (count < SELECTING_OBJECT_RANGE) {
+		for (Carrier_PO* obj : *tempCarrierBuffer) {
+			if (obj->intersectionCheck(rayPos)) {
+				std::cout << "object selected!" << std::endl;
+				propertyWindow->addPropertyMap(obj->getPropertyMap());
+				extern bool _propertyWindowOn;
+				_propertyWindowOn = true;
+				return;
+			}
+		}
+		rayPos += dir * SELECTING_OBJECT_PRECISION;
+		count += SELECTING_OBJECT_PRECISION;
+	}
+	std::cout << "no objects found!" << std::endl;
 }

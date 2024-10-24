@@ -27,6 +27,12 @@ public:
 
 	void draw() override;
 
+	bool intersectionCheck(glm::vec3 v) override;
+
+	float& getLength() { return length; }
+	float& getWidth() { return width; }
+	float& getHeight() { return height; }
+
 
 
 

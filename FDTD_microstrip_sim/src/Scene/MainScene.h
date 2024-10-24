@@ -1,11 +1,15 @@
 #pragma once
 
 #include <iostream>
+#include <map>
+#include <string>
 
 #include "Scene.h"
 #include "../Physics/CoordinateSystem.h"
 #include "../Physics/Carrier_PO.h"
 #include "../Physics/TestingLine.h"
+
+#include "../GUI/PropertyWindow.h"
 
 class MainScene : public Scene
 {
@@ -28,6 +32,8 @@ private:
 	std::vector<Carrier_PO*>* tempCarrierBuffer;
 
 	TestingLine* testingLine;
+
+	PropertyWindow* propertyWindow;
 
 
 public:
@@ -59,5 +65,12 @@ public:
 	glm::mat4 getViewMatrix() const { return viewMatrix; }
 
 	TestingLine* getTestingLine() { return testingLine; }
+
+	void generateRay(glm::vec3 pos, glm::vec3 dir);
+	void selectObject(glm::vec3 pos, glm::vec3 dir);
+
+	PropertyWindow* getPropertyWindow() { return propertyWindow; }
+
+
 
 };

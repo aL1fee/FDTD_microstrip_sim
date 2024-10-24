@@ -20,6 +20,7 @@ void VertexVectorDS::clear()
 	for (int i = 0; i < data->size(); i++) {
 		delete data->at(i);
 	}
+	lastIndex = 0;
 	data->clear();
 }
 

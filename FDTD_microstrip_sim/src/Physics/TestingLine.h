@@ -31,6 +31,7 @@ public:
 
 	void build() override;
 	void draw() override;
+	bool intersectionCheck(glm::vec3 v) override;
 	void addPoint(glm::vec3 v);
 	void terminateLine();
 

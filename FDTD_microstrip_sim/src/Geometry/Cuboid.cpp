@@ -72,7 +72,8 @@ Cuboid::Cuboid(glm::vec3 o, float l, float w, float h, glm::vec3 c)
 }
 
 void Cuboid::build()
-{   
+{
+    std::cout << length << std::endl;
     vertices->clear();
     VAOs->clear();
     buildVertices();
@@ -99,7 +100,7 @@ void Cuboid::buildVertices()
         addColorVertex(color);
     }
     vertices->allocateNewArray();
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 2; i++) {
         y = (i == 1) ? 1 : 0;
         vertices->pushToExistingArray(origin + glm::vec3(length, height * y, 0));
         addColorVertex(color);
@@ -123,7 +124,7 @@ void Cuboid::buildVAOs()
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices->at(i)->size(), vertices->at(i)->data(), GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(GLfloat)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(GLfloat)));
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         VAOs->push(VAO);
@@ -144,4 +145,15 @@ void Cuboid::draw()
             glBindVertexArray(0);
         }
     }
+}
+
+bool Cuboid::intersectionCheck(glm::vec3 v)
+{
+    if ((origin.x < v.x && origin.x + length > v.x) &&
+        (origin.y < v.y && origin.y + height > v.y) &&
+        (origin.z < v.z && origin.z + width > v.z))
+    {
+        return true;
+    }
+    return false;
 }

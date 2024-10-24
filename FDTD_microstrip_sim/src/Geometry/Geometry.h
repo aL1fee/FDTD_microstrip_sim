@@ -30,7 +30,7 @@ protected:
 public:
 	virtual void build() = 0;
 	virtual void draw() = 0;
-
+	virtual bool intersectionCheck(glm::vec3 v) = 0;
 
 
 };
