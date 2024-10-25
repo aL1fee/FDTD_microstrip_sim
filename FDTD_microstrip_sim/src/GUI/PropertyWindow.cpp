@@ -6,7 +6,7 @@ PropertyWindow::PropertyWindow()
 	object = nullptr;
 }
 
-void PropertyWindow::addPropertyMap(std::map<std::string, float&>* p)
+void PropertyWindow::addPropertyMap(std::vector<std::pair<std::string, float*>>* p)
 {
 	properties = p;
 }

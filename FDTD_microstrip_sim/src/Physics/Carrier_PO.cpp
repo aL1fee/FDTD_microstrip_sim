@@ -12,24 +12,27 @@ Carrier_PO::Carrier_PO()
 
 void Carrier_PO::updatePropertyMap()
 {
-	propertyMap["Length"] = getLength();
+	propertyMap->push_back(std::make_pair("X position", &origin.x));
+	propertyMap->push_back(std::make_pair("Z position", &origin.z));
+	propertyMap->push_back(std::make_pair("Y position", &origin.y));
+	propertyMap->push_back(std::make_pair("Length", getLength()));
+	propertyMap->push_back(std::make_pair("Width", getWidth()));
+	propertyMap->push_back(std::make_pair("Height", getHeight()));
+	propertyMap->push_back(std::make_pair("Permittivity", &permittivity));
+	propertyMap->push_back(std::make_pair("Conductivity", &conductivity));
 
 
-	float& l = getLength();
-	propertyMap->insert(std::make_pair("hey", getLength()));
-
-	propertyMap->insert();
-
-
-	propertyMap->insert(std::make_pair("Length", l));
-	propertyMap->insert(std::make_pair("Width", getWidth()));
-	propertyMap->insert(std::make_pair("Height", getHeight()));
-	propertyMap->insert(std::make_pair("Permittivity", permittivity));
-
-
+	//propertyMap->insert(std::make_pair("X position", &origin.x));
+	//propertyMap->insert(std::make_pair("Z position", &origin.z));
+	//propertyMap->insert(std::make_pair("Y position", &origin.y));
+	//propertyMap->insert(std::make_pair("Length", getLength()));
+	//propertyMap->insert(std::make_pair("Width", getWidth()));
+	//propertyMap->insert(std::make_pair("Height", getHeight()));
+	//propertyMap->insert(std::make_pair("Permittivity", &permittivity));
+	//propertyMap->insert(std::make_pair("Conductivity", &conductivity));
 }
 
-std::map<std::string, float&>* Carrier_PO::getPropertyMap()
+std::vector<std::pair<std::string, float*>>* Carrier_PO::getPropertyMap()
 {
 	return propertyMap;
 }

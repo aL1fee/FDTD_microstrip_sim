@@ -206,6 +206,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void Renderer::run() const 
 {
+	enableDepthTest();
+	enablePolygonOffset();
+
+
+
+
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -258,6 +264,38 @@ void Renderer::centeredViewportResize() const {
 		lowerLeftCornerOfViewportY = static_cast<int>((height - newHeight) / 2.0f);
 	}
 	glViewport(lowerLeftCornerOfViewportX, lowerLeftCornerOfViewportY, newWidth, newHeight);
+}
+
+void Renderer::enablePolygonOffset() const
+{
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1.0f, 1.0f);
+}
+
+void Renderer::disablePolygonOffset() const
+{
+	glDisable(GL_POLYGON_OFFSET_LINE);
+}
+
+void Renderer::disableLineSmoothing() const
+{
+	glDisable(GL_LINE_SMOOTH);
+}
+
+void Renderer::setLineWidth(float value) const
+{
+	glLineWidth(value);
+}
+
+void Renderer::enableDepthTest() const
+{
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+}
+
+void Renderer::disableDepthTest() const
+{
+	glDisable(GL_DEPTH_TEST);
 }
 
 void Renderer::render() const

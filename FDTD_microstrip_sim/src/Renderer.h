@@ -53,6 +53,12 @@ private:
 
 	void centeredViewportResize() const;
 
+	void enablePolygonOffset() const;
+	void disablePolygonOffset() const;
+	void disableLineSmoothing() const;
+	void setLineWidth(float value) const;
+	void enableDepthTest() const;
+	void disableDepthTest() const;
 
 public:
 	Renderer(GLFWwindow* w, GUI* g);

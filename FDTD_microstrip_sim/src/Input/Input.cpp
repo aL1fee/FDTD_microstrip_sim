@@ -116,7 +116,7 @@ void Input::processInput()
 
         _scene_main->selectObject(cam->getPos(), rayWorld);
     }
-
+    _selectingObjectExpected = true;
 
 
 

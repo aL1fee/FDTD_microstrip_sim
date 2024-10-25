@@ -259,7 +259,7 @@ void GUI::buildLeftPanel()
 			//const char* properties[] = { "Width", "Height", "Depth" };
 			//static float values[] = { 100.0f, 200.0f, 300.0f };
 			PropertyWindow* propertyWindow = _scene_main->getPropertyWindow();
-			std::map<std::string, float>* properties = propertyWindow->getProperties();
+			std::vector<std::pair<std::string, float*>>* properties = propertyWindow->getProperties();
 
 			for (auto it = properties->begin(); it != properties->end(); ++it) {
 				ImGui::TableNextRow();
@@ -267,8 +267,8 @@ void GUI::buildLeftPanel()
 				ImGui::Text("%s", it->first.c_str());
 				ImGui::TableSetColumnIndex(1);
 				ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
-				float& propertyValue = it->second;
-				if (ImGui::InputFloat(("##value" + it->first).c_str(), &(propertyValue), 0.0f, 0.0f, "%.2f")) {
+				float* propertyValue = it->second;
+				if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f")) {
 					// TODO only rebuild the object which property had been updated
 					_rebuildObjects = true;
 					std::cout << "One of the properties has been updated!" << std::endl;

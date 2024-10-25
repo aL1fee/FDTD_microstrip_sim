@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <vector>
 #include <string>
 
 #include "../Physics/Carrier_PO.h"
@@ -8,7 +8,8 @@
 class PropertyWindow
 {
 private:
-	std::map<std::string, float&>* properties;
+	//std::map<std::string, float*>* properties;
+	std::vector<std::pair<std::string, float*>>* properties;
 
 	//TODO no hardcoding
 	Carrier_PO* object;
@@ -17,9 +18,9 @@ private:
 public:
 	PropertyWindow();
 
-	void addPropertyMap(std::map<std::string, float&>* p);
+	void addPropertyMap(std::vector<std::pair<std::string, float*>>* p);
 
-	std::map<std::string, float&>* getProperties() { return properties; }
+	std::vector<std::pair<std::string, float*>>* getProperties() { return properties; }
 
 	void updateActiveObject();
 

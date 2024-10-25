@@ -21,6 +21,7 @@ class PhysicalObject
 protected:
 	glm::vec3 color;
 	float permittivity;
+	float conductivity;
 	bool isActivelyDrawn;
 
 public:

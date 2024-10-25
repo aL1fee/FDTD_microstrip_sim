@@ -13,24 +13,31 @@ Plan:
 #placing openGL context semi-correctly
 #do aspect ratio w/ correct drawing line (future ray casting) mouse pointing.
 #do more basic vertex/vao data structures and improve line drawing algorithm
+#ray casting at objects and cuboid collision detection
+#do properties window w/ live changes
+#address depth
 
 
 
 
-*ray casting at objects
+
+*make all objects generic and pointing to the same parent to get rid of vectors and arrays extra hardcodes
 
 *build cuboid carriers and substrates w/ properties
 
-#address depth
-
+*fix property window bugs, add features and appearance
 *ability to translate cuboids and modify their properties
 
 *ray casting at x-z plane
 *draw custom polygons w/ properties
 
-#apply textures to carriers, substrates, traces
+*apply textures to carriers, substrates, traces
 
-#implement wires
+*implement traces
+
+*implement power sources and detectors
+
+*implement wires
 
 
 
