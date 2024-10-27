@@ -5,72 +5,52 @@
 #include <string>
 
 #include "Scene.h"
-#include "../Physics/CoordinateSystem.h"
-#include "../Physics/Carrier_PO.h"
-#include "../Physics/TestingLine.h"
+#include "../Physics/Physical Objects (POs)/CoordinateSystem_PO.h"
+#include "../Physics/Physical Objects (POs)/Carrier_PO.h"
+#include "../Physics/Physical Objects (POs)/Substrate_PO.h"
+#include "../Physics/Physical Objects (POs)/Trace_PO.h"
+#include "../Physics/Physical Objects (POs)/Housing_PO.h"
+#include "../Physics/Physical Objects (POs)/Curve_PO.h"
 
 #include "../GUI/PropertyWindow.h"
 
 class MainScene : public Scene
 {
 private:
-	CoordinateSystem csys;
-	Shader shader_csys;
-	Shader shader_carrier;
-
-	GLuint viewCamLoc;
-	GLuint projCamLoc;
-	GLuint colCsysLoc;
-
-	glm::vec3 mainGridColor;
-	glm::vec3 helperGridColor;
-
+	std::map<std::string, Shader*>* shaderMap;
+	std::vector<PhysicalObject*>* physicalObjectBuffer;
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
-
-	std::vector<PhysicalObject*>* physicalObjectBuffer;
-	std::vector<Carrier_PO*>* tempCarrierBuffer;
-
-	TestingLine* testingLine;
-
 	PropertyWindow* propertyWindow;
 
+	Curve_PO* testingLine;
+	Shader* testingLineShader;
+
+	PhysicalObject* activeObject;
 
 public:
-	//MainScene(GLFWwindow* w, GUI* g, Input* in) :Scene(w, g, in), shader_csys("res/shaders/coordinate_system.shader", 0), csys(0.0f, 0.0f), viewCamLoc(0), projCamLoc(0), colCsysLoc(0),
-	//	mainGridColor(1.0f, 1.0f, 1.0f), helperGridColor(0.5f, 0.5f, 0.5f), viewMatrix(1.0f), projMatrix(1.0f) {
-	//	physicalObjectBuffer = new std::vector<PhysicalObject>();
-	//	init();
-	//}
-	//MainScene(GLFWwindow* w, Input* in) : Scene(w, in), shader_csys("res/shaders/coordinate_system.shader", 0), csys(0.0f, 0.0f), viewCamLoc(0), projCamLoc(0), colCsysLoc(0),
-	//	mainGridColor(1.0f, 1.0f, 1.0f), helperGridColor(0.5f, 0.5f, 0.5f), viewMatrix(1.0f), projMatrix(1.0f) {
-	//	physicalObjectBuffer = new std::vector<PhysicalObject*>();
-	//	init();
-	//}
-	MainScene(GLFWwindow* w) : Scene(w), shader_csys("res/shaders/coordinate_system.shader", 0), shader_carrier("res/shaders/carrier.shader", 1),
-		csys(0.0f, 0.0f), viewCamLoc(0), projCamLoc(0), colCsysLoc(0),
-		mainGridColor(1.0f, 1.0f, 1.0f), helperGridColor(0.5f, 0.5f, 0.5f), viewMatrix(1.0f), projMatrix(1.0f) {
-		physicalObjectBuffer = new std::vector<PhysicalObject*>();
-		init();
-	}
+	MainScene(GLFWwindow* w);
 
 	void init() override;
 	void render() override;
 
 	void addCarrier(std::string& s);
+	void addSubstrate(std::string& s);
+	void addTrace(std::string& s);
+	void addHousing(std::string& s);
+
+	void deleteActiveObject();
+	void deleteAllObjects();
 
 	void setProjMatrix(glm::mat4 m) { projMatrix = m; }
 
 	glm::mat4 getProjMatrix() const { return projMatrix; }
 	glm::mat4 getViewMatrix() const { return viewMatrix; }
 
-	TestingLine* getTestingLine() { return testingLine; }
+	Curve_PO* getTestingLine() { return testingLine; }
 
 	void generateRay(glm::vec3 pos, glm::vec3 dir);
 	void selectObject(glm::vec3 pos, glm::vec3 dir);
 
 	PropertyWindow* getPropertyWindow() { return propertyWindow; }
-
-
-
 };

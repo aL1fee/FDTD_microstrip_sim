@@ -16,7 +16,7 @@ VertexVectorDS::~VertexVectorDS()
 
 void VertexVectorDS::clear()
 {
-	std::cout << "size: " << data->size() << std::endl;
+	std::cout << "cleaning vertexvectorDS" << std::endl;
 	for (int i = 0; i < data->size(); i++) {
 		delete data->at(i);
 	}

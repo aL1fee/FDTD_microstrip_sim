@@ -13,22 +13,33 @@
 #include "glm.hpp"
 #include <gtx/string_cast.hpp>
 
-#include "../Geometry/Geometry.h"
+
+#include "../Geometry/GeometricalObject.h"
+#include "../Setup/Shader.h"
 
 
-class PhysicalObject
+class PhysicalObject : public GeometricalObject
 {
 protected:
-	glm::vec3 color;
 	float permittivity;
 	float conductivity;
-	bool isActivelyDrawn;
+	bool rebuiltExpected;
+	bool isInteractable;
+	Shader* shader;
+	std::vector<std::pair<std::string, float*>>* propertyMap;
 
 public:
 	PhysicalObject();
-	PhysicalObject(glm::vec3 c, float p);
+	PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh);
+	~PhysicalObject();
 
-	glm::vec3 getColor() const { return color; }
+	virtual void updatePropertyMap() {};
+	std::vector<std::pair<std::string, float*>>* getPropertyMap() { return propertyMap; }
 
+	bool needsRebuilding() { return rebuiltExpected; }
+	bool interactable() const { return isInteractable; }
+	void setRebuiltExpected(bool b) { rebuiltExpected = b; }
+
+	std::string getShaderName() const { return shader->}
 
 };

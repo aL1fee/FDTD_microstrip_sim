@@ -137,18 +137,22 @@
   <ItemGroup>
     <ClInclude Include="src\Data Structures\VAOVectorDS.h" />
     <ClInclude Include="src\Data Structures\VertexVectorDS.h" />
-    <ClInclude Include="src\Geometry\Cuboid.h" />
-    <ClInclude Include="src\Geometry\Geometry.h" />
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Curve_PO.h" />
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\Substrate_PO.h" />
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Housing_PO.h" />
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Trace_PO.h" />
+    <ClInclude Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.h" />
+    <ClInclude Include="src\Geometry\GeometricalObject.h" />
     <ClInclude Include="src\GUI\GUI.h" />
     <ClInclude Include="src\GUI\PropertyWindow.h" />
     <ClInclude Include="src\GUI\StatusWindow.h" />
     <ClInclude Include="src\Input\Input.h" />
     <ClInclude Include="src\Input\InputBuffer.h" />
     <ClInclude Include="src\Macros.h" />
-    <ClInclude Include="src\Physics\Carrier_PO.h" />
-    <ClInclude Include="src\Physics\CoordinateSystem.h" />
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\Carrier_PO.h" />
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.h" />
     <ClInclude Include="src\Physics\PhysicalObject.h" />
-    <ClInclude Include="src\Physics\TestingLine.h" />
+    <ClInclude Include="src\Physics\PO Templates %28POTs%29\Curve_POT.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Scene\MainScene.h" />
@@ -171,17 +175,20 @@
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c" />
     <ClCompile Include="src\Data Structures\VAOVectorDS.cpp" />
     <ClCompile Include="src\Data Structures\VertexVectorDS.cpp" />
-    <ClCompile Include="src\Geometry\Cuboid.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Housing_PO.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Substrate_PO.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Trace_PO.cpp" />
+    <ClCompile Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.cpp" />
     <ClCompile Include="src\GUI\GUI.cpp" />
     <ClCompile Include="src\GUI\PropertyWindow.cpp" />
     <ClCompile Include="src\GUI\StatusWindow.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\Input\InputBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Physics\Carrier_PO.cpp" />
-    <ClCompile Include="src\Physics\CoordinateSystem.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects %28POs%29\Carrier_PO.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.cpp" />
     <ClCompile Include="src\Physics\PhysicalObject.cpp" />
-    <ClCompile Include="src\Physics\TestingLine.cpp" />
+    <ClCompile Include="src\Physics\PO Templates %28POTs%29\Curve_POT.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\MainScene.cpp" />
@@ -208,6 +215,10 @@
     <None Include="res\shaders\coordinate_system.shader" />
     <None Include="res\shaders\cube.shader" />
     <None Include="res\shaders\help.shader" />
+    <None Include="res\shaders\housing.shader" />
+    <None Include="res\shaders\substrate.shader" />
+    <None Include="res\shaders\testingline.shader" />
+    <None Include="res\shaders\trace.shader" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
   </ItemGroup>
   <ItemGroup>

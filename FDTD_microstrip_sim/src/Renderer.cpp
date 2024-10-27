@@ -15,6 +15,8 @@ bool _cameraTranslationalMotionOn = false;
 
 bool _rayExpected = false;
 
+bool _windowS1On = false;
+bool _windowS2On = false;
 
 bool _projMatrixChanged = true;
 bool _viewMatrixChanged = true;
@@ -31,7 +33,7 @@ int _currentWindowWidth = 0;
 int _currentWindowHeight = 0;
 
 bool _propertyWindowOn = false;
-bool _rebuildObjects = false;
+bool _rebuildAllObjects = false;
 
 
 std::mutex mtx;

@@ -18,7 +18,7 @@
     <ClInclude Include="src\GUI\GUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Physics\CoordinateSystem.h">
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Camera.h">
@@ -78,16 +78,16 @@
     <ClInclude Include="src\Scene\MainScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Geometry\Geometry.h">
+    <ClInclude Include="src\Geometry\GeometricalObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics\PhysicalObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Physics\Carrier_PO.h">
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\Carrier_PO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Geometry\Cuboid.h">
+    <ClInclude Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\GUI\StatusWindow.h">
@@ -96,7 +96,7 @@
     <ClInclude Include="src\Input\InputBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Physics\TestingLine.h">
+    <ClInclude Include="src\Physics\PO Templates %28POTs%29\Curve_POT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Data Structures\VertexVectorDS.h">
@@ -108,9 +108,21 @@
     <ClInclude Include="src\GUI\PropertyWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Curve_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\Substrate_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Trace_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Housing_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Physics\CoordinateSystem.cpp">
+    <ClCompile Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\Camera.cpp">
@@ -167,13 +179,13 @@
     <ClCompile Include="src\Scene\MainScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Physics\Carrier_PO.cpp">
+    <ClCompile Include="src\Physics\Physical Objects %28POs%29\Carrier_PO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics\PhysicalObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Geometry\Cuboid.cpp">
+    <ClCompile Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\GUI\StatusWindow.cpp">
@@ -185,7 +197,7 @@
     <ClCompile Include="src\Input\InputBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Physics\TestingLine.cpp">
+    <ClCompile Include="src\Physics\PO Templates %28POTs%29\Curve_POT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Data Structures\VertexVectorDS.cpp">
@@ -195,6 +207,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\GUI\PropertyWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Substrate_PO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Trace_PO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Housing_PO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -209,6 +230,10 @@
     <None Include="res\shaders\help.shader" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
     <None Include="res\shaders\carrier.shader" />
+    <None Include="res\shaders\testingline.shader" />
+    <None Include="res\shaders\substrate.shader" />
+    <None Include="res\shaders\trace.shader" />
+    <None Include="res\shaders\housing.shader" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />

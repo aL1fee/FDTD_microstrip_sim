@@ -3,7 +3,7 @@
 PropertyWindow::PropertyWindow()
 {
 	properties = nullptr;
-	object = nullptr;
+	activeObject = nullptr;
 }
 
 void PropertyWindow::addPropertyMap(std::vector<std::pair<std::string, float*>>* p)
@@ -11,7 +11,15 @@ void PropertyWindow::addPropertyMap(std::vector<std::pair<std::string, float*>>*
 	properties = p;
 }
 
-void PropertyWindow::updateActiveObject()
+void PropertyWindow::setDefaultPropertyMap()
 {
+	//if (properties != nullptr) {
+	//	properties->clear();
+	//}
+	properties = nullptr;
+}
 
+void PropertyWindow::updateActiveObject(PhysicalObject* obj)
+{
+	activeObject = obj;
 }

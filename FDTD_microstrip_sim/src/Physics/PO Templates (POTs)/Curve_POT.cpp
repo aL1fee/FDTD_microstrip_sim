@@ -1,11 +1,11 @@
-#include "TestingLine.h"
+#include "Curve_POT.h"
 
-void TestingLine::buildVertices()
+void Curve_POT::buildVertices()
 {
 
 }
 
-void TestingLine::buildVAOs()
+void Curve_POT::buildVAOs()
 {
     for (int i = builtUntilIndex; i < vertices->getSize(); i++) {
         if (VAOs->getSize() < vertices->getSize()) {
@@ -24,39 +24,47 @@ void TestingLine::buildVAOs()
     }
 }
 
-TestingLine::TestingLine()
+Curve_POT::Curve_POT(Shader* sh)
 {
+    shader = sh;
     vertices = new VertexVectorDS();
     VAOs = new VAOVectorDS();
+    length = 0;
+    width = -1;
+    height = -1;
     builtUntilIndex = 0;
 }
 
-void TestingLine::build()
+void Curve_POT::build()
 {
     buildVAOs();
 }
 
-void TestingLine::draw()
+void Curve_POT::draw()
 {
+    build();
+    shader->bind();
+    shader->setUniform3f("color", 0.0f, 0.0f, 1.0f);
     for (int i = 0; i < VAOs->getSize(); i++) {
         glBindVertexArray(VAOs->at(i));
-        glDrawArrays(GL_LINE_STRIP, 0, vertices->at(i)->size());
+        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size()));
         glBindVertexArray(0);
     }
+    shader->unbind();
 }
 
 //TODO
-bool TestingLine::intersectionCheck(glm::vec3 v)
+bool Curve_POT::intersectionCheck(glm::vec3 v)
 {
     return false;
 }
 
-void TestingLine::addPoint(glm::vec3 v)
+void Curve_POT::addPoint(glm::vec3 v)
 {
     vertices->pushToExistingArray(v);
 }
 
-void TestingLine::terminateLine()
+void Curve_POT::terminateLine()
 {
     if (vertices->getSize() != 0) {
         vertices->allocateNewArray();

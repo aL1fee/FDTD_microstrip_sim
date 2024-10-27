@@ -13,6 +13,7 @@ struct ShaderProgramSource {
 class Shader {
 private:
 	string _Filepath;
+	string shaderName;
 	unsigned int _RendererID;
 	//caching for uniforms
 	unordered_map<string, int> _UniformLocationCache;
@@ -39,5 +40,7 @@ public:
 	void unbind() const;
 
 	void printShader();
+
+	std::string getName() const { return shaderName; }
 
 };

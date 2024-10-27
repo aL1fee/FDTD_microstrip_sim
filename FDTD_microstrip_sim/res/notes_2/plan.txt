@@ -11,65 +11,59 @@ Plan:
 	2. Rendering Thread: renders the scene using OpenGL
 	3. Worker Threads: physics updates, math calculations, asset loading
 #placing openGL context semi-correctly
+#do correct window resizing
 #do aspect ratio w/ correct drawing line (future ray casting) mouse pointing.
 #do more basic vertex/vao data structures and improve line drawing algorithm
 #ray casting at objects and cuboid collision detection
 #do properties window w/ live changes
 #address depth
+#make all objects generic and pointing to the same parent to get rid of vectors and arrays extra hardcodes
+#POs should contain their own shaders as variables and run instructions as abstracted methods
+#build cuboid carriers and substrates w/ properties
 
 
 
-
-
-*make all objects generic and pointing to the same parent to get rid of vectors and arrays extra hardcodes
-
-*build cuboid carriers and substrates w/ properties
-
+*ability to delete objects
+*build cut corner-shaped surfaces
+*make a camera that rotates around a given object when you click on scrolling button
 *fix property window bugs, add features and appearance
 *ability to translate cuboids and modify their properties
 
+
+extra:
 *ray casting at x-z plane
 *draw custom polygons w/ properties
 
+
+10/27-11/2
 *apply textures to carriers, substrates, traces
-
 *implement traces
-
-*implement power sources and detectors
-
+*implement cylindrical power sources and detectors
 *implement wires
-
-
-
-
-
-*address cpu usage & v-sync https://stackoverflow.com/questions/30381064/how-to-reduce-opengl-cpu-usage-and-or-how-to-use-opengl-properly
-
-
 *make the scroll pointing to the mouse; not the front vector
-*do correct window resizing
-
-*do .frag and .vert shader files rather than .shader
-
 *make custom polygons with defined sizes
-
 *implement a hierarchy data structure to store elements & its properties of a scene
 
 
+testingline and other curves rebuilding
 
 
-*shaders: https://github.com/benburrill/picoputt/tree/main
 
 
-*incorporate matrix stack calls when calculating model,view,proj matrices as specified in the book
 
 
-==Unsolved issues:
+
+
+
+
+
+
+==not a priority:
 1. glfwpollevents doesn't run when resizing/dragging the window. As a result, key releases are not registered during resizing/dragging.
 2. placing openGL context correctly
 3. Worker Threads: physics updates, math calculations, asset loading
-
-
+4. incorporate matrix stack calls when calculating model,view,proj matrices as specified in the book
+5. do .frag and .vert shader files rather than .shader
 
 
 ------
@@ -81,3 +75,15 @@ future:
 
 
 ray casting for mouse object picking https://antongerdelan.net/opengl/raycasting.html#:~:text=It%20can%20be%20useful%20to%20click%20on%2C%20or,any%20objects.%20This%20is%20usually%20called%20ray%20casting.
+address cpu usage & v-sync https://stackoverflow.com/questions/30381064/how-to-reduce-opengl-cpu-usage-and-or-how-to-use-opengl-properly
+shaders: https://github.com/benburrill/picoputt/tree/main
+
+GPU-accelerated simulations:
+GPU-accelerated simulation refers to the use of Graphics Processing Units (GPUs) to speed up computational tasks involved in simulations. GPUs are highly efficient at handling parallel processing, which makes them ideal for tasks that require a lot of simultaneous calculations.
+
+Here’s a breakdown of what this means:
+
+Parallel Processing: GPUs can perform many calculations at the same time, unlike CPUs which are optimized for sequential processing. This parallelism is particularly useful for simulations that involve large datasets or complex mathematical computations.
+Speed and Efficiency: By offloading compute-intensive parts of the simulation to the GPU, the overall simulation can run much faster. This is because GPUs have thousands of cores designed for handling multiple tasks simultaneously1.
+Applications: GPU acceleration is used in various fields such as molecular dynamics, climate modeling, astrophysics, and more2. For example, in climate modeling, GPUs can process vast amounts of data to simulate weather patterns more quickly and accurately.
+Integration with Software: Many simulation software packages, like MATLAB and Simulink, support GPU acceleration. They allow users to pass data to the GPU, perform computations, and then retrieve the results, minimizing the data transfer between the CPU and GPU3.

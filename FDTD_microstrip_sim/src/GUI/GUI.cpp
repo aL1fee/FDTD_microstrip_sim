@@ -1,6 +1,10 @@
 #include "GUI.h"
 
 extern MainScene* _scene_main;
+extern bool _propertyWindowOn;
+
+extern bool _windowS1On;
+extern bool _windowS2On;
 
 GUI::GUI(GLFWwindow* w)
 {
@@ -94,11 +98,47 @@ void GUI::buildMenuUpperPanel()
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
 
-				std::string s = "> Choose points to build a carrier";
+				std::string s = "> Adding a carrier";
 				_scene_main->addCarrier(s);
 				statusWindow->setMessage(s);
+			}
+			if (ImGui::MenuItem("Substrate"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
 
+				std::string s = "> Adding a substrate";
+				_scene_main->addSubstrate(s);
+				statusWindow->setMessage(s);
+			}
+			if (ImGui::MenuItem("Trace"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
 
+				std::string s = "> Adding a trace";
+				_scene_main->addTrace(s);
+				statusWindow->setMessage(s);
+			}
+			if (ImGui::MenuItem("Housing"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
+
+				std::string s = "> Adding a housing";
+				_scene_main->addHousing(s);
+				statusWindow->setMessage(s);
+			}
+			if (ImGui::MenuItem("A simple system"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
+
+				std::string s = "> Adding a system";
+				_scene_main->addCarrier(s);
+				_scene_main->addSubstrate(s);
+				_scene_main->addTrace(s);
+				statusWindow->setMessage(s);
 			}
 			ImGui::EndMenu();
 		}
@@ -113,6 +153,18 @@ void GUI::buildMenuUpperPanel()
 			{
 				extern bool _selectingObjectExpected;
 				_selectingObjectExpected = true;
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Delete"))
+		{
+			if (ImGui::MenuItem("Delete an object", "del"))
+			{
+				
+			}
+			if (ImGui::MenuItem("Delete all objects"))
+			{
+				_scene_main->deleteAllObjects();
 			}
 			ImGui::EndMenu();
 		}
@@ -244,11 +296,8 @@ void GUI::buildLeftPanel()
 		ImGuiWindowFlags_NoMove);
 	// removed ImGuiWindowFlags_NoTitleBar
 
-	extern bool _propertyWindowOn;
 	if (_propertyWindowOn)
 	{
-		extern bool _rebuildObjects;
-		_rebuildObjects = false;
 		if (ImGui::BeginTable("PropertiesTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
 			// Setup columns
 			ImGui::TableSetupColumn("Property");
@@ -260,32 +309,24 @@ void GUI::buildLeftPanel()
 			//static float values[] = { 100.0f, 200.0f, 300.0f };
 			PropertyWindow* propertyWindow = _scene_main->getPropertyWindow();
 			std::vector<std::pair<std::string, float*>>* properties = propertyWindow->getProperties();
+			PhysicalObject* activeObj = propertyWindow->getActiveObject();
 
-			for (auto it = properties->begin(); it != properties->end(); ++it) {
-				ImGui::TableNextRow();
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("%s", it->first.c_str());
-				ImGui::TableSetColumnIndex(1);
-				ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
-				float* propertyValue = it->second;
-				if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f")) {
-					// TODO only rebuild the object which property had been updated
-					_rebuildObjects = true;
-					std::cout << "One of the properties has been updated!" << std::endl;
+			if (properties != nullptr && activeObj != nullptr)
+			{
+				for (auto it = properties->begin(); it != properties->end(); ++it) {
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("%s", it->first.c_str());
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
+					float* propertyValue = it->second;
+					if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue)) {
+						// TODO only rebuild the object which property had been updated
+						activeObj->setRebuiltExpected(true);
+						std::cout << "One of the properties has been updated!" << std::endl;
+					}
 				}
 			}
-
-
-
-			//for (int row = 0; row < IM_ARRAYSIZE(properties); row++) {
-			//	ImGui::TableNextRow();
-			//	ImGui::TableSetColumnIndex(0);
-			//	ImGui::Text("%s", properties[row]);
-			//	ImGui::TableSetColumnIndex(1);
-			//	ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
-			//	ImGui::InputFloat(("##value" + std::to_string(row)).c_str(), &values[row], 0.0f, 0.0f, "%.2f");
-			//}
-
 			ImGui::EndTable();
 		}
 	}
@@ -349,6 +390,9 @@ void GUI::buildRightPanels()
 	ImGui::Begin("S21", nullptr,ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 
+	_windowS1On = false;
+	_windowS2On = false;
+
 	firstRightPanelMinimized = ImGui::IsWindowCollapsed();
 
 	ImGui::End();
@@ -356,6 +400,7 @@ void GUI::buildRightPanels()
 
 	int secondRightPanelY = 17;
 	if (!firstRightPanelMinimized) {
+		_windowS1On = true;
 		secondRightPanelY = (int) (windowHeight - 160 - 83) / 2 - 1;
 	}
 
@@ -369,6 +414,10 @@ void GUI::buildRightPanels()
 	ImGui::SetNextWindowCollapsed(true, ImGuiCond_Once);
 	ImGui::Begin("S11, S22", nullptr, ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
+	if (!ImGui::IsWindowCollapsed()) {
+		_windowS2On = true;
+	}
 
 	ImGui::End();
 	ImGui::PopStyleColor(4);

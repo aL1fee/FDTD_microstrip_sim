@@ -35,6 +35,7 @@ protected:
 
 public:
 	//Scene(GLFWwindow* w, GUI* g, Input* in);
+	Scene();
 	Scene(GLFWwindow* w);
 
 

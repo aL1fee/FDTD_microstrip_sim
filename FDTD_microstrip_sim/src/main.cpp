@@ -1,7 +1,10 @@
-#include <iostream>
+#include <Windows.h>
+#undef APIENTRY
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include <iostream>
 
 #include "Macros.h"
 #include "Renderer.h"
@@ -61,7 +64,7 @@ int main() {
 	extern int _initialWindowHeight;
 	extern int _currentWindowWidth;
 	extern int _currentWindowHeight;
-	int width, height;
+	//int width, height;
 	glfwGetWindowSize(window, &_initialWindowWidth, &_initialWindowHeight);
 	_currentWindowWidth = _initialWindowWidth;
 	_currentWindowHeight = _initialWindowHeight;
@@ -69,9 +72,9 @@ int main() {
 	extern float _aspectRatio;
 
 	_aspectRatio = (float) _initialWindowWidth / _initialWindowHeight;
-	std::cout << "AR: " << _aspectRatio << std::endl;
-	std::cout << "width: " << _initialWindowWidth << std::endl;
-	std::cout << "height: " << _initialWindowHeight << std::endl;
+	//std::cout << "AR: " << _aspectRatio << std::endl;
+	//std::cout << "width: " << _initialWindowWidth << std::endl;
+	//std::cout << "height: " << _initialWindowHeight << std::endl;
 
 
 	//glViewport(0, 0, FULL_SCREEN_SIZE_X, FULL_SCREEN_SIZE_Y);

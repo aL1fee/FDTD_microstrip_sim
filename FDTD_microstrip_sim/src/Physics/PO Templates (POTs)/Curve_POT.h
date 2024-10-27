@@ -13,27 +13,27 @@
 #include "glm.hpp"
 #include <gtx/string_cast.hpp>
 
-#include "PhysicalObject.h"
-#include "../Geometry/Geometry.h"
+#include "../PhysicalObject.h"
+#include "../../Geometry/GeometricalObject.h"
+#include "../../Data Structures/VertexVectorDS.h"
 
-#include "../Data Structures/VertexVectorDS.h"
-
-class TestingLine : public Geometry
+class Curve_POT : public PhysicalObject
 {
 protected:
-	void buildVertices();
-	void buildVAOs();
-
 	int builtUntilIndex;
 
+	void buildVertices() override;
+	void buildVAOs() override;
+	void buildEdges() override {}
+
+
 public:
-	TestingLine();
+	Curve_POT(Shader* sh);
 
 	void build() override;
 	void draw() override;
 	bool intersectionCheck(glm::vec3 v) override;
+
 	void addPoint(glm::vec3 v);
 	void terminateLine();
-
-
 };
