@@ -1,5 +1,7 @@
 #include "PhysicalObject.h"
 
+extern unsigned int physicalObjectNextId;
+
 PhysicalObject::PhysicalObject()
 {
 	vertices = new VertexVectorDS();
@@ -15,8 +17,8 @@ PhysicalObject::PhysicalObject()
 	isInteractable = true;
 	edgesOn = true;
 	shader = nullptr;
-	// TODO: generate a default propertyMap
-	propertyMap = new std::vector<std::pair<std::string, float*>>();;
+	propertyMap = new std::vector<std::pair<std::string, float*>>();
+	id = physicalObjectNextId++;
 }
 
 PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh)
@@ -35,6 +37,7 @@ PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3
 	edgesOn = true;
 	shader = sh;
 	propertyMap = new std::vector<std::pair<std::string, float*>>();
+	id = physicalObjectNextId++;
 }
 
 PhysicalObject::~PhysicalObject()
@@ -42,6 +45,15 @@ PhysicalObject::~PhysicalObject()
 	delete vertices;
 	delete VAOs;
 	delete propertyMap;
-	delete shader;
+	if (shader->getNumObjectsServed() == 0) {
+		std::cout << "a shader is deleted!" << std::endl;
+		delete shader;
+	}
+}
+
+glm::vec3 PhysicalObject::getCenterLocation() const
+{
+	return glm::vec3((origin.x + length) / 2.0f,
+		(origin.z + width) / 2.0f, (origin.y + height) / 2.0f);
 }
 

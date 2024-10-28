@@ -25,4 +25,6 @@ public:
 	void updateActiveObject(PhysicalObject* obj);
 	
 	PhysicalObject* getActiveObject() { return activeObject; }
+
+	void nullify();
 };

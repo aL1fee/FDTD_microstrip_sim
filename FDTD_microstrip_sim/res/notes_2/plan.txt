@@ -17,43 +17,40 @@ Plan:
 #ray casting at objects and cuboid collision detection
 #do properties window w/ live changes
 #address depth
+#implement traces, housing
 #make all objects generic and pointing to the same parent to get rid of vectors and arrays extra hardcodes
 #POs should contain their own shaders as variables and run instructions as abstracted methods
 #build cuboid carriers and substrates w/ properties
+#ability to delete objects
+#give control to PO parameters to GUI when building
 
 
 
-*ability to delete objects
-*build cut corner-shaped surfaces
+*make the scroll pointing to the mouse; not the front vector
 *make a camera that rotates around a given object when you click on scrolling button
-*fix property window bugs, add features and appearance
 *ability to translate cuboids and modify their properties
+*implement cylindrical power sources and detectors
 
 
-extra:
+*implement a hierarchy data structure to store elements & its properties of a scene
+*implement tuning pads
+*implement wires
+
+*build cut corner-shaped surfaces
+*fix property window bugs, add features and appearance
+
 *ray casting at x-z plane
 *draw custom polygons w/ properties
 
+*testingline and other curves rebuilding
 
-10/27-11/2
+
+
 *apply textures to carriers, substrates, traces
-*implement traces
-*implement cylindrical power sources and detectors
-*implement wires
-*make the scroll pointing to the mouse; not the front vector
-*make custom polygons with defined sizes
-*implement a hierarchy data structure to store elements & its properties of a scene
-
-
-testingline and other curves rebuilding
 
 
 
-
-
-
-
-
+***start with/ FDTD
 
 
 

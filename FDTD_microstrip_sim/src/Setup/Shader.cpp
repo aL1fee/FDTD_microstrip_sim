@@ -87,7 +87,7 @@ unsigned int Shader::createShader(const string& vertexShader, const string& frag
 }
 
 
-Shader::Shader(const string& filepath, unsigned int id)
+Shader::Shader(const string& filepath, unsigned int id, const string& name)
 	: _Filepath(filepath), _RendererID(id)
 {
 	if (filepath == "-1") {
@@ -95,6 +95,8 @@ Shader::Shader(const string& filepath, unsigned int id)
 	}
 	ShaderProgramSource source = parseShader(filepath);
 	_RendererID = createShader(source.vertexSource, source.FragmentSource);
+	shaderName = name;
+	objectsServed = 0;
 }
 
 Shader::~Shader()

@@ -23,3 +23,9 @@ void PropertyWindow::updateActiveObject(PhysicalObject* obj)
 {
 	activeObject = obj;
 }
+
+void PropertyWindow::nullify()
+{
+	properties = nullptr;
+	activeObject = nullptr;
+}

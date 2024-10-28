@@ -14,8 +14,8 @@ class Shader {
 private:
 	string _Filepath;
 	string shaderName;
+	int objectsServed;
 	unsigned int _RendererID;
-	//caching for uniforms
 	unordered_map<string, int> _UniformLocationCache;
 
 	unsigned int compileShader(unsigned int type, const string& source);
@@ -26,7 +26,7 @@ private:
 
 
 public:
-	Shader(const string& filepath, unsigned int id);
+	Shader(const string& filepath, unsigned int id, const string& name);
 	~Shader();
 
 	unsigned int getUniformLocation(const string& name);
@@ -40,6 +40,10 @@ public:
 	void unbind() const;
 
 	void printShader();
+
+	void incrNumObjectsServed() { objectsServed++; }
+	void decrNumObjectsServed() { objectsServed--; }
+	int getNumObjectsServed() { return objectsServed; }
 
 	std::string getName() const { return shaderName; }
 

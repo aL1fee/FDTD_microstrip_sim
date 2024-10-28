@@ -1,6 +1,7 @@
 #include "Input.h"
 
 extern Camera* cam;
+extern MainScene* _scene_main;
 
 extern int _initialWindowWidth;
 extern int _initialWindowHeight;
@@ -37,26 +38,26 @@ void Input::processInput()
 {
     extern float _deltaTime;
     extern bool _cameraTranslationalMotionOn;
+    extern bool _cameraRotationAboutPointOn;
+    _cameraRotationAboutPointOn = false;
     _cameraTranslationalMotionOn = false;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        _selectingObjectExpected = false;
         cam->moveForward(_deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        _selectingObjectExpected = false;
         cam->moveBackward(_deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        _selectingObjectExpected = false;
         cam->moveLeft(_deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        _selectingObjectExpected = false;
         cam->moveRight(_deltaTime);
     }
+    if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
+        _scene_main->deleteActiveObject();
+    }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        _selectingObjectExpected = false;
         extern bool _mouseRightButtonPressed;
         if (_mouseRightButtonPressed) {
             _cameraTranslationalMotionOn = true;
@@ -65,10 +66,19 @@ void Input::processInput()
             _cameraTranslationalMotionOn = false;
         }
     }
-    extern MainScene* _scene_main;
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+        //extern bool _mouseMiddleButtonPressed;
+        _cameraRotationAboutPointOn = true;
+        /*if (_mouseMiddleButtonPressed) {
+            _cameraRotationAboutPointOn = true;
+        }
+        else {
+            _cameraRotationAboutPointOn = false;
+        }*/
+    }
+
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _testingLineExpected)
     {
-        _selectingObjectExpected = false;
         _testingLinePressed = true;
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -86,14 +96,12 @@ void Input::processInput()
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _testingLinePressed)
     {
-        _selectingObjectExpected = false;
         _scene_main->getTestingLine()->terminateLine();
         _testingLineExpected = false;
         _testingLinePressed = false;
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _rayExpected)
     {
-        _selectingObjectExpected = false;
         _rayExpected = false;
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -105,6 +113,10 @@ void Input::processInput()
         glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
 
         _scene_main->generateRay(cam->getPos(), rayWorld);
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+    {
+        _selectingObjectExpected = true;
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _selectingObjectExpected)
     {
@@ -134,15 +146,19 @@ void Input::processInput()
             }
         }
     }
-
-
-    _selectingObjectExpected = true;
 }
+
+
+bool testOnce = true;
+glm::vec3 point = glm::vec3(0.0f, 0.0f, 0.0f);
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    extern float _deltaTime;
     extern bool _mouseRightButtonPressed;
+    extern bool _mouseMiddleButtonPressed;
     extern bool _cameraTranslationalMotionOn;
+    extern bool _cameraRotationAboutPointOn;
     float posXF = static_cast<float>(xpos);
     float posYF = static_cast<float>(ypos);
 
@@ -163,19 +179,38 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     float offsetY = _lastY - posYF; // reversed since y-coordinates go from bottom to top
     _lastX = posXF;
     _lastY = posYF;
-    _selectingObjectExpected = false;
     if (_cameraTranslationalMotionOn) {
-        extern float _deltaTime;
         cam->processMouseTranslation(offsetX, offsetY, _deltaTime);
     } else if (_mouseRightButtonPressed) {
         cam->processMouseRotation(offsetX, offsetY);
+    }
+    if (_cameraRotationAboutPointOn) {
+        //glm::vec3 point = glm::vec3(0.0f, 0.0f, 0.0f);
+        if (_scene_main->getActiveObject() != nullptr)
+        {
+            point = _scene_main->getActiveObject()->getCenterLocation();
+        }
+        else if (testOnce) {
+            testOnce = false;
+            double mouseX, mouseY;
+            glfwGetCursorPos(window, &mouseX, &mouseY);
+            glm::vec3 rayNDC = Utility::screenToNDC(window,
+                static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
+            glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+            glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+            glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+
+            point = cam->getPos() + rayWorld * 10.0f;
+
+        }
+        cam->processMouseRotationAboutPoint(offsetX, offsetY,
+            _deltaTime, point);
     }
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     extern float _deltaTime;
-    _selectingObjectExpected = false;
     cam->processMouseScroll(static_cast<float>(yoffset), _deltaTime);
 }
 
@@ -187,41 +222,4 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     } else {
         _mouseRightButtonPressed = false;
     }
-
-    //extern bool _mouseLeftButtonPressed;
-    //if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-    //    //_mouseLeftButtonPressed = true;
-    //    //double mouseX, mouseY;
-    //    //glfwGetCursorPos(window, &mouseX, &mouseY);
-    //    ////std::cout << "Here: " << mouseX << ", " << mouseY << std::endl;
-    //    extern int _preserveLeftClickNum;
-
-
-    //    //glm::vec3 rayNDC = Utility::screenToNDC(window, mouseX, mouseY, 1.0f);
-    //    //glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
-    //    //glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
-    //    //glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
-
-    //    //std::cout << "X: " << rayWorld.x << std::endl;
-    //    //std::cout << "Y: " << rayWorld.y << std::endl;
-    //    //std::cout << "Z: " << rayWorld.z << std::endl;
-
-    //    //extern MainScene* _scene_main;
-    //    //_scene_main->getTestingLine()->addPoint(rayWorld);
-
-
-
-
-    //    if (_preserveLeftClickNum > 0) {
-    //        _preserveLeftClickNum--;
-
-    //    }
-
-    //} else {
-    //    _mouseLeftButtonPressed = false;
-    //}
-
-
-
-
 }

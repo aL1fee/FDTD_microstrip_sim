@@ -1,9 +1,6 @@
 #include "Curve_POT.h"
 
-void Curve_POT::buildVertices()
-{
-
-}
+void Curve_POT::buildVertices() {}
 
 void Curve_POT::buildVAOs()
 {

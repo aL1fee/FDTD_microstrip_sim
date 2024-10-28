@@ -27,6 +27,7 @@ protected:
 	bool isInteractable;
 	Shader* shader;
 	std::vector<std::pair<std::string, float*>>* propertyMap;
+	unsigned int id;
 
 public:
 	PhysicalObject();
@@ -40,6 +41,14 @@ public:
 	bool interactable() const { return isInteractable; }
 	void setRebuiltExpected(bool b) { rebuiltExpected = b; }
 
-	std::string getShaderName() const { return shader->}
+	std::string getShaderName() const { return shader->getName(); }
+	unsigned int getId() const { return id; }
+
+	glm::vec3 getCenterLocation() const;
+
+
+	bool operator==(const PhysicalObject& other) const {
+		return id == other.getId();
+	}
 
 };

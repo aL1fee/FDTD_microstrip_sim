@@ -12,6 +12,8 @@ bool _selectingObjectExpected = false;
 bool _selectingObjectPressed = false;
 bool _mouseRightButtonPressed = false;
 bool _cameraTranslationalMotionOn = false;
+bool _mouseMiddleButtonPressed = false;
+bool _cameraRotationAboutPointOn = false;
 
 bool _rayExpected = false;
 
@@ -35,6 +37,7 @@ int _currentWindowHeight = 0;
 bool _propertyWindowOn = false;
 bool _rebuildAllObjects = false;
 
+unsigned int physicalObjectNextId = 0;
 
 std::mutex mtx;
 
@@ -323,7 +326,6 @@ void Renderer::render() const
 			clearDepthBuffer();
 
 			_scene_main->render();
-
 
 			input->processInput();
 

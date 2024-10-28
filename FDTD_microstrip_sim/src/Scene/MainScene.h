@@ -18,7 +18,7 @@ class MainScene : public Scene
 {
 private:
 	std::map<std::string, Shader*>* shaderMap;
-	std::vector<PhysicalObject*>* physicalObjectBuffer;
+	std::map<unsigned int, PhysicalObject*>* physicalObjectBuffer;
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
 	PropertyWindow* propertyWindow;
@@ -28,16 +28,22 @@ private:
 
 	PhysicalObject* activeObject;
 
+	void eraseShaderMapOneInstance(std::string name);
+
 public:
 	MainScene(GLFWwindow* w);
 
 	void init() override;
 	void render() override;
 
-	void addCarrier(std::string& s);
-	void addSubstrate(std::string& s);
-	void addTrace(std::string& s);
-	void addHousing(std::string& s);
+	void addCarrier(std::string& s, glm::vec3 o, float l, float w, 
+		float h, glm::vec3 col, float perm, float cond);
+	void addSubstrate(std::string& s, glm::vec3 o, float l, float w,
+		float h, glm::vec3 col, float perm, float cond);
+	void addTrace(std::string& s, glm::vec3 o, float l, float w,
+		float h, glm::vec3 col, float perm, float cond);
+	void addHousing(std::string& s, glm::vec3 o, float l, float w,
+		float h, glm::vec3 col, float perm, float cond);
 
 	void deleteActiveObject();
 	void deleteAllObjects();
@@ -53,4 +59,6 @@ public:
 	void selectObject(glm::vec3 pos, glm::vec3 dir);
 
 	PropertyWindow* getPropertyWindow() { return propertyWindow; }
+
+	PhysicalObject* getActiveObject() const { return activeObject; }
 };

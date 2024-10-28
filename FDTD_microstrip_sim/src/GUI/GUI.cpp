@@ -99,7 +99,8 @@ void GUI::buildMenuUpperPanel()
 				_acceptingLeftClickBufferInput = true;
 
 				std::string s = "> Adding a carrier";
-				_scene_main->addCarrier(s);
+				_scene_main->addCarrier(s, glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
+					glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
 				statusWindow->setMessage(s);
 			}
 			if (ImGui::MenuItem("Substrate"))
@@ -108,7 +109,8 @@ void GUI::buildMenuUpperPanel()
 				_acceptingLeftClickBufferInput = true;
 
 				std::string s = "> Adding a substrate";
-				_scene_main->addSubstrate(s);
+				_scene_main->addSubstrate(s, glm::vec3(0.0f), 4.5f, 1.0f, 0.6f,
+					glm::vec3(.4f, .8f, 1.0f), .00001f, 3.05f);
 				statusWindow->setMessage(s);
 			}
 			if (ImGui::MenuItem("Trace"))
@@ -117,7 +119,8 @@ void GUI::buildMenuUpperPanel()
 				_acceptingLeftClickBufferInput = true;
 
 				std::string s = "> Adding a trace";
-				_scene_main->addTrace(s);
+				_scene_main->addTrace(s, glm::vec3(0.0f), 4.5f, .15f, 0.01f,
+					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
 				statusWindow->setMessage(s);
 			}
 			if (ImGui::MenuItem("Housing"))
@@ -126,7 +129,8 @@ void GUI::buildMenuUpperPanel()
 				_acceptingLeftClickBufferInput = true;
 
 				std::string s = "> Adding a housing";
-				_scene_main->addHousing(s);
+				_scene_main->addHousing(s, glm::vec3(0.0f, 0.0f, -.2f), 9.0f, .2f, 2.0f,
+					glm::vec3(.88f, .88f, .88f), 10.0f, 50);
 				statusWindow->setMessage(s);
 			}
 			if (ImGui::MenuItem("A simple system"))
@@ -135,9 +139,12 @@ void GUI::buildMenuUpperPanel()
 				_acceptingLeftClickBufferInput = true;
 
 				std::string s = "> Adding a system";
-				_scene_main->addCarrier(s);
-				_scene_main->addSubstrate(s);
-				_scene_main->addTrace(s);
+				_scene_main->addCarrier(s, glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
+					glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
+				_scene_main->addSubstrate(s, glm::vec3(0.0f, .45f, 3.0f), 4.5f, 1.0f, 0.6f,
+					glm::vec3(.4f, .8f, 1.0f), .00001f, 3.05f);
+				_scene_main->addTrace(s, glm::vec3(0.0f, 1.05f, 3.42f), 4.5f, .15f, 0.01f,
+					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
 				statusWindow->setMessage(s);
 			}
 			ImGui::EndMenu();
@@ -158,9 +165,9 @@ void GUI::buildMenuUpperPanel()
 		}
 		if (ImGui::BeginMenu("Delete"))
 		{
-			if (ImGui::MenuItem("Delete an object", "del"))
+			if (ImGui::MenuItem("Delete the object", "del"))
 			{
-				
+				_scene_main->deleteActiveObject();
 			}
 			if (ImGui::MenuItem("Delete all objects"))
 			{

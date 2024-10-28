@@ -6,7 +6,7 @@ MainScene::MainScene(GLFWwindow* w)
 {
 	window = w;
 	shaderMap = new map<std::string, Shader*>();
-	physicalObjectBuffer = new std::vector<PhysicalObject*>();
+	physicalObjectBuffer = new std::map<unsigned int, PhysicalObject*>();
 	viewMatrix = glm::mat4(1.0f);
 	projMatrix = glm::mat4(1.0f);
 	propertyWindow = new PropertyWindow();
@@ -23,12 +23,14 @@ void MainScene::init()
 	viewMatrix = cam->lookAt();
 
 
-	Shader* shader_csys = new Shader("res/shaders/coordinate_system.shader", 0);
+	Shader* shader_csys = new Shader("res/shaders/coordinate_system.shader", 0, "Csys");
 	shaderMap->insert(std::make_pair("Csys", shader_csys));
+	shader_csys->incrNumObjectsServed();
 	PhysicalObject* csys = new CoordinateSystem_PO(20.0f, 0.6f, shader_csys);
-	physicalObjectBuffer->push_back(csys);
+	physicalObjectBuffer->insert(std::make_pair(csys->getId(), csys));
+	//physicalObjectBuffer->push_back(csys);
 
-	testingLineShader = new Shader("res/shaders/testingLine.shader", 0);
+	testingLineShader = new Shader("res/shaders/testingLine.shader", 0, "Curve");
 	testingLine = new Curve_PO(testingLineShader);
 }
 
@@ -63,7 +65,8 @@ void MainScene::render()
 
 	testingLine->draw();
 	 
-	for (PhysicalObject* obj : *physicalObjectBuffer) {
+	for (auto& pair : *physicalObjectBuffer) {
+		PhysicalObject* obj = pair.second;
 		if (obj->needsRebuilding())
 		{
 			obj->build();
@@ -71,116 +74,148 @@ void MainScene::render()
 		}
 		obj->draw();
 	}
-
-
-
 }
 
-void MainScene::addCarrier(std::string& s)
+void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
+	float h, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	if (shaderMap->find("Carrier") == shaderMap->end())
+	std::string name = "Carrier";
+	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/carrier.shader", 1);
-		shaderMap->insert(std::make_pair("Carrier", shader));
+		shader = new Shader("res/shaders/carrier.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
-		shader = shaderMap->at("Carrier");
+		shader = shaderMap->at(name);
 	}
-	Carrier_PO* carrierPO = new Carrier_PO(glm::vec3(0.0f), 4.5f, 7.0f, 0.45f, 
-		glm::vec3(1.0f, 1.0f, .66f), 1500, 600, shader);
+	shader->incrNumObjectsServed();
+	/*Carrier_PO* carrierPO = new Carrier_PO(glm::vec3(0.0f), 4.5f, 7.0f, 0.45f, 
+		glm::vec3(1.0f, 1.0f, .66f), 1500, 600, shader);*/
+	Carrier_PO* carrierPO = new Carrier_PO(o, l, w, h, col, perm, cond, shader);
 	carrierPO->updatePropertyMap();
-	physicalObjectBuffer->push_back(carrierPO);
+	physicalObjectBuffer->insert(std::make_pair(carrierPO->getId(), carrierPO));
+	//physicalObjectBuffer->push_back(carrierPO);
 	_viewMatrixChanged = true;
 	_projMatrixChanged = true;
 }
 
-void MainScene::addSubstrate(std::string& s)
+void MainScene::addSubstrate(std::string& s, glm::vec3 o, float l, float w,
+	float h, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	if (shaderMap->find("Substrate") == shaderMap->end())
+	std::string name = "Substrate";
+	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/substrate.shader", 1);
-		shaderMap->insert(std::make_pair("Substrate", shader));
+		shader = new Shader("res/shaders/substrate.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
-		shader = shaderMap->at("Substrate");
+		shader = shaderMap->at(name);
 	}
-	Substrate_PO* substratePO = new Substrate_PO(glm::vec3(0.0f, .45f, 3.0f), 4.5f, 1.0f, 0.6f,
-		glm::vec3(.4f, .8f, 1.0f), .00001f, 3.05f, shader);
+	shader->incrNumObjectsServed();
+	//Substrate_PO* substratePO = new Substrate_PO(glm::vec3(0.0f, .45f, 3.0f), 4.5f, 1.0f, 0.6f,
+		//glm::vec3(.4f, .8f, 1.0f), .00001f, 3.05f, shader);
+	Substrate_PO* substratePO = new Substrate_PO(o, l, w, h, col, perm, cond, shader);
 	substratePO->updatePropertyMap();
-	physicalObjectBuffer->push_back(substratePO);
+	physicalObjectBuffer->insert(std::make_pair(substratePO->getId(), substratePO));
+	//physicalObjectBuffer->push_back(substratePO);
 	_viewMatrixChanged = true;
 	_projMatrixChanged = true;
 }
 
-void MainScene::addTrace(std::string& s)
+void MainScene::addTrace(std::string& s, glm::vec3 o, float l, float w,
+	float h, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	if (shaderMap->find("Trace") == shaderMap->end())
+	std::string name = "Trace";
+	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/trace.shader", 1);
-		shaderMap->insert(std::make_pair("Trace", shader));
+		shader = new Shader("res/shaders/trace.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
-		shader = shaderMap->at("Trace");
+		shader = shaderMap->at(name);
 	}
-	Trace_PO* tracePO = new Trace_PO(glm::vec3(0.0f, 1.05f, 3.42f), 4.5f, .15f, 0.01f,
-		glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410, shader);
+	shader->incrNumObjectsServed();
+	//Trace_PO* tracePO = new Trace_PO(glm::vec3(0.0f, 1.05f, 3.42f), 4.5f, .15f, 0.01f,
+	//	glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410, shader);
+	Trace_PO* tracePO = new Trace_PO(o, l, w, h, col, perm, cond, shader);
 	tracePO->updatePropertyMap();
-	physicalObjectBuffer->push_back(tracePO);
+	physicalObjectBuffer->insert(std::make_pair(tracePO->getId(), tracePO));
+	//physicalObjectBuffer->push_back(tracePO);
 	_viewMatrixChanged = true;
 	_projMatrixChanged = true;
 }
 
-void MainScene::addHousing(std::string& s)
+void MainScene::addHousing(std::string& s, glm::vec3 o, float l, float w,
+	float h, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	if (shaderMap->find("Housing") == shaderMap->end())
+	std::string name = "Housing";
+	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/housing.shader", 1);
-		shaderMap->insert(std::make_pair("Housing", shader));
+		shader = new Shader("res/shaders/housing.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
-		shader = shaderMap->at("Housing");
+		shader = shaderMap->at(name);
 	}
-	Housing_PO* housingPO = new Housing_PO(glm::vec3(0.0f, 0.0f, -.2f), 9.0f, .2f, 2.0f,
-		glm::vec3(.88f, .88f, .88f), 10.0f, 50, shader);
+	shader->incrNumObjectsServed();
+	//Housing_PO* housingPO = new Housing_PO(glm::vec3(0.0f, 0.0f, -.2f), 9.0f, .2f, 2.0f,
+	//	glm::vec3(.88f, .88f, .88f), 10.0f, 50, shader);
+	Housing_PO* housingPO = new Housing_PO(o, l, w, h, col, perm, cond, shader);
 	housingPO->updatePropertyMap();
-	physicalObjectBuffer->push_back(housingPO);
+	physicalObjectBuffer->insert(std::make_pair(housingPO->getId(), housingPO));
+	//physicalObjectBuffer->push_back(housingPO);
 	_viewMatrixChanged = true;
 	_projMatrixChanged = true;
+}
+
+void MainScene::eraseShaderMapOneInstance(std::string name)
+{
+	std::cout << "objs served: " << shaderMap->at(name)->getNumObjectsServed() << std::endl;
+	
+	shaderMap->at(name)->decrNumObjectsServed();
+	if (shaderMap->at(name)->getNumObjectsServed() == 0) {
+		std::cout << "erasing the shader" << std::endl;
+		shaderMap->erase(name);
+	}
 }
 
 void MainScene::deleteActiveObject()
 {
-
-
-
-	delete activeObject;
-	activeObject = nullptr;
+	if (activeObject != nullptr)
+	{
+		if (activeObject->interactable())
+		{
+			physicalObjectBuffer->erase(activeObject->getId());
+			eraseShaderMapOneInstance(activeObject->getShaderName());
+			delete activeObject;
+			activeObject = nullptr;
+			propertyWindow->nullify();
+			return;
+		}
+	}
 }
 
 void MainScene::deleteAllObjects()
 {
-	for (auto it = physicalObjectBuffer->begin(); it != physicalObjectBuffer->end();)
-	{
-		if ((*it)->interactable()) {
-			std::string shaderName = (*it)->
-			delete *it;
-			it = physicalObjectBuffer->erase(it);
+	for (auto it = physicalObjectBuffer->begin(); 
+		it != physicalObjectBuffer->end();) {
+		PhysicalObject* obj = it->second;
+		std::cout << obj->getShaderName() << std::endl;
+		if (obj->interactable()) {
+			eraseShaderMapOneInstance(obj->getShaderName());
+			delete obj;
+			it = physicalObjectBuffer->erase(it); // Erase returns the next iterator
 		}
 		else {
 			++it;
 		}
 	}
-	physicalObjectBuffer->clear();
-	shaderMap->clear();
-
-	//NEED contain shader names in physicalobjects and emptry shadermap here
-
-
-
+	activeObject = nullptr;
+	propertyWindow->nullify();
 }
 
 void MainScene::generateRay(glm::vec3 pos, glm::vec3 dir)
@@ -197,7 +232,8 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 	glm::vec3 rayPos = pos;
 	float count = 0.0f;
 	while (count < SELECTING_OBJECT_RANGE) {
-		for (PhysicalObject* obj : *physicalObjectBuffer) {
+		for (auto &pair : *physicalObjectBuffer) {
+			PhysicalObject* obj = pair.second;
 			if (obj->intersectionCheck(rayPos)) {
 				std::cout << "object selected!" << std::endl;
 				propertyWindow->addPropertyMap(obj->getPropertyMap());
