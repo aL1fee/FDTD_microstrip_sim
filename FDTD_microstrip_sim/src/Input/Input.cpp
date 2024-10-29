@@ -8,6 +8,8 @@ extern int _initialWindowHeight;
 extern int _currentWindowWidth;
 extern int _currentWindowHeight;
 
+bool _middleMouseReleaseExpected = false;
+
 bool _firstMouseMovement = true;
 float _lastX = INITIAL_OPENGL_CONTEXT_SCREEN_WIDTH / 2.0f;
 float _lastY = INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT / 2.0f;
@@ -26,6 +28,8 @@ extern bool _windowS2On;
 
 int screenWidth;
 int screenHeight;
+
+glm::vec3 cameraRotationPoint = glm::vec3(0.0f, 0.0f, 0.0f);
 
 Input::Input(GLFWwindow* w)
 {
@@ -57,6 +61,13 @@ void Input::processInput()
     if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
         _scene_main->deleteActiveObject();
     }
+    //TODO inefficiencies
+    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
+        cam->modifyCameraSpeed(CAMERA_MAX_SPEED);
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_RELEASE) {
+        cam->modifyCameraSpeed(CAMERA_SPEED);
+    }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         extern bool _mouseRightButtonPressed;
         if (_mouseRightButtonPressed) {
@@ -76,7 +87,9 @@ void Input::processInput()
             _cameraRotationAboutPointOn = false;
         }*/
     }
-
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_RELEASE) {
+        _middleMouseReleaseExpected = false;
+    }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _testingLineExpected)
     {
         _testingLinePressed = true;
@@ -148,15 +161,10 @@ void Input::processInput()
     }
 }
 
-
-bool testOnce = true;
-glm::vec3 point = glm::vec3(0.0f, 0.0f, 0.0f);
-
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     extern float _deltaTime;
     extern bool _mouseRightButtonPressed;
-    extern bool _mouseMiddleButtonPressed;
     extern bool _cameraTranslationalMotionOn;
     extern bool _cameraRotationAboutPointOn;
     float posXF = static_cast<float>(xpos);
@@ -185,13 +193,17 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         cam->processMouseRotation(offsetX, offsetY);
     }
     if (_cameraRotationAboutPointOn) {
-        //glm::vec3 point = glm::vec3(0.0f, 0.0f, 0.0f);
         if (_scene_main->getActiveObject() != nullptr)
         {
-            point = _scene_main->getActiveObject()->getCenterLocation();
+        //TODO shouldn't be just an active object: one has to be pointing at it
+        //---> point of collision w/ the object, not its center!
+            cameraRotationPoint = _scene_main->getActiveObject()->getCenterLocation();
+            _middleMouseReleaseExpected = true;
         }
-        else if (testOnce) {
-            testOnce = false;
+        // confusing nameings (_middleMouseReleaseExpected)
+        else if (!_middleMouseReleaseExpected) 
+        {
+            _middleMouseReleaseExpected = true;
             double mouseX, mouseY;
             glfwGetCursorPos(window, &mouseX, &mouseY);
             glm::vec3 rayNDC = Utility::screenToNDC(window,
@@ -199,12 +211,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
             glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
             glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
             glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
-
-            point = cam->getPos() + rayWorld * 10.0f;
-
+            cameraRotationPoint = cam->getPos() + rayWorld * 10.0f;
         }
         cam->processMouseRotationAboutPoint(offsetX, offsetY,
-            _deltaTime, point);
+            _deltaTime, cameraRotationPoint);
     }
 }
 

@@ -31,6 +31,10 @@ private:
 	float cameraSpeed;
 	float mouseSensitivity;
 
+
+	float yawCamToOrigin;
+	float pitchCamToOrigin;
+
 	void updateVectors();
 
 	void computeInitialYaw();
@@ -59,5 +63,7 @@ public:
 	void processMouseTranslation(float offsetX, float offsetY, float dt);
 	void processMouseScroll(float offsetY, float dt);
 	void processMouseRotationAboutPoint(float offsetX, float offsetY, float dt, glm::vec3 point);
+
+	void modifyCameraSpeed(float value) { cameraSpeed = value; }
 
 };

@@ -1,7 +1,7 @@
 Plan:
 
 #build a coordinate system
-#do a camera
+#do a simple camera
 #do ok frame timing
 #do simple solidworks-like camera
 #memory leaks
@@ -23,28 +23,37 @@ Plan:
 #build cuboid carriers and substrates w/ properties
 #ability to delete objects
 #give control to PO parameters to GUI when building
+#make a camera that rotates around a given object when you click on scrolling button
+#added near/far plane settigns to the view
 
 
 
-*make the scroll pointing to the mouse; not the front vector
-*make a camera that rotates around a given object when you click on scrolling button
+
 *ability to translate cuboids and modify their properties
+
+*test the program on another PC
+
+*cuboid scaling
+
+*delete all lines option
+
 *implement cylindrical power sources and detectors
 
 
 *implement a hierarchy data structure to store elements & its properties of a scene
 *implement tuning pads
+*implement ribbons
 *implement wires
 
 *build cut corner-shaped surfaces
-*fix property window bugs, add features and appearance
+*fix property window bugs, add features and appearance. apply units
 
 *ray casting at x-z plane
 *draw custom polygons w/ properties
 
 *testingline and other curves rebuilding
 
-
+*do status window (latest messages appear at the top; time, scroll history features)
 
 *apply textures to carriers, substrates, traces
 
@@ -61,7 +70,9 @@ Plan:
 3. Worker Threads: physics updates, math calculations, asset loading
 4. incorporate matrix stack calls when calculating model,view,proj matrices as specified in the book
 5. do .frag and .vert shader files rather than .shader
-
+6. make the scroll pointing to the mouse; not the front vector
+7. improve point rotational camera
+8. cuboid and other object rotation
 
 ------
 future:

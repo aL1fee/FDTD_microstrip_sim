@@ -45,7 +45,25 @@ void GUI::buildMainMenuPanel()
 		}
 		if (ImGui::BeginMenu("View"))
 		{
-			if (ImGui::MenuItem("view")) { /* Undo action */ }
+			if (ImGui::BeginMenu("Adjust clipping plane")) 
+			{ 
+				if (ImGui::BeginMenu("Modify near-plane"))
+				{
+					float* near_plane_value = _scene_main->getNearPlaneValue();
+					ImGui::SliderFloat("x", near_plane_value, .01f, 1.15f);
+					_scene_main->updateProjMatrix();
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Modify far-plane"))
+				{
+					float* far_plane_value = _scene_main->getFarPlaneValue();
+					ImGui::SliderFloat("x", far_plane_value, 50.0f, 300.0f);
+					_scene_main->updateProjMatrix();
+					ImGui::EndMenu();
+
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Tools"))
@@ -175,6 +193,24 @@ void GUI::buildMenuUpperPanel()
 			}
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Modify"))
+		{
+			if (ImGui::MenuItem("Translate an object"))
+			{
+				PhysicalObject* obj = _scene_main->getActiveObject();
+				if (obj == nullptr) {
+					string s = "> No object selected!\n";
+					statusWindow->setMessage(s);
+				}
+				//obj->buildTranslateVectors();
+
+
+
+			}
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMenuBar();
 	}
 	ImGui::End();

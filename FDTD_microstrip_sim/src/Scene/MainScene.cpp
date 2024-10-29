@@ -11,6 +11,8 @@ MainScene::MainScene(GLFWwindow* w)
 	projMatrix = glm::mat4(1.0f);
 	propertyWindow = new PropertyWindow();
 	activeObject = nullptr;
+	nearPlaneValue = INITIAL_NEAR_PLANE_VALUE;
+	farPlaneValue = INITIAL_FAR_PLANE_VALUE;
 	init();
 }
 
@@ -37,7 +39,7 @@ void MainScene::init()
 void MainScene::render()
 {
 	if (_projMatrixChanged) {
-		projMatrix = glm::perspective(glm::radians(cam->getZoom()), aspect, 0.1f, 100.0f);
+		projMatrix = glm::perspective(glm::radians(cam->getZoom()), aspect, nearPlaneValue, farPlaneValue);
 		testingLineShader->bind();
 		glUniformMatrix4fv(testingLineShader->getUniformLocation("proj"), 1, GL_FALSE, glm::value_ptr(projMatrix));
 		testingLineShader->unbind();
@@ -60,8 +62,6 @@ void MainScene::render()
 		}
 		_viewMatrixChanged = false;
 	}
-
-
 
 	testingLine->draw();
 	 
@@ -225,7 +225,6 @@ void MainScene::generateRay(glm::vec3 pos, glm::vec3 dir)
 	testingLine->addPoint(pos + dir * 20.0f);
 }
 
-// hardcoding just the carriers for now
 // TODO inefficient ray picking
 void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 {
@@ -247,6 +246,7 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 		rayPos += dir * SELECTING_OBJECT_PRECISION;
 		count += SELECTING_OBJECT_PRECISION;
 	}
+	activeObject = nullptr;
 	propertyWindow->setDefaultPropertyMap();
 	propertyWindow->updateActiveObject(nullptr);
 	std::cout << "no objects found!" << std::endl;

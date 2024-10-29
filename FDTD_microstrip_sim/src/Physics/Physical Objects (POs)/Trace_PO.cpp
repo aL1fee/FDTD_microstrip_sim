@@ -10,4 +10,5 @@ void Trace_PO::updatePropertyMap()
 	propertyMap->push_back(std::make_pair("Height", getHeight()));
 	propertyMap->push_back(std::make_pair("Permittivity", &permittivity));
 	propertyMap->push_back(std::make_pair("Conductivity", &conductivity));
+	propertyMap->push_back(std::make_pair("Char. impedance", &charImpledance));
 }

@@ -28,6 +28,9 @@ private:
 
 	PhysicalObject* activeObject;
 
+	float nearPlaneValue;
+	float farPlaneValue;
+
 	void eraseShaderMapOneInstance(std::string name);
 
 public:
@@ -61,4 +64,11 @@ public:
 	PropertyWindow* getPropertyWindow() { return propertyWindow; }
 
 	PhysicalObject* getActiveObject() const { return activeObject; }
+
+	float* getNearPlaneValue() { return &nearPlaneValue; }
+	float* getFarPlaneValue() { return &farPlaneValue; }
+
+	void updateProjMatrix() { _projMatrixChanged = true; }
+
+
 };
