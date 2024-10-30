@@ -38,6 +38,7 @@ bool _propertyWindowOn = false;
 bool _rebuildAllObjects = false;
 
 unsigned int physicalObjectNextId = 0;
+unsigned int physicalObjectNextIdMax = 0xFFFFFFFF;
 
 std::mutex mtx;
 

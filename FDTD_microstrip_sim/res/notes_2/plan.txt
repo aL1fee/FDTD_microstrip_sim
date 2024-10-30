@@ -28,14 +28,15 @@ Plan:
 
 
 
-
+*differentiate b/n noninteractable and nondeletable
 *ability to translate cuboids and modify their properties
+*cuboid scaling
+*delete all lines option
+
+
+
 
 *test the program on another PC
-
-*cuboid scaling
-
-*delete all lines option
 
 *implement cylindrical power sources and detectors
 
@@ -60,6 +61,7 @@ Plan:
 
 
 ***start with/ FDTD
+pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 
 
@@ -95,3 +97,38 @@ Parallel Processing: GPUs can perform many calculations at the same time, unlike
 Speed and Efficiency: By offloading compute-intensive parts of the simulation to the GPU, the overall simulation can run much faster. This is because GPUs have thousands of cores designed for handling multiple tasks simultaneously1.
 Applications: GPU acceleration is used in various fields such as molecular dynamics, climate modeling, astrophysics, and more2. For example, in climate modeling, GPUs can process vast amounts of data to simulate weather patterns more quickly and accurately.
 Integration with Software: Many simulation software packages, like MATLAB and Simulink, support GPU acceleration. They allow users to pass data to the GPU, perform computations, and then retrieve the results, minimizing the data transfer between the CPU and GPU3.
+
+
+
+
+
+
+!
+!
+
+In most real-time graphics applications, the vertices for static objects are not regenerated every frame on the CPU. Instead, here's how the process generally works:
+
+1. Static Geometry
+For static objects (like buildings, terrain, etc.):
+
+Vertices are pre-defined: The vertices of these objects are usually generated or loaded once at the beginning of the program (e.g., when loading models from files).
+Stored in GPU Buffers: These vertices are then sent to the GPU and stored in vertex buffers. Once they are in the GPU memory, they can be rendered multiple times without needing to regenerate them.
+Transformations: The model matrix (for transformations like translation, rotation, scaling) is computed on the CPU if the object moves or rotates. However, the vertex data remains unchanged unless the object itself is modified (e.g., a character animating or a terrain changing).
+2. Dynamic Geometry
+For dynamic objects (like characters or items that change every frame):
+
+Vertex Data Update: In cases where vertices need to be updated every frame (like deformable models or particle systems), you may regenerate or modify vertex data on the CPU.
+Buffer Updates: The updated vertex data can then be sent to the GPU each frame or every few frames. This can be done efficiently using methods like glBufferSubData or mapping the buffer for updates.
+3. Procedural Generation
+For procedurally generated content (like terrain or other structures generated at runtime):
+
+On-the-Fly Generation: Vertices can be generated on the CPU each frame or as needed. This is common in games that create or modify environments dynamically.
+Optimization Strategies: To maintain performance, such dynamic vertex generation is often combined with culling techniques and level of detail (LOD) management to limit the amount of geometry processed.
+4. Instancing
+For rendering many instances of the same object:
+
+Single Vertex Data: Instead of generating vertices for each instance, you can store a single copy of the vertex data and use instancing techniques. The GPU handles drawing multiple instances with different transformations (model matrices) efficiently.
+Summary
+Static objects: Vertices are generated once, stored in GPU buffers, and reused.
+Dynamic objects: Vertex data may need to be updated or regenerated on the CPU, but this is done selectively and efficiently.
+Performance: The goal is to minimize unnecessary CPU work and optimize how data is passed to the GPU for rendering. In practice, the method used depends on the specific needs of the application, the nature of the objects being rendered, and performance considerations.

@@ -53,7 +53,9 @@ PhysicalObject::~PhysicalObject()
 
 glm::vec3 PhysicalObject::getCenterLocation() const
 {
-	return glm::vec3((origin.x + length) / 2.0f,
-		(origin.z + width) / 2.0f, (origin.y + height) / 2.0f);
+	glm::vec3 ret = glm::vec3(origin.x + length / 2.0f,
+		origin.y + height / 2.0f, origin.z + width / 2.0f);
+	return ret;
 }
+
 

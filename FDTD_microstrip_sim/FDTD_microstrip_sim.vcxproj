@@ -140,6 +140,7 @@
     <ClInclude Include="src\Physics\Physical Objects (POs)\Curve_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects %28POs%29\Substrate_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Housing_PO.h" />
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Trace_PO.h" />
     <ClInclude Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.h" />
     <ClInclude Include="src\Geometry\GeometricalObject.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="src\Data Structures\VAOVectorDS.cpp" />
     <ClCompile Include="src\Data Structures\VertexVectorDS.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\Housing_PO.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\Substrate_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\Trace_PO.cpp" />
     <ClCompile Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.cpp" />
@@ -214,6 +216,7 @@
     <None Include="res\shaders\carrier.shader" />
     <None Include="res\shaders\coordinate_system.shader" />
     <None Include="res\shaders\cube.shader" />
+    <None Include="res\shaders\generic.shader" />
     <None Include="res\shaders\help.shader" />
     <None Include="res\shaders\housing.shader" />
     <None Include="res\shaders\substrate.shader" />

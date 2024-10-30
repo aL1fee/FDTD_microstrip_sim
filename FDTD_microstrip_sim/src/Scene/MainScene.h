@@ -12,7 +12,12 @@
 #include "../Physics/Physical Objects (POs)/Housing_PO.h"
 #include "../Physics/Physical Objects (POs)/Curve_PO.h"
 
+#include "../Data Structures/VertexVectorDS.h"
+#include "../Data Structures/VAOVectorDS.h"
+
 #include "../GUI/PropertyWindow.h"
+
+#include "../Physics/Physical Objects (POs)/ModifyingVectors_PO.h"
 
 class MainScene : public Scene
 {
@@ -31,7 +36,15 @@ private:
 	float nearPlaneValue;
 	float farPlaneValue;
 
+	//VertexVectorDS* modifyingVectorsVertices;
+	//VAOVectorDS* modifyingVectorsVAOs;
+
+	ModifyingVectors_PO* modifyingVectors;
+
 	void eraseShaderMapOneInstance(std::string name);
+
+	//void buildModifyingVectors();
+	//void clearModifyingVectors();
 
 public:
 	MainScene(GLFWwindow* w);
@@ -70,5 +83,11 @@ public:
 
 	void updateProjMatrix() { _projMatrixChanged = true; }
 
+	void buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType type);
+	void deleteModifyingVectors();
+	ModifyingVectors_PO* getModifyingVectors() { return modifyingVectors; }
+
+	void preObjectInsertionSetup();
+	void postObjectInsertionSetup();
 
 };

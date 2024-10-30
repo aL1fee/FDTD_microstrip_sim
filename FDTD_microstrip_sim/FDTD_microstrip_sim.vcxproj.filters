@@ -120,6 +120,9 @@
     <ClInclude Include="src\Physics\Physical Objects (POs)\Housing_PO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.cpp">
@@ -218,6 +221,9 @@
     <ClCompile Include="src\Physics\Physical Objects (POs)\Housing_PO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\notes_2\concepts.txt" />
@@ -234,6 +240,7 @@
     <None Include="res\shaders\substrate.shader" />
     <None Include="res\shaders\trace.shader" />
     <None Include="res\shaders\housing.shader" />
+    <None Include="res\shaders\generic.shader" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />

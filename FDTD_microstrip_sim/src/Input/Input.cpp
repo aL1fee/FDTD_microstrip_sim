@@ -58,6 +58,9 @@ void Input::processInput()
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         cam->moveRight(_deltaTime);
     }
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+        _scene_main->buildModifyingVectors(_scene_main->getActiveObject(), Translation);
+    }
     if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
         _scene_main->deleteActiveObject();
     }

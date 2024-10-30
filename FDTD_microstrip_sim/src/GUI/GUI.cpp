@@ -195,14 +195,17 @@ void GUI::buildMenuUpperPanel()
 		}
 		if (ImGui::BeginMenu("Modify"))
 		{
-			if (ImGui::MenuItem("Translate an object"))
+			if (ImGui::MenuItem("Translate an object", "T"))
 			{
 				PhysicalObject* obj = _scene_main->getActiveObject();
+				// redundant check
 				if (obj == nullptr) {
 					string s = "> No object selected!\n";
 					statusWindow->setMessage(s);
 				}
-				//obj->buildTranslateVectors();
+				else {
+					_scene_main->buildModifyingVectors(obj, Translation);
+				}
 
 
 
@@ -366,6 +369,13 @@ void GUI::buildLeftPanel()
 					if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue)) {
 						// TODO only rebuild the object which property had been updated
 						activeObj->setRebuiltExpected(true);
+						ModifyingVectors_PO* modVecs = _scene_main->getModifyingVectors();
+						if (modVecs != nullptr)
+						{
+							_scene_main->getModifyingVectors()->setRebuiltExpected(true);
+							_scene_main->getModifyingVectors()->setOrigin(activeObj->getCenterLocation());
+						}
+
 						std::cout << "One of the properties has been updated!" << std::endl;
 					}
 				}

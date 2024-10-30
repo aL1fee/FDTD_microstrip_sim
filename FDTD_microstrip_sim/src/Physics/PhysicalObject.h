@@ -17,7 +17,10 @@
 #include "../Geometry/GeometricalObject.h"
 #include "../Setup/Shader.h"
 
-
+//axes:
+//	x: red
+//  z: blue
+//  y: green
 class PhysicalObject : public GeometricalObject
 {
 protected:
@@ -45,10 +48,16 @@ public:
 	unsigned int getId() const { return id; }
 
 	glm::vec3 getCenterLocation() const;
+	glm::vec3* getOrigin() { return &origin; }
 
+	void setOrigin(glm::vec3 v) { origin = v; }
+
+	void setInteractable(bool val) { isInteractable = val; }
 
 	bool operator==(const PhysicalObject& other) const {
 		return id == other.getId();
 	}
+
+	void setId(unsigned int ui) { id = ui; }
 
 };

@@ -1,6 +1,7 @@
 #include "MainScene.h"
 
 //extern bool _rebuildAllObjects;
+extern unsigned int physicalObjectNextIdMax;
 
 MainScene::MainScene(GLFWwindow* w)
 {
@@ -13,6 +14,7 @@ MainScene::MainScene(GLFWwindow* w)
 	activeObject = nullptr;
 	nearPlaneValue = INITIAL_NEAR_PLANE_VALUE;
 	farPlaneValue = INITIAL_FAR_PLANE_VALUE;
+	modifyingVectors = nullptr;
 	init();
 }
 
@@ -96,8 +98,7 @@ void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
 	carrierPO->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(carrierPO->getId(), carrierPO));
 	//physicalObjectBuffer->push_back(carrierPO);
-	_viewMatrixChanged = true;
-	_projMatrixChanged = true;
+	postObjectInsertionSetup();
 }
 
 void MainScene::addSubstrate(std::string& s, glm::vec3 o, float l, float w,
@@ -120,8 +121,7 @@ void MainScene::addSubstrate(std::string& s, glm::vec3 o, float l, float w,
 	substratePO->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(substratePO->getId(), substratePO));
 	//physicalObjectBuffer->push_back(substratePO);
-	_viewMatrixChanged = true;
-	_projMatrixChanged = true;
+	postObjectInsertionSetup();
 }
 
 void MainScene::addTrace(std::string& s, glm::vec3 o, float l, float w,
@@ -143,9 +143,7 @@ void MainScene::addTrace(std::string& s, glm::vec3 o, float l, float w,
 	Trace_PO* tracePO = new Trace_PO(o, l, w, h, col, perm, cond, shader);
 	tracePO->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(tracePO->getId(), tracePO));
-	//physicalObjectBuffer->push_back(tracePO);
-	_viewMatrixChanged = true;
-	_projMatrixChanged = true;
+	postObjectInsertionSetup();
 }
 
 void MainScene::addHousing(std::string& s, glm::vec3 o, float l, float w,
@@ -168,8 +166,7 @@ void MainScene::addHousing(std::string& s, glm::vec3 o, float l, float w,
 	housingPO->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(housingPO->getId(), housingPO));
 	//physicalObjectBuffer->push_back(housingPO);
-	_viewMatrixChanged = true;
-	_projMatrixChanged = true;
+	postObjectInsertionSetup();
 }
 
 void MainScene::eraseShaderMapOneInstance(std::string name)
@@ -194,6 +191,7 @@ void MainScene::deleteActiveObject()
 			delete activeObject;
 			activeObject = nullptr;
 			propertyWindow->nullify();
+			deleteModifyingVectors();
 			return;
 		}
 	}
@@ -214,6 +212,7 @@ void MainScene::deleteAllObjects()
 			++it;
 		}
 	}
+	modifyingVectors = nullptr;
 	activeObject = nullptr;
 	propertyWindow->nullify();
 }
@@ -240,6 +239,11 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 				activeObject = obj;
 				extern bool _propertyWindowOn;
 				_propertyWindowOn = true;
+				if (modifyingVectors != nullptr)
+				{
+					modifyingVectors->setOrigin(activeObject->getCenterLocation());
+					modifyingVectors->setRebuiltExpected(true);
+				}
 				return;
 			}
 		}
@@ -249,5 +253,67 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 	activeObject = nullptr;
 	propertyWindow->setDefaultPropertyMap();
 	propertyWindow->updateActiveObject(nullptr);
+	deleteModifyingVectors();
 	std::cout << "no objects found!" << std::endl;
+}
+
+void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType type)
+{
+	if (modifyingVectors != nullptr || obj == nullptr)
+	{
+		return;
+	}
+	ModifyingVectors_PO* ret = nullptr;
+	Shader* shader = new Shader("res/shaders/generic.shader", 1, "Generic shader");
+	switch (type) {
+	case Translation:
+		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
+			type, obj->getCenterLocation(), shader);
+		ret->setId(physicalObjectNextIdMax--);
+		//ret->setInteractable(false);
+		break;
+	case Scaling:
+
+		break;
+	case Rotation:
+
+		break;
+	}
+	if (ret != nullptr)
+	{
+		modifyingVectors = ret;
+		shader->incrNumObjectsServed();
+		physicalObjectBuffer->insert(std::make_pair(ret->getId(), ret));
+		shaderMap->insert(std::make_pair(shader->getName(), shader));
+		_viewMatrixChanged = true;
+		_projMatrixChanged = true;
+	}
+}
+
+void MainScene::deleteModifyingVectors()
+{
+	if (modifyingVectors != nullptr)
+	{
+		physicalObjectBuffer->erase(modifyingVectors->getId());
+		eraseShaderMapOneInstance(modifyingVectors->getShaderName());
+		modifyingVectors = nullptr;
+		delete modifyingVectors;
+	}
+}
+
+void MainScene::preObjectInsertionSetup() {
+
+}
+
+void MainScene::postObjectInsertionSetup() {
+
+
+
+	//if (modifyingVectors != nullptr) {
+	//	// TODO inefficiency
+	//	deleteModifyingVectors();
+	//	buildModifyingVectors(activeObject, Translation);
+	//}
+	_viewMatrixChanged = true;
+	_projMatrixChanged = true;
 }
