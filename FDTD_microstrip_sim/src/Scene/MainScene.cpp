@@ -2,6 +2,8 @@
 
 //extern bool _rebuildAllObjects;
 extern unsigned int physicalObjectNextIdMax;
+extern bool _modifyingVectorsActivated;
+extern glm::vec3 _modifyingVectorsDirection;
 
 MainScene::MainScene(GLFWwindow* w)
 {
@@ -229,9 +231,33 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 {
 	glm::vec3 rayPos = pos;
 	float count = 0.0f;
+	// checking high priority objects first
+	if (modifyingVectors != nullptr)
+	{
+		while (count < SELECTING_OBJECT_RANGE)
+		{
+			glm::vec3 v = modifyingVectors->intersectionDirection(rayPos);
+			if (v != glm::vec3(0.0f))
+			{
+				_modifyingVectorsActivated = true;
+				_modifyingVectorsDirection = v;
+				return;
+			}
+			rayPos += dir * SELECTING_OBJECT_PRECISION;
+			count += SELECTING_OBJECT_PRECISION;
+		}
+	}
+	_modifyingVectorsActivated = false;
+	rayPos = pos;
+	count = 0.0f;
+	// checking for the rest of the objects
 	while (count < SELECTING_OBJECT_RANGE) {
 		for (auto &pair : *physicalObjectBuffer) {
 			PhysicalObject* obj = pair.second;
+			// make sure this check works
+			if (obj == modifyingVectors) {
+				continue;
+			}
 			if (obj->intersectionCheck(rayPos)) {
 				std::cout << "object selected!" << std::endl;
 				propertyWindow->addPropertyMap(obj->getPropertyMap());

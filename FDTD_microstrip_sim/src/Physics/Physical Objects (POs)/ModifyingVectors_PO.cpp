@@ -144,3 +144,33 @@ bool ModifyingVectors_PO::intersectionCheck(glm::vec3 v)
 {
     return false;
 }
+
+glm::vec3 ModifyingVectors_PO::intersectionDirection(glm::vec3 v)
+{
+    if ((origin.x < v.x && origin.x + size > v.x) &&
+        (origin.y + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.y &&
+            origin.y - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.y) &&
+        (origin.z + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.z &&
+            origin.z - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.z))
+    {
+        return glm::vec3(1.0f, 0.0f, 0.0f);
+    }
+    if ((origin.y < v.y && origin.y + size > v.y) &&
+        (origin.x + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.x &&
+            origin.x - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.x) &&
+        (origin.z + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.z &&
+            origin.z - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.z))
+    {
+        return glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+    if ((origin.z < v.z && origin.z + size > v.z) &&
+        (origin.y + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.y &&
+            origin.y - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.y) &&
+        (origin.x + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.x &&
+            origin.x - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.x))
+    {
+        // neg z dir
+        return glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+    return glm::vec3(0.0f);
+}

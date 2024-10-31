@@ -57,6 +57,8 @@ public:
 
 	glm::vec3 getPos() const { return cameraPos; }
 	glm::vec3 getFront() const { return cameraFront; }
+	glm::vec3 getRight() const { return cameraRight; }
+	glm::vec3 getUp() const { return cameraUp; }
 	float getZoom() const { return zoom; }
 
 	void processMouseRotation(float offsetX, float offsetY);

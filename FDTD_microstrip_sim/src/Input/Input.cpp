@@ -29,6 +29,13 @@ extern bool _windowS2On;
 int screenWidth;
 int screenHeight;
 
+extern bool _modifyingVectorsActivated;
+extern glm::vec3 _modifyingVectorsDirection;
+
+
+bool _modyfingVectorsMovementStart = false;
+glm::vec3 _modyfingVectorsMovementStartOrigin = glm::vec3(0.0f);
+
 glm::vec3 cameraRotationPoint = glm::vec3(0.0f, 0.0f, 0.0f);
 
 Input::Input(GLFWwindow* w)
@@ -133,6 +140,7 @@ void Input::processInput()
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
     {
         _selectingObjectExpected = true;
+        _modyfingVectorsMovementStart = false;
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _selectingObjectExpected)
     {
@@ -160,9 +168,37 @@ void Input::processInput()
                 glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
                 _scene_main->selectObject(cam->getPos(), rayWorld);
             }
+            else {
+                _scene_main->deleteModifyingVectors();
+            }
+        }
+        else {
+            _scene_main->deleteModifyingVectors();
         }
     }
+    //if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _modifyingVectorsActivated)
+    //{
+    //    //double mouseX, mouseY;
+    //    //glfwGetCursorPos(window, &mouseX, &mouseY);
+    //    //glm::vec3 rayNDC = Utility::screenToNDC(window,
+    //    //    static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
+    //    //glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+    //    //glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+    //    //glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+    //    if (_scene_main->getModifyingVectors() != nullptr)
+    //    {
+    //        _scene_main->getActiveObject()->
+    //            setOrigin(*_scene_main->getActiveObject()->getOrigin() +
+    //                _modifyingVectorsDirection * MODIFYING_VECTORS_MOVEMENT_STEP);
+    //        _scene_main->getActiveObject()->setRebuiltExpected(true);
+    //        _scene_main->getModifyingVectors()->setOrigin
+    //        (_scene_main->getActiveObject()->getCenterLocation());
+    //        _scene_main->getModifyingVectors()->setRebuiltExpected(true);
+    //    }
+    //}
 }
+
+//double lastMouseX = 0.0f, lastMouseY = 0.0f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -172,6 +208,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     extern bool _cameraRotationAboutPointOn;
     float posXF = static_cast<float>(xpos);
     float posYF = static_cast<float>(ypos);
+    double mouseX, mouseY;
 
     glfwGetWindowSize(window, &screenWidth, &screenHeight);
 
@@ -207,7 +244,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         else if (!_middleMouseReleaseExpected) 
         {
             _middleMouseReleaseExpected = true;
-            double mouseX, mouseY;
             glfwGetCursorPos(window, &mouseX, &mouseY);
             glm::vec3 rayNDC = Utility::screenToNDC(window,
                 static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
@@ -218,6 +254,73 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         }
         cam->processMouseRotationAboutPoint(offsetX, offsetY,
             _deltaTime, cameraRotationPoint);
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _modifyingVectorsActivated)
+    {
+        // painful hardcodes
+        if (_scene_main->getModifyingVectors() != nullptr)
+        {
+            double mouseX, mouseY;
+            glfwGetCursorPos(window, &mouseX, &mouseY);
+            glm::vec3 rayNDC = Utility::screenToNDC(window,
+                static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
+            glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+            glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+            glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+            glm::vec3 activeObjOrigin = *_scene_main->getActiveObject()->getOrigin();
+
+            glm::vec3 rayOrigin = cam->getPos();
+            glm::vec3 rayDir = glm::vec3(rayWorld);
+            glm::vec3 planeNormal = glm::vec3(0.0f, 0.0f, 0.0f);
+            glm::vec3 planePoint = glm::vec3(0.0f, 0.0f, 0.0f);
+
+            glm::vec3 intersectionPoint = glm::vec3(0.0f);
+            if (_modifyingVectorsDirection == glm::vec3(1.0, 0.0, 0.0f))
+            {
+                planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
+                planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+            }
+            else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
+            {
+                planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
+                planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+            }
+            else {
+                planePoint = glm::vec3(activeObjOrigin.x, 0.0, activeObjOrigin.z);
+                //?
+                planeNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+            }
+            float denom = glm::dot(planeNormal, rayDir);
+            if (fabs(denom) > 1e-6) {
+                float t = glm::dot(planeNormal, (planePoint - rayOrigin)) / denom;
+                intersectionPoint = rayOrigin + t * rayDir;
+                if (!_modyfingVectorsMovementStart) {
+                    _modyfingVectorsMovementStartOrigin = intersectionPoint - activeObjOrigin;
+                    _modyfingVectorsMovementStart = true;
+
+                }
+                intersectionPoint -= _modyfingVectorsMovementStartOrigin;
+            }
+            if (_modifyingVectorsDirection == glm::vec3(1.0, 0.0, 0.0f))
+            {
+                intersectionPoint.y = activeObjOrigin.y;
+                intersectionPoint.z = activeObjOrigin.z;
+            }
+            else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
+            {
+                intersectionPoint.y = activeObjOrigin.y;
+                intersectionPoint.x = activeObjOrigin.x;
+            }
+            else {
+                intersectionPoint.z = activeObjOrigin.z;
+                intersectionPoint.x = activeObjOrigin.x;
+            }
+            _scene_main->getActiveObject()->setOrigin(intersectionPoint);
+            _scene_main->getActiveObject()->setRebuiltExpected(true);
+            _scene_main->getModifyingVectors()->setOrigin
+            (_scene_main->getActiveObject()->getCenterLocation());
+            _scene_main->getModifyingVectors()->setRebuiltExpected(true);
+        }
     }
 }
 

@@ -40,6 +40,9 @@ bool _rebuildAllObjects = false;
 unsigned int physicalObjectNextId = 0;
 unsigned int physicalObjectNextIdMax = 0xFFFFFFFF;
 
+bool _modifyingVectorsActivated = false;
+glm::vec3 _modifyingVectorsDirection = glm::vec3(0.0f);
+
 std::mutex mtx;
 
 //MainScene* _scene_main = nullptr;

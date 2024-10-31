@@ -25,20 +25,20 @@ Plan:
 #give control to PO parameters to GUI when building
 #make a camera that rotates around a given object when you click on scrolling button
 #added near/far plane settigns to the view
+#ability to translate objects 
+#ray casting at plane
 
 
 
-*differentiate b/n noninteractable and nondeletable
-*ability to translate cuboids and modify their properties
 *cuboid scaling
+*differentiate b/n noninteractable and nondeletable
 *delete all lines option
-
-
+*add vertical rotation at left shift + middle mouse
+*implement cylindrical power sources and detectors
 
 
 *test the program on another PC
 
-*implement cylindrical power sources and detectors
 
 
 *implement a hierarchy data structure to store elements & its properties of a scene
@@ -46,10 +46,9 @@ Plan:
 *implement ribbons
 *implement wires
 
-*build cut corner-shaped surfaces
+*?build cut corner-shaped surfaces
 *fix property window bugs, add features and appearance. apply units
 
-*ray casting at x-z plane
 *draw custom polygons w/ properties
 
 *testingline and other curves rebuilding
@@ -105,6 +104,7 @@ Integration with Software: Many simulation software packages, like MATLAB and Si
 
 !
 !
+!!Insane cpu object generation/deletion. FIX
 
 In most real-time graphics applications, the vertices for static objects are not regenerated every frame on the CPU. Instead, here's how the process generally works:
 

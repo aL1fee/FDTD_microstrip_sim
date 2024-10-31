@@ -33,14 +33,18 @@ void GUI::buildMainMenuPanel()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+			if (ImGui::MenuItem("New")) { /* Open action */ }
 			if (ImGui::MenuItem("Open", "Ctrl+O")) { /* Open action */ }
 			if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Save action */ }
+			if (ImGui::MenuItem("Exit", "Alt+F4")) { /* Save action */ }
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Edit"))
 		{
 			if (ImGui::MenuItem("Undo", "Ctrl+Z")) { /* Undo action */ }
 			if (ImGui::MenuItem("Redo", "Ctrl+Y")) { /* Redo action */ }
+			if (ImGui::MenuItem("Copy", "Ctrl+C")) { /* Redo action */ }
+			if (ImGui::MenuItem("Paste", "Ctrl+P")) { /* Redo action */ }
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("View"))
@@ -68,12 +72,13 @@ void GUI::buildMainMenuPanel()
 		}
 		if (ImGui::BeginMenu("Tools"))
 		{
-			if (ImGui::MenuItem("tools")) { /* Undo action */ }
+			if (ImGui::MenuItem("Propetry menu")) { /* Undo action */ }
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Help"))
 		{
-			if (ImGui::MenuItem("help")) { /* Undo action */ }
+			if (ImGui::MenuItem("About"))
+			if (ImGui::MenuItem("Commands")) { /* Undo action */ }
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
