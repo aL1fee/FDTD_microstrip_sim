@@ -299,7 +299,9 @@ void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType ty
 		//ret->setInteractable(false);
 		break;
 	case Scaling:
-
+		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
+			type, obj->getCenterLocation(), shader);
+		ret->setId(physicalObjectNextIdMax--);
 		break;
 	case Rotation:
 

@@ -58,4 +58,11 @@ glm::vec3 PhysicalObject::getCenterLocation() const
 	return ret;
 }
 
+void PhysicalObject::setScale(float l, float h, float w)
+{
+	length = l;
+	width = w;
+	height = h;
+}
+
 

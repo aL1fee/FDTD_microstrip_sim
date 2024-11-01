@@ -211,9 +211,18 @@ void GUI::buildMenuUpperPanel()
 				else {
 					_scene_main->buildModifyingVectors(obj, Translation);
 				}
-
-
-
+			}
+			if (ImGui::MenuItem("Scale an object", "Y"))
+			{
+				PhysicalObject* obj = _scene_main->getActiveObject();
+				// redundant check
+				if (obj == nullptr) {
+					string s = "> No object selected!\n";
+					statusWindow->setMessage(s);
+				}
+				else {
+					_scene_main->buildModifyingVectors(obj, Scaling);
+				}
 			}
 
 			ImGui::EndMenu();

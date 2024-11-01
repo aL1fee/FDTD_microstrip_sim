@@ -15,6 +15,11 @@
 
 extern bool _viewMatrixChanged;
 
+enum Direction {
+	HORIZONTAL,
+	VERTICAL
+};
+
 class Camera
 {
 private:
@@ -64,7 +69,9 @@ public:
 	void processMouseRotation(float offsetX, float offsetY);
 	void processMouseTranslation(float offsetX, float offsetY, float dt);
 	void processMouseScroll(float offsetY, float dt);
-	void processMouseRotationAboutPoint(float offsetX, float offsetY, float dt, glm::vec3 point);
+	void processMouseRotationAboutPoint(float offsetX,
+		float offsetY, float dt, glm::vec3 point,
+		Direction dir);
 
 	void modifyCameraSpeed(float value) { cameraSpeed = value; }
 

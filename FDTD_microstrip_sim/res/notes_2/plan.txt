@@ -27,13 +27,16 @@ Plan:
 #added near/far plane settigns to the view
 #ability to translate objects 
 #ray casting at plane
+#add vertical rotation at left shift + middle mouse
+
 
 
 
 *cuboid scaling
-*differentiate b/n noninteractable and nondeletable
+
+
 *delete all lines option
-*add vertical rotation at left shift + middle mouse
+*differentiate b/n noninteractable and nondeletable
 *implement cylindrical power sources and detectors
 
 
@@ -55,7 +58,7 @@ Plan:
 
 *do status window (latest messages appear at the top; time, scroll history features)
 
-*apply textures to carriers, substrates, traces
+
 
 
 
@@ -66,6 +69,8 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 
 
 ==not a priority:
+-1. GPU model matrix manipulation for CPU usage reduction
+0. use glDrawElements to massively reduce vertex number
 1. glfwpollevents doesn't run when resizing/dragging the window. As a result, key releases are not registered during resizing/dragging.
 2. placing openGL context correctly
 3. Worker Threads: physics updates, math calculations, asset loading
@@ -74,6 +79,8 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 6. make the scroll pointing to the mouse; not the front vector
 7. improve point rotational camera
 8. cuboid and other object rotation
+9. issues w/ y translation
+10. apply textures to carriers, substrates, traces
 
 ------
 future:

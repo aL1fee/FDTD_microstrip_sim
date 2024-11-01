@@ -51,6 +51,7 @@ public:
 	glm::vec3* getOrigin() { return &origin; }
 
 	void setOrigin(glm::vec3 v) { origin = v; }
+	void setScale(float l, float h, float w);
 
 	void setInteractable(bool val) { isInteractable = val; }
 

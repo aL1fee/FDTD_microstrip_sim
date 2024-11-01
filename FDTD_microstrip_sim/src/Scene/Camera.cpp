@@ -142,8 +142,9 @@ void Camera::processMouseScroll(float offsetY, float dt)
     }
 }
 
-void Camera::processMouseRotationAboutPoint(float offsetX, float offsetY, float dt, glm::vec3 point)
-{
+void Camera::processMouseRotationAboutPoint(float offsetX,
+    float offsetY, float dt, glm::vec3 point,
+    Direction dir) {
     _viewMatrixChanged = true;
     glm::vec3 relativePos = cameraPos - point;
     float rotationRadius = glm::length(relativePos);
@@ -154,13 +155,23 @@ void Camera::processMouseRotationAboutPoint(float offsetX, float offsetY, float 
     offsetX *= mouseSensitivity * 3.0f;
     offsetY *= mouseSensitivity * 3.0f;
 
-    yawCamToOrigin += offsetX;
-
+    if (dir == HORIZONTAL)
+    {
+        yawCamToOrigin += offsetX;
+        yaw += offsetX;
+    }
+    if (dir == VERTICAL)
+    {
+        pitchCamToOrigin -= offsetY;
+        pitch += offsetY;
+        if (pitch > 89.0f || pitch < -89.0f || 
+            pitchCamToOrigin > 89.0f || pitchCamToOrigin < -89.0f) {
+            pitchCamToOrigin += offsetY;
+            pitch -= offsetY;
+        }
+    }
     cameraPos.x = point.x + rotationRadius * cos(glm::radians(pitchCamToOrigin)) * cos(glm::radians(yawCamToOrigin));
     cameraPos.z = point.z + rotationRadius * cos(glm::radians(pitchCamToOrigin)) * sin(glm::radians(yawCamToOrigin));
     cameraPos.y = point.y + rotationRadius * sin(glm::radians(pitchCamToOrigin));
-
-    yaw += offsetX;
-
     updateVectors();
 }

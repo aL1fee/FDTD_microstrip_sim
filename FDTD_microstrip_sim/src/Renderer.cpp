@@ -14,6 +14,7 @@ bool _mouseRightButtonPressed = false;
 bool _cameraTranslationalMotionOn = false;
 bool _mouseMiddleButtonPressed = false;
 bool _cameraRotationAboutPointOn = false;
+bool _cameraVerticalRotationAboutPointOn = false;
 
 bool _rayExpected = false;
 

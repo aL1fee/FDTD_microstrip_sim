@@ -31,9 +31,10 @@ void ModifyingVectors_PO::buildVertices()
     vertices->pushToExistingArray(colorZ);
     switch (type) {
         case Translation:
-            constructTranslationArrow();
+            constructTranslationArrows();
             break;
         case Scaling:
+            constructScalingArrows();
             break;
         case Rotation:
             break;
@@ -60,7 +61,7 @@ void ModifyingVectors_PO::buildVAOs()
 
 void ModifyingVectors_PO::buildEdges() {}
 
-void ModifyingVectors_PO::constructTranslationArrow()
+void ModifyingVectors_PO::constructTranslationArrows()
 {
     float radius = MODIFYING_VECTORS_ARROW_LENGTH
         * sin(arrowAngle);
@@ -114,6 +115,124 @@ void ModifyingVectors_PO::constructTranslationArrow()
     }
 }
 
+//nasty
+void ModifyingVectors_PO::constructScalingArrows()
+{
+    float radius = MODIFYING_VECTORS_ARROW_LENGTH
+        * sin(arrowAngle);
+    glm::vec3 point = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 col = glm::vec3(0.0f);
+    int x = 0, y = 0, z = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        switch (i) {
+        case 0:
+            x = 1;
+            col = colorX;
+            break;
+        case 1:
+            x = 0;
+            y = 1;
+            col = colorY;
+            break;
+        case 2:
+            y = 0;
+            z = 1;
+            col = colorZ;
+            break;
+        }
+        point = origin + glm::vec3(x * size, y * size, z * size);
+        int xInner = 0, yInner = 0, zInner = 0;
+        if (i == 0)
+        {
+            point += glm::vec3(-MODIFYING_VECTORS_ARROW_LENGTH, -radius / 2.0f, -radius / 2.0f);
+            vertices->allocateNewArray();
+            for (int j = 0; j < 5; j++) {
+                zInner = (j == 1 || j == 2) ? 1 : 0;
+                yInner = (j == 2 || j == 3) ? 1 : 0;
+                vertices->pushToExistingArray(point + glm::vec3(0, radius * yInner, radius * zInner));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(MODIFYING_VECTORS_ARROW_LENGTH, radius * yInner, radius * zInner));
+                addColorVertex(col);
+            }
+            vertices->allocateNewArray();
+            for (int j = 0; j < 2; j++) {
+                yInner = (j == 1) ? j : 0;
+                vertices->pushToExistingArray(point + glm::vec3(0, radius * yInner, 0));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(0, radius * yInner, radius));
+                addColorVertex(col);
+            }
+            vertices->allocateNewArray();
+            for (int j = 0; j < 2; j++) {
+                yInner = (j == 1) ? 1 : 0;
+                vertices->pushToExistingArray(point + glm::vec3(MODIFYING_VECTORS_ARROW_LENGTH, radius * yInner, 0));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(MODIFYING_VECTORS_ARROW_LENGTH, radius * yInner, radius));
+                addColorVertex(col);
+            }
+        }
+        else if (i == 1)
+        {
+            point += glm::vec3(-radius / 2.0f, -MODIFYING_VECTORS_ARROW_LENGTH, -radius / 2.0f);
+            vertices->allocateNewArray();
+            for (int j = 0; j < 5; j++) {
+                xInner = (j == 1 || j == 2) ? 1 : 0;
+                zInner = (j == 2 || j == 3) ? 1 : 0;
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, 0.0f, radius * zInner));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, MODIFYING_VECTORS_ARROW_LENGTH, radius * zInner));
+                addColorVertex(col);
+            }
+            vertices->allocateNewArray();
+            for (int j = 0; j < 2; j++) {
+                xInner = (j == 1) ? j : 0;
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, 0.0f, 0.0f));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, 0.0f, radius));
+                addColorVertex(col);
+            }
+            vertices->allocateNewArray();
+            for (int j = 0; j < 2; j++) {
+                xInner = (j == 1) ? 1 : 0;
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, MODIFYING_VECTORS_ARROW_LENGTH, 0.0f));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, MODIFYING_VECTORS_ARROW_LENGTH, radius));
+                addColorVertex(col);
+            }
+        }
+        else if (i == 2)
+        {
+            point += glm::vec3(-radius / 2.0f, -radius / 2.0f, -MODIFYING_VECTORS_ARROW_LENGTH);
+            vertices->allocateNewArray();
+            for (int j = 0; j < 5; j++) {
+                xInner = (j == 1 || j == 2) ? 1 : 0;
+                yInner = (j == 2 || j == 3) ? 1 : 0;
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, radius * yInner, 0.0f));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(radius * xInner, radius * yInner, MODIFYING_VECTORS_ARROW_LENGTH));
+                addColorVertex(col);
+            }
+            vertices->allocateNewArray();
+            for (int j = 0; j < 2; j++) {
+                yInner = (j == 1) ? j : 0;
+                vertices->pushToExistingArray(point + glm::vec3(0.0f, radius * yInner, 0.0f));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(radius, radius * yInner, 0.0f));
+                addColorVertex(col);
+            }
+            vertices->allocateNewArray();
+            for (int j = 0; j < 2; j++) {
+                yInner = (j == 1) ? 1 : 0;
+                vertices->pushToExistingArray(point + glm::vec3(0.0f, radius * yInner, MODIFYING_VECTORS_ARROW_LENGTH));
+                addColorVertex(col);
+                vertices->pushToExistingArray(point + glm::vec3(radius, radius * yInner, MODIFYING_VECTORS_ARROW_LENGTH));
+                addColorVertex(col);
+            }
+        }
+    }
+}
+
 void ModifyingVectors_PO::build()
 {
     vertices->clear();
@@ -126,16 +245,33 @@ void ModifyingVectors_PO::draw()
 {
     glDisable(GL_DEPTH_TEST);
     shader->bind();
-    for (int i = 0; i < 3; i++) {
-        glBindVertexArray(VAOs->at(i));
-        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
-        glBindVertexArray(0);
+    switch (type) {
+        case Translation:
+        for (int i = 0; i < 3; i++) {
+            glBindVertexArray(VAOs->at(i));
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+            glBindVertexArray(0);
+        }
+        for (int i = 3; i < vertices->getSize(); i++) {
+            glBindVertexArray(VAOs->at(i));
+            glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+            glBindVertexArray(0);
+        }
+        break;
+        case Scaling:
+            for (int i = 0; i < 3; i++) {
+                glBindVertexArray(VAOs->at(i));
+                glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+                glBindVertexArray(0);
+            }
+            for (int i = 3; i < vertices->getSize(); i++) {
+                glBindVertexArray(VAOs->at(i));
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+                glBindVertexArray(0);
+            }
+            break;
     }
-    for (int i = 3; i < vertices->getSize(); i++) {
-        glBindVertexArray(VAOs->at(i));
-        glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
-        glBindVertexArray(0);
-    }
+
     shader->unbind();
     glEnable(GL_DEPTH_TEST);
 }

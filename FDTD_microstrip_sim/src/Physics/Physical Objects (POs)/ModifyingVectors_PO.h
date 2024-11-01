@@ -37,7 +37,8 @@ private:
 	void buildVAOs() override;
 	void buildEdges() override;
 
-	void constructTranslationArrow();
+	void constructTranslationArrows();
+	void constructScalingArrows();
 
 
 public:
@@ -48,4 +49,6 @@ public:
 	bool intersectionCheck(glm::vec3 v) override;
 
 	glm::vec3 intersectionDirection(glm::vec3 v);
+
+	ModyfingVectorType getType() const { return type; }
 };
