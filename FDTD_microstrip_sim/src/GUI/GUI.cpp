@@ -109,6 +109,7 @@ void GUI::buildMenuUpperPanel()
 	{
 		if (ImGui::BeginMenu("Add"))
 		{
+			std::string s = "";
 			if (ImGui::MenuItem("Testing line"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
@@ -121,55 +122,92 @@ void GUI::buildMenuUpperPanel()
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
 
-				std::string s = "> Adding a carrier";
+				s = "> Adding a carrier";
 				_scene_main->addCarrier(s, glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
 					glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
-				statusWindow->setMessage(s);
 			}
 			if (ImGui::MenuItem("Substrate"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
 
-				std::string s = "> Adding a substrate";
+				s = "> Adding a substrate";
 				_scene_main->addSubstrate(s, glm::vec3(0.0f), 4.5f, 1.0f, 0.6f,
 					glm::vec3(.4f, .8f, 1.0f), .00001f, 3.05f);
-				statusWindow->setMessage(s);
 			}
 			if (ImGui::MenuItem("Trace"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
 
-				std::string s = "> Adding a trace";
+				s = "> Adding a trace";
 				_scene_main->addTrace(s, glm::vec3(0.0f), 4.5f, .15f, 0.01f,
 					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
-				statusWindow->setMessage(s);
 			}
 			if (ImGui::MenuItem("Housing"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
 
-				std::string s = "> Adding a housing";
+				s = "> Adding a housing";
 				_scene_main->addHousing(s, glm::vec3(0.0f, 0.0f, -.2f), 9.0f, .2f, 2.0f,
 					glm::vec3(.88f, .88f, .88f), 10.0f, 50);
-				statusWindow->setMessage(s);
+			}
+			if (ImGui::MenuItem("Power source"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
+
+				s = "> Adding a power source";
+				_scene_main->addPowerSource(s, glm::vec3(0.0f, 0.0f, 0.0f),
+					glm::vec3(1.0, 0.0f, 0.0f), -10.0f, .2f, .6f,
+					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+			}
+			if (ImGui::MenuItem("Power detector"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
+
+				s = "> Adding a power detector";
+				_scene_main->addPowerDetector(s, glm::vec3(10.0f, 1.16f, 3.49f),
+					glm::vec3(1.0, 0.0f, 0.0f), 25.5f, .1f, .2f,
+					glm::vec3(1.0f, 1.0f, 0.0f), 5.2f, 410);
 			}
 			if (ImGui::MenuItem("A simple system"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
 
-				std::string s = "> Adding a system";
+				s = "> Adding a system";
 				_scene_main->addCarrier(s, glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
 					glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
 				_scene_main->addSubstrate(s, glm::vec3(0.0f, .45f, 3.0f), 4.5f, 1.0f, 0.6f,
 					glm::vec3(.4f, .8f, 1.0f), .00001f, 3.05f);
 				_scene_main->addTrace(s, glm::vec3(0.0f, 1.05f, 3.42f), 4.5f, .15f, 0.01f,
 					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
-				statusWindow->setMessage(s);
+				s = "> Adding a housing";
+				_scene_main->addHousing(s, glm::vec3(0.0f, 0.0f, -.2f), 9.0f, .2f, 2.0f,
+					glm::vec3(.88f, .88f, .88f), 10.0f, 50);
 			}
+			if (ImGui::MenuItem("Another system"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
+
+				s = "> Adding a system";
+				_scene_main->addCarrier(s, glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
+					glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
+				_scene_main->addSubstrate(s, glm::vec3(0.0f, .45f, 3.0f), 4.5f, 1.0f, 0.6f,
+					glm::vec3(.4f, .8f, 1.0f), .00001f, 3.05f);
+				_scene_main->addTrace(s, glm::vec3(0.0f, 1.05f, 3.42f), 4.5f, .15f, 0.01f,
+					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+				_scene_main->addPowerSource(s, glm::vec3(0.0f, 1.16f, 3.49f),
+					glm::vec3(1.0, 0.0f, 0.0f), -10.0f, .1f, .2f,
+					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+				_scene_main->addHousing(s, glm::vec3(-0.2f, 0.0f, 0.0f), .2f, 7.0f, 1.4f,
+					glm::vec3(.88f, .88f, .88f), 10.0f, 50);
+			}
+			statusWindow->setMessage(s);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Select"))
@@ -195,6 +233,10 @@ void GUI::buildMenuUpperPanel()
 			if (ImGui::MenuItem("Delete all objects"))
 			{
 				_scene_main->deleteAllObjects();
+			}
+			if (ImGui::MenuItem("Delete all lines"))
+			{
+				_scene_main->clearLines();
 			}
 			ImGui::EndMenu();
 		}
@@ -382,6 +424,15 @@ void GUI::buildLeftPanel()
 					float* propertyValue = it->second;
 					if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue)) {
 						// TODO only rebuild the object which property had been updated
+						if (it->first == "Length" || it->first == "Width" ||
+							it->first == "Height" || it->first == "Radius") {
+							if (*propertyValue < MIN_OBJECT_SIZE) {
+								*propertyValue = MIN_OBJECT_SIZE;
+							}
+							if (*propertyValue > MAX_OBJECT_SIZE) {
+								*propertyValue = MAX_OBJECT_SIZE;
+							}
+						}
 						activeObj->setRebuiltExpected(true);
 						ModifyingVectors_PO* modVecs = _scene_main->getModifyingVectors();
 						if (modVecs != nullptr)

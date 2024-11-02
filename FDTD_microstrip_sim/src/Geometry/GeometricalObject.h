@@ -34,6 +34,7 @@ protected:
 	virtual void buildVertices() = 0;
 	virtual void buildVAOs() = 0;
 	virtual void buildEdges() = 0;
+	virtual void clear() = 0;
 	void addColorVertex(glm::vec3 v) { vertices->pushToExistingArray(v); }
 
 

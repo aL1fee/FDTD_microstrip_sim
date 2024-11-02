@@ -123,6 +123,15 @@
     <ClInclude Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Physics\PO Templates %28POTs%29\Cylinder_POT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics\Physical Objects (POs)\PowerSource_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics\Physical Objects (POs)\PowerDetector_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.cpp">
@@ -222,6 +231,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\PO Templates (POTs)\Cylinder_POT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\Physical Objects (POs)\PowerSource_PO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\Physical Objects (POs)\PowerDetector_PO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

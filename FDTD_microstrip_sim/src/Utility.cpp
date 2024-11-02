@@ -53,4 +53,16 @@ glm::vec3 Utility::eyeToWorldC(glm::vec4 v)
     return glm::normalize(rayWorld);
 }
 
+bool Utility::add_overflow(int x, int y, int* result)
+{
+    if (x > 0 && y > std::numeric_limits<int>::max() - x) {
+        return true;
+    }
+    if (x < 0 && y < std::numeric_limits<int>::min() - x) {
+        return true;
+    }
+    *result = x + y;
+    return false;
+}
+
 

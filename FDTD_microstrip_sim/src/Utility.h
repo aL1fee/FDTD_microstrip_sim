@@ -48,5 +48,6 @@ public:
 
 	static glm::vec3 eyeToWorldC(glm::vec4 v);
 
+	bool add_overflow(int x, int y, int* result);
 
 };

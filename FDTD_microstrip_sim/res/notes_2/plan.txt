@@ -28,19 +28,11 @@ Plan:
 #ability to translate objects 
 #ray casting at plane
 #add vertical rotation at left shift + middle mouse
+#cuboid scaling
+#delete all lines option
+#implement x-direction cylindrical power sources and detectors
 
 
-
-
-*cuboid scaling
-
-
-*delete all lines option
-*differentiate b/n noninteractable and nondeletable
-*implement cylindrical power sources and detectors
-
-
-*test the program on another PC
 
 
 
@@ -48,6 +40,10 @@ Plan:
 *implement tuning pads
 *implement ribbons
 *implement wires
+
+
+*test the program on another PC
+
 
 *?build cut corner-shaped surfaces
 *fix property window bugs, add features and appearance. apply units
@@ -58,6 +54,9 @@ Plan:
 
 *do status window (latest messages appear at the top; time, scroll history features)
 
+*copying and pasting
+
+*differentiate b/n noninteractable and nondeletable
 
 
 
@@ -81,6 +80,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 8. cuboid and other object rotation
 9. issues w/ y translation
 10. apply textures to carriers, substrates, traces
+11. implement all directions cylindrical power sources and detectors
 
 ------
 future:

@@ -23,6 +23,7 @@ void Curve_POT::buildVAOs()
 
 Curve_POT::Curve_POT(Shader* sh)
 {
+    objectType = TRACE;
     shader = sh;
     vertices = new VertexVectorDS();
     VAOs = new VAOVectorDS();
@@ -54,6 +55,13 @@ void Curve_POT::draw()
 bool Curve_POT::intersectionCheck(glm::vec3 v)
 {
     return false;
+}
+
+void Curve_POT::clear()
+{
+    vertices->clear();
+    VAOs->clear();
+    builtUntilIndex = 0;
 }
 
 void Curve_POT::addPoint(glm::vec3 v)

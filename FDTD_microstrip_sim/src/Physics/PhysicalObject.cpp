@@ -4,6 +4,7 @@ extern unsigned int physicalObjectNextId;
 
 PhysicalObject::PhysicalObject()
 {
+	objectType = UNDEFINED;
 	vertices = new VertexVectorDS();
 	VAOs = new VAOVectorDS();
 	origin = glm::vec3(0.0f);
@@ -23,6 +24,7 @@ PhysicalObject::PhysicalObject()
 
 PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh)
 {
+	objectType = UNDEFINED;
 	vertices = new VertexVectorDS();
 	VAOs = new VAOVectorDS();
 	origin = o;

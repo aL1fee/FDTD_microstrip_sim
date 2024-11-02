@@ -11,6 +11,8 @@
 #include "../Physics/Physical Objects (POs)/Trace_PO.h"
 #include "../Physics/Physical Objects (POs)/Housing_PO.h"
 #include "../Physics/Physical Objects (POs)/Curve_PO.h"
+#include "../Physics/Physical Objects (POs)/PowerSource_PO.h"
+#include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
 
 #include "../Data Structures/VertexVectorDS.h"
 #include "../Data Structures/VAOVectorDS.h"
@@ -60,6 +62,12 @@ public:
 		float h, glm::vec3 col, float perm, float cond);
 	void addHousing(std::string& s, glm::vec3 o, float l, float w,
 		float h, glm::vec3 col, float perm, float cond);
+	void addPowerSource(std::string& s, glm::vec3 o, glm::vec3 dir, float p,
+		float r, float l, glm::vec3 col, float perm, float cond);
+	void addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, float sens,
+		float r, float l, glm::vec3 col, float perm, float cond);
+
+
 
 	void deleteActiveObject();
 	void deleteAllObjects();
@@ -90,4 +98,5 @@ public:
 	void preObjectInsertionSetup();
 	void postObjectInsertionSetup();
 
+	void clearLines();
 };

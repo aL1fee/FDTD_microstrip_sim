@@ -171,6 +171,46 @@ void MainScene::addHousing(std::string& s, glm::vec3 o, float l, float w,
 	postObjectInsertionSetup();
 }
 
+void MainScene::addPowerSource(std::string& s, glm::vec3 o, glm::vec3 dir, float p,
+	float r, float l, glm::vec3 col, float perm, float cond)
+{
+	Shader* shader;
+	std::string name = "Trace";
+	if (shaderMap->find(name) == shaderMap->end())
+	{
+		shader = new Shader("res/shaders/housing.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
+	}
+	else {
+		shader = shaderMap->at(name);
+	}
+	shader->incrNumObjectsServed(); 
+	PowerSource_PO* powerSourcePO = new PowerSource_PO(o, dir, p, r, l, col, perm, cond, shader);
+	powerSourcePO->updatePropertyMap();
+	physicalObjectBuffer->insert(std::make_pair(powerSourcePO->getId(), powerSourcePO));
+	postObjectInsertionSetup();
+}
+
+void MainScene::addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, float sens,
+	float r, float l, glm::vec3 col, float perm, float cond)
+{
+	Shader* shader;
+	std::string name = "Trace";
+	if (shaderMap->find(name) == shaderMap->end())
+	{
+		shader = new Shader("res/shaders/housing.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
+	}
+	else {
+		shader = shaderMap->at(name);
+	}
+	shader->incrNumObjectsServed();
+	PowerDetector_PO* powerDetector_PO = new PowerDetector_PO(o, dir, sens, r, l, col, perm, cond, shader);
+	powerDetector_PO->updatePropertyMap();
+	physicalObjectBuffer->insert(std::make_pair(powerDetector_PO->getId(), powerDetector_PO));
+	postObjectInsertionSetup();
+}
+
 void MainScene::eraseShaderMapOneInstance(std::string name)
 {
 	std::cout << "objs served: " << shaderMap->at(name)->getNumObjectsServed() << std::endl;
@@ -329,19 +369,18 @@ void MainScene::deleteModifyingVectors()
 	}
 }
 
-void MainScene::preObjectInsertionSetup() {
+void MainScene::preObjectInsertionSetup() 
+{
 
 }
 
-void MainScene::postObjectInsertionSetup() {
-
-
-
-	//if (modifyingVectors != nullptr) {
-	//	// TODO inefficiency
-	//	deleteModifyingVectors();
-	//	buildModifyingVectors(activeObject, Translation);
-	//}
+void MainScene::postObjectInsertionSetup() 
+{
 	_viewMatrixChanged = true;
 	_projMatrixChanged = true;
+}
+
+void MainScene::clearLines()
+{
+	testingLine->clear();
 }

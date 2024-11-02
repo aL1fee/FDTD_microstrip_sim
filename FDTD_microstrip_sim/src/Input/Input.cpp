@@ -70,9 +70,11 @@ void Input::processInput()
         cam->moveRight(_deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+        _scene_main->deleteModifyingVectors();
         _scene_main->buildModifyingVectors(_scene_main->getActiveObject(), Translation);
     }
     if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+        _scene_main->deleteModifyingVectors();
         _scene_main->buildModifyingVectors(_scene_main->getActiveObject(), Scaling);
     }
     if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
@@ -183,6 +185,8 @@ void Input::processInput()
         }
     }
 }
+
+float lastScaleValue = 0.0f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -339,15 +343,18 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                 {
                     planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
                     planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                    lastScaleValue = *_scene_main->getActiveObject()->getLength();
                 }
                 else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
                 {
                     planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
                     planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                    lastScaleValue = *_scene_main->getActiveObject()->getWidth();
                 }
                 else if (_modifyingVectorsDirection == glm::vec3(0.0, 1.0, 0.0f)) {
                     planePoint = glm::vec3(activeObjOrigin.x, 0.0f, activeObjOrigin.z);
                     planeNormal = glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f));
+                    lastScaleValue = *_scene_main->getActiveObject()->getHeight();
                 }
                 else {
                     return;
@@ -360,9 +367,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                         _modyfingVectorsScalingStartOrigin = glm::vec3(*_scene_main->getActiveObject()->getLength(),
                             *_scene_main->getActiveObject()->getHeight(), *_scene_main->getActiveObject()->getWidth());
                         _modyfingVectorsScalingStart = true;
-                        _modyfingVectorsMovementStartOrigin = intersectionPoint - activeObjOrigin;
+                        _modyfingVectorsMovementStartOrigin = intersectionPoint;
                         _modyfingVectorsMovementStart = true;
-
                     }
                     intersectionPoint -= _modyfingVectorsMovementStartOrigin;
                 }
@@ -372,40 +378,70 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                     intersectionPoint.y = activeObjOrigin.y;
                     intersectionPoint.z = activeObjOrigin.z;
                     value = intersectionPoint.x + _modyfingVectorsScalingStartOrigin.x;
-                    //value = (value > 10000.f) ? 10000.f : value;
-                    //value = (value < -10000.f) ? -10000.f : value;
-                    if (value >= 100 || value <= -100) {
-                        return;
+                    if (value < MIN_OBJECT_SIZE) {
+                        value = MIN_OBJECT_SIZE;
                     }
-                    else {
-                        _scene_main->getActiveObject()->setScale(
-                            value,
-                            *_scene_main->getActiveObject()->getHeight(),
-                            *_scene_main->getActiveObject()->getWidth());
+                    if (value > MAX_OBJECT_SIZE) {
+                        value = MAX_OBJECT_SIZE;
                     }
 
+                    if (fabs(lastScaleValue - value) > MAX_DISTANCE_RESIZE_JUMP) {
+                        return;
+                    }
+                    /*_scene_main->getActiveObject()->setScale(
+                        value,
+                        *_scene_main->getActiveObject()->getHeight(),
+                        *_scene_main->getActiveObject()->getWidth());*/
+                    _scene_main->getActiveObject()->setScaleL(value);
                 }
                 else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
                 {
                     intersectionPoint.y = activeObjOrigin.y;
                     intersectionPoint.x = activeObjOrigin.x;
-                    _scene_main->getActiveObject()->setScale(
-                        intersectionPoint.x + _modyfingVectorsScalingStartOrigin.x,
-                        *_scene_main->getActiveObject()->getHeight(),
-                        *_scene_main->getActiveObject()->getWidth());
+                    value = intersectionPoint.z + _modyfingVectorsScalingStartOrigin.z;
+                    if (value < MIN_OBJECT_SIZE) {
+                        value = MIN_OBJECT_SIZE;
+                    }
+                    if (value > MAX_OBJECT_SIZE) {
+                        value = MAX_OBJECT_SIZE;
+                    }
+
+                    if (fabs(lastScaleValue - value) > MAX_DISTANCE_RESIZE_JUMP) {
+                        return;
+                    }
+
+                    _scene_main->getActiveObject()->setScaleW(value);
+
+                    //_scene_main->getActiveObject()->setScale(
+                    //    *_scene_main->getActiveObject()->getLength(),
+                    //    *_scene_main->getActiveObject()->getHeight(),
+                    //    value);
                 }
-                else {
+                else if (_modifyingVectorsDirection == glm::vec3(0.0, 1.0, 0.0f)) 
+                {
                     intersectionPoint.z = activeObjOrigin.z;
                     intersectionPoint.x = activeObjOrigin.x;
-                }
+                    value = intersectionPoint.y + _modyfingVectorsScalingStartOrigin.y;
+                    if (value < MIN_OBJECT_SIZE) {
+                        value = MIN_OBJECT_SIZE;
+                    }
+                    if (value > MAX_OBJECT_SIZE) {
+                        value = MAX_OBJECT_SIZE;
+                    }
 
-               
-                
+                    if (fabs(lastScaleValue - value) > MAX_DISTANCE_RESIZE_JUMP) {
+                        return;
+                    }
+                    /*_scene_main->getActiveObject()->setScale(
+                        *_scene_main->getActiveObject()->getLength(),
+                        value,
+                        *_scene_main->getActiveObject()->getWidth());*/
+                    _scene_main->getActiveObject()->setScaleH(value);
+                }
                 _scene_main->getActiveObject()->setRebuiltExpected(true);
                 _scene_main->getModifyingVectors()->setOrigin
                 (_scene_main->getActiveObject()->getCenterLocation());
                 _scene_main->getModifyingVectors()->setRebuiltExpected(true);
-
             }
         }
     }

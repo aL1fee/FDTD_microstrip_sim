@@ -47,6 +47,7 @@ public:
 	void build() override;
 	void draw() override;
 	bool intersectionCheck(glm::vec3 v) override;
+	void clear() override {}
 
 	glm::vec3 intersectionDirection(glm::vec3 v);
 

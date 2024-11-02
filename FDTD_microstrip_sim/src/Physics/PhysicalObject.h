@@ -21,9 +21,18 @@
 //	x: red
 //  z: blue
 //  y: green
+
+enum PhysicalObjectType {
+	UNDEFINED,
+	CUBOID,
+	TRACE,
+	CYLINDER
+};
+
 class PhysicalObject : public GeometricalObject
 {
 protected:
+	PhysicalObjectType objectType;
 	float permittivity;
 	float conductivity;
 	bool rebuiltExpected;
@@ -51,7 +60,10 @@ public:
 	glm::vec3* getOrigin() { return &origin; }
 
 	void setOrigin(glm::vec3 v) { origin = v; }
-	void setScale(float l, float h, float w);
+	virtual void setScale(float l, float h, float w);
+	virtual void setScaleL(float l) { length = l; }
+	virtual void setScaleH(float h) { height = h; }
+	virtual void setScaleW(float w) { width = w; }
 
 	void setInteractable(bool val) { isInteractable = val; }
 
@@ -60,5 +72,7 @@ public:
 	}
 
 	void setId(unsigned int ui) { id = ui; }
+
+	PhysicalObjectType getObjectType() const { return objectType; }
 
 };

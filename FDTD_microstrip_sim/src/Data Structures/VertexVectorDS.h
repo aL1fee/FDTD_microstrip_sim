@@ -25,12 +25,15 @@ public:
 	void pushToNewArray(glm::vec3 v);
 	void pushToIndArray(int i, glm::vec3 v);
 	void allocateNewArray();
+	void allocateNewEmptyArray();
 
 	std::vector<glm::vec3>* at(int i) const;
 
 	int getSize() const;
+	int getLastIndex() const { return lastIndex; }
 
 	glm::vec3 peekAtLast() const;
+
 
 
 };

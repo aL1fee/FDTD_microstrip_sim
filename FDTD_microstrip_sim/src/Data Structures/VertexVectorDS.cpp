@@ -57,6 +57,15 @@ void VertexVectorDS::allocateNewArray()
 	}
 }
 
+void VertexVectorDS::allocateNewEmptyArray()
+{
+	if (getSize() != 0) {
+		lastIndex++;
+	}
+	std::vector<glm::vec3>* vec = new std::vector<glm::vec3>();
+	data->push_back(vec);
+}
+
 std::vector<glm::vec3>* VertexVectorDS::at(int i) const
 {
 	return data->at(i);
