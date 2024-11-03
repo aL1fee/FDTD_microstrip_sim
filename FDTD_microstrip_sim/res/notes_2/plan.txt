@@ -34,8 +34,8 @@ Plan:
 
 
 
-
 *restructure tuning pads drawing: use instanced rendering or batching to lower vao# from 10000 (50x50 case)
+*implement another model of not rebuilding the same object w/ transformations. use the model matrix
 *implement tuning pads (scaling issues, edge cases)
 
 
@@ -80,7 +80,11 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 1. translation changes direction in y at certain cam angles
 
 
-======Not a priority:
+======Memory leaks and performance TODO:
+1. delete heap elements in object destructors that are children of physicalObject
+
+
+======Not a priority improvements TODO:
 -1. GPU model matrix manipulation for CPU usage reduction
 0. use glDrawElements to massively reduce vertex number
 1. glfwpollevents doesn't run when resizing/dragging the window. As a result, key releases are not registered during resizing/dragging.

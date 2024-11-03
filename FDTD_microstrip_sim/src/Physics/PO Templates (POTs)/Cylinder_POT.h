@@ -42,6 +42,7 @@ public:
 	bool intersectionCheck(glm::vec3 v) override;
 	void clear() override {}
 
+	glm::vec3 getCenterLocation() const override;
 
 	//void setScale(float l, float h, float w) override;
 	void setScaleH(float h) override;

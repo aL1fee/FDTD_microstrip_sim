@@ -116,6 +116,11 @@ bool Cylinder_POT::intersectionCheck(glm::vec3 v)
     return false;
 }
 
+glm::vec3 Cylinder_POT::getCenterLocation() const
+{
+    return origin + glm::vec3(length / 2.0f, 0.0f, 0.0f);
+}
+
 void Cylinder_POT::setScaleH(float h)
 {
     height = h;

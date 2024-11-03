@@ -174,14 +174,16 @@ void GUI::buildMenuUpperPanel()
 					glm::vec3(1.0, 0.0f, 0.0f), 25.5f, .1f, .2f,
 					glm::vec3(1.0f, 1.0f, 0.0f), 5.2f, 410);
 			}
-			if (ImGui::MenuItem("Tuning Pad Array"))
+			if (ImGui::MenuItem("Tuning pad array"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
 
 				s = "> Adding a tuning pad array";
-				_scene_main->addTuningPadArray(s, glm::vec3(0.0f), 3, 2, .2f, .2f, .2f, .2f,
-					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+				_scene_main->addTuningPadArray(s, glm::vec3(.5f, .1f, 1.0), 19, 2,
+					.15f, .1f, .08f, .08f, glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+				//_scene_main->addTuningPadArray(s, glm::vec3(0.0f), 3, 2, .2f, .2f, .2f, .2f,
+				//	glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
 			}
 			if (ImGui::MenuItem("A simple system"))
 			{
@@ -218,8 +220,6 @@ void GUI::buildMenuUpperPanel()
 					.15f, .1f, .08f, .08f, glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
 				_scene_main->addTuningPadArray(s, glm::vec3(.14f, 1.05, 3.66), 19, 2,
 					.15f, .1f, .08f, .08f, glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
-
-
 
 				_scene_main->addHousing(s, glm::vec3(-0.2f, 0.0f, 0.0f), .2f, 7.0f, 1.4f,
 					glm::vec3(.88f, .88f, .88f), 10.0f, 50);

@@ -215,10 +215,10 @@ void MainScene::addTuningPadArray(std::string& s, glm::vec3 o, int npX, int npZ,
 	float padSepX, float padSepZ, float sX, float sZ, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	std::string name = "Trace";
+	std::string name = "Cuboid Instanced Array";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/trace.shader", 1, name);
+		shader = new Shader("res/shaders/cuboid_instanced_array.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {

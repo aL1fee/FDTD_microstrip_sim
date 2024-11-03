@@ -226,6 +226,7 @@
     <None Include="res\shaders\carrier.shader" />
     <None Include="res\shaders\coordinate_system.shader" />
     <None Include="res\shaders\cube.shader" />
+    <None Include="res\shaders\cuboid_instanced_array.shader" />
     <None Include="res\shaders\generic.shader" />
     <None Include="res\shaders\help.shader" />
     <None Include="res\shaders\housing.shader" />

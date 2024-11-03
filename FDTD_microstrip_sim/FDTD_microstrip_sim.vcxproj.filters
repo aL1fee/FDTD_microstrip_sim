@@ -271,6 +271,7 @@
     <None Include="res\shaders\trace.shader" />
     <None Include="res\shaders\housing.shader" />
     <None Include="res\shaders\generic.shader" />
+    <None Include="res\shaders\cuboid_instanced_array.shader" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />
