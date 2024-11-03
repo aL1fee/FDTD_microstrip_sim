@@ -19,6 +19,7 @@ PhysicalObject::PhysicalObject()
 	edgesOn = true;
 	shader = nullptr;
 	propertyMap = new std::vector<std::pair<std::string, float*>>();
+	propertyMapInt = new std::vector<std::pair<std::string, int*>>();
 	id = physicalObjectNextId++;
 }
 
@@ -39,6 +40,7 @@ PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3
 	edgesOn = true;
 	shader = sh;
 	propertyMap = new std::vector<std::pair<std::string, float*>>();
+	propertyMapInt = new std::vector<std::pair<std::string, int*>>();
 	id = physicalObjectNextId++;
 }
 

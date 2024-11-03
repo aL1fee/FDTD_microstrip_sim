@@ -13,6 +13,8 @@
 #include "../Physics/Physical Objects (POs)/Curve_PO.h"
 #include "../Physics/Physical Objects (POs)/PowerSource_PO.h"
 #include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
+#include "../Physics/Physical Objects (POs)/TuningPadArray_PO.h"
+#include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
 
 #include "../Data Structures/VertexVectorDS.h"
 #include "../Data Structures/VAOVectorDS.h"
@@ -66,7 +68,9 @@ public:
 		float r, float l, glm::vec3 col, float perm, float cond);
 	void addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, float sens,
 		float r, float l, glm::vec3 col, float perm, float cond);
-
+	void addTuningPadArray(std::string& s, glm::vec3 o, int npX, int npZ,
+		float padSepX, float padSepZ, float sX, float sZ, glm::vec3 col,
+		float perm, float cond);
 
 
 	void deleteActiveObject();

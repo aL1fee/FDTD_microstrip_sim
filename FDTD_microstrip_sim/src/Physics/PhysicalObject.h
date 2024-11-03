@@ -39,6 +39,7 @@ protected:
 	bool isInteractable;
 	Shader* shader;
 	std::vector<std::pair<std::string, float*>>* propertyMap;
+	std::vector<std::pair<std::string, int*>>* propertyMapInt;
 	unsigned int id;
 
 public:
@@ -48,6 +49,7 @@ public:
 
 	virtual void updatePropertyMap() {};
 	std::vector<std::pair<std::string, float*>>* getPropertyMap() { return propertyMap; }
+	std::vector<std::pair<std::string, int*>>* getPropertyMapInt() { return propertyMapInt; }
 
 	bool needsRebuilding() { return rebuiltExpected; }
 	bool interactable() const { return isInteractable; }
@@ -56,7 +58,7 @@ public:
 	std::string getShaderName() const { return shader->getName(); }
 	unsigned int getId() const { return id; }
 
-	glm::vec3 getCenterLocation() const;
+	virtual glm::vec3 getCenterLocation() const;
 	glm::vec3* getOrigin() { return &origin; }
 
 	void setOrigin(glm::vec3 v) { origin = v; }

@@ -77,8 +77,9 @@ void GUI::buildMainMenuPanel()
 		}
 		if (ImGui::BeginMenu("Help"))
 		{
-			if (ImGui::MenuItem("About"))
 			if (ImGui::MenuItem("Commands")) { /* Undo action */ }
+			if (ImGui::MenuItem("Theory of operation")) { /* Undo action */ }
+			if (ImGui::MenuItem("About")) {}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
@@ -173,6 +174,15 @@ void GUI::buildMenuUpperPanel()
 					glm::vec3(1.0, 0.0f, 0.0f), 25.5f, .1f, .2f,
 					glm::vec3(1.0f, 1.0f, 0.0f), 5.2f, 410);
 			}
+			if (ImGui::MenuItem("Tuning Pad Array"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				_acceptingLeftClickBufferInput = true;
+
+				s = "> Adding a tuning pad array";
+				_scene_main->addTuningPadArray(s, glm::vec3(0.0f), 3, 2, .2f, .2f, .2f, .2f,
+					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+			}
 			if (ImGui::MenuItem("A simple system"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
@@ -204,8 +214,16 @@ void GUI::buildMenuUpperPanel()
 				_scene_main->addPowerSource(s, glm::vec3(0.0f, 1.16f, 3.49f),
 					glm::vec3(1.0, 0.0f, 0.0f), -10.0f, .1f, .2f,
 					glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+				_scene_main->addTuningPadArray(s, glm::vec3(.14f, 1.05, 3.07), 19, 2,
+					.15f, .1f, .08f, .08f, glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+				_scene_main->addTuningPadArray(s, glm::vec3(.14f, 1.05, 3.66), 19, 2,
+					.15f, .1f, .08f, .08f, glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
+
+
+
 				_scene_main->addHousing(s, glm::vec3(-0.2f, 0.0f, 0.0f), .2f, 7.0f, 1.4f,
 					glm::vec3(.88f, .88f, .88f), 10.0f, 50);
+
 			}
 			statusWindow->setMessage(s);
 			ImGui::EndMenu();
@@ -411,6 +429,7 @@ void GUI::buildLeftPanel()
 			//static float values[] = { 100.0f, 200.0f, 300.0f };
 			PropertyWindow* propertyWindow = _scene_main->getPropertyWindow();
 			std::vector<std::pair<std::string, float*>>* properties = propertyWindow->getProperties();
+			std::vector<std::pair<std::string, int*>>* propertiesInt = propertyWindow->getPropertiesInt();
 			PhysicalObject* activeObj = propertyWindow->getActiveObject();
 
 			if (properties != nullptr && activeObj != nullptr)
@@ -425,7 +444,9 @@ void GUI::buildLeftPanel()
 					if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue)) {
 						// TODO only rebuild the object which property had been updated
 						if (it->first == "Length" || it->first == "Width" ||
-							it->first == "Height" || it->first == "Radius") {
+							it->first == "Height" || it->first == "Radius" ||
+							it->first == "X pad size" || it->first == "Z pad size" ||
+							it->first == "X pad separation" || it->first == "Z pad separation") {
 							if (*propertyValue < MIN_OBJECT_SIZE) {
 								*propertyValue = MIN_OBJECT_SIZE;
 							}
@@ -445,6 +466,41 @@ void GUI::buildLeftPanel()
 					}
 				}
 			}
+			if (propertiesInt != nullptr && activeObj != nullptr)
+			{
+				for (auto it = propertiesInt->begin(); it != propertiesInt->end(); ++it) {
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("%s", it->first.c_str());
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
+					int* propertyValue = it->second;
+					if (ImGui::InputScalar(("##value" + it->first).c_str(), ImGuiDataType_S32, propertyValue, 
+						nullptr, nullptr, "%d", ImGuiInputTextFlags_EnterReturnsTrue)) {
+						// TODO only rebuild the object which property had been updated
+						if (it->first == "X number of pads" || it->first == "Z number of pads")
+						{
+							if (*propertyValue < MIN_NUM_PADS) {
+								*propertyValue = MIN_NUM_PADS;
+							}
+							if (*propertyValue > MAX_NUM_PADS) {
+								*propertyValue = MAX_NUM_PADS;
+							}
+						}
+						activeObj->setRebuiltExpected(true);
+						ModifyingVectors_PO* modVecs = _scene_main->getModifyingVectors();
+						if (modVecs != nullptr)
+						{
+							_scene_main->getModifyingVectors()->setRebuiltExpected(true);
+							_scene_main->getModifyingVectors()->setOrigin(activeObj->getCenterLocation());
+						}
+
+						std::cout << "One of the properties has been updated!" << std::endl;
+					}
+				}
+			}
+
+
 			ImGui::EndTable();
 		}
 	}

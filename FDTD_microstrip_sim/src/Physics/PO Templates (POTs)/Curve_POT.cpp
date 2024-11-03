@@ -77,6 +77,14 @@ void Curve_POT::terminateLine()
     }
 }
 
+//not safe
+void Curve_POT::terminateLineWithBuiltIndexIncr()
+{
+    if (vertices->getSize() != 0) {
+        vertices->allocateNewArray();
+    }
+}
+
 
 
 

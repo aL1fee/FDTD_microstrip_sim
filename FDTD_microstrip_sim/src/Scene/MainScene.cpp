@@ -178,7 +178,7 @@ void MainScene::addPowerSource(std::string& s, glm::vec3 o, glm::vec3 dir, float
 	std::string name = "Trace";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/housing.shader", 1, name);
+		shader = new Shader("res/shaders/trace.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -198,7 +198,7 @@ void MainScene::addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, flo
 	std::string name = "Trace";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/housing.shader", 1, name);
+		shader = new Shader("res/shaders/trace.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -208,6 +208,27 @@ void MainScene::addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, flo
 	PowerDetector_PO* powerDetector_PO = new PowerDetector_PO(o, dir, sens, r, l, col, perm, cond, shader);
 	powerDetector_PO->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(powerDetector_PO->getId(), powerDetector_PO));
+	postObjectInsertionSetup();
+}
+
+void MainScene::addTuningPadArray(std::string& s, glm::vec3 o, int npX, int npZ,
+	float padSepX, float padSepZ, float sX, float sZ, glm::vec3 col, float perm, float cond)
+{
+	Shader* shader;
+	std::string name = "Trace";
+	if (shaderMap->find(name) == shaderMap->end())
+	{
+		shader = new Shader("res/shaders/trace.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
+	}
+	else {
+		shader = shaderMap->at(name);
+	}
+	shader->incrNumObjectsServed();
+	TuningPadArray* tuningArrayPaw_PO = new TuningPadArray(o, npX, npZ, padSepX, padSepZ, sX, sZ,
+		col, perm, cond, shader);
+	tuningArrayPaw_PO->updatePropertyMap();
+	physicalObjectBuffer->insert(std::make_pair(tuningArrayPaw_PO->getId(), tuningArrayPaw_PO));
 	postObjectInsertionSetup();
 }
 
@@ -263,7 +284,8 @@ void MainScene::generateRay(glm::vec3 pos, glm::vec3 dir)
 {
 	testingLine->terminateLine();
 	testingLine->addPoint(pos);
-	testingLine->addPoint(pos + dir * 20.0f);
+	testingLine->addPoint(pos + dir * RAY_LENGTH);
+	testingLine->terminateLineWithBuiltIndexIncr();
 }
 
 // TODO inefficient ray picking
@@ -301,6 +323,7 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 			if (obj->intersectionCheck(rayPos)) {
 				std::cout << "object selected!" << std::endl;
 				propertyWindow->addPropertyMap(obj->getPropertyMap());
+				propertyWindow->addPropertyMapInt(obj->getPropertyMapInt());
 				propertyWindow->updateActiveObject(obj);
 				activeObject = obj;
 				extern bool _propertyWindowOn;

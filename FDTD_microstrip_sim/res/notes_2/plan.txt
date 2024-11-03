@@ -35,11 +35,20 @@ Plan:
 
 
 
+*restructure tuning pads drawing: use instanced rendering or batching to lower vao# from 10000 (50x50 case)
+*implement tuning pads (scaling issues, edge cases)
+
+
+
+*implement wires
+
+
+*implement ribbon
 
 *implement a hierarchy data structure to store elements & its properties of a scene
-*implement tuning pads
-*implement ribbons
-*implement wires
+
+
+*add secondary lines to all objects
 
 
 *test the program on another PC
@@ -61,13 +70,17 @@ Plan:
 
 
 
-***start with/ FDTD
+start with/ FDTD
 pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 
 
 
-==not a priority:
+======Bugs TODO:
+1. translation changes direction in y at certain cam angles
+
+
+======Not a priority:
 -1. GPU model matrix manipulation for CPU usage reduction
 0. use glDrawElements to massively reduce vertex number
 1. glfwpollevents doesn't run when resizing/dragging the window. As a result, key releases are not registered during resizing/dragging.

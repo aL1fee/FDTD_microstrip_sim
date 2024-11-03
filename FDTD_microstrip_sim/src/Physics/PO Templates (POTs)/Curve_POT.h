@@ -37,4 +37,5 @@ public:
 
 	void addPoint(glm::vec3 v);
 	void terminateLine();
+	void terminateLineWithBuiltIndexIncr();
 };
