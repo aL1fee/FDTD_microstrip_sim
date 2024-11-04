@@ -71,10 +71,10 @@ void MainScene::render()
 	 
 	for (auto& pair : *physicalObjectBuffer) {
 		PhysicalObject* obj = pair.second;
-		if (obj->needsRebuilding())
+		if (obj->needsBuilding())
 		{
 			obj->build();
-			obj->setRebuiltExpected(false);
+			obj->setBuiltExpected(false);
 		}
 		obj->draw();
 	}
@@ -214,7 +214,9 @@ void MainScene::addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, flo
 void MainScene::addTuningPadArray(std::string& s, glm::vec3 o, int npX, int npZ,
 	float padSepX, float padSepZ, float sX, float sZ, glm::vec3 col, float perm, float cond)
 {
+	extern unsigned int physicalObjectNextId;
 	Shader* shader;
+	//std::string name = "Cuboid Instanced Array" + std::to_string(physicalObjectNextId);
 	std::string name = "Cuboid Instanced Array";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
@@ -353,6 +355,7 @@ void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType ty
 		return;
 	}
 	ModifyingVectors_PO* ret = nullptr;
+
 	Shader* shader = new Shader("res/shaders/generic.shader", 1, "Generic shader");
 	switch (type) {
 	case Translation:

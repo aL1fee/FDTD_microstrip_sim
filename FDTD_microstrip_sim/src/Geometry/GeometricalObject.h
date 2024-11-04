@@ -31,11 +31,20 @@ protected:
 	VAOVectorDS* VAOs;
 	bool edgesOn;
 
+	glm::vec3 translationVector;
+	glm::vec3 scalingVector;
+	glm::vec3 rotationVector;
+	float rotationAngle;
+	glm::mat4 modelMatrix;
+
+	void addColorVertex(glm::vec3 v) { vertices->pushToExistingArray(v); }
+
 	virtual void buildVertices() = 0;
 	virtual void buildVAOs() = 0;
 	virtual void buildEdges() = 0;
 	virtual void clear() = 0;
-	void addColorVertex(glm::vec3 v) { vertices->pushToExistingArray(v); }
+
+	virtual void rebuild() = 0;
 
 
 public:

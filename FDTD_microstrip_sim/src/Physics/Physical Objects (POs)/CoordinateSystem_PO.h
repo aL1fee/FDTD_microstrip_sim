@@ -25,6 +25,9 @@ private:
 	void buildVAOs() override;
 	void buildEdges() override;
 
+	void rebuild() override;
+
+
 public:
 	CoordinateSystem_PO(float l, float mls, Shader* sh);
 

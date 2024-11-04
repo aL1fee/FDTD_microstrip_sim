@@ -1,77 +1,5 @@
 #include "CuboidArray_POT.h"
 
-//void CuboidArray_POT::buildVertices()
-//{
-//	for (int countZ = 0; countZ < numPadsZ; countZ++) 
-//    {
-//        for (int countX = 0; countX < numPadsX; countX++)
-//        {
-//            vertices->allocateNewArray();
-//            int x = 0, y = 0, z = 0;
-//            for (int i = 0; i < 5; i++) {
-//                z = (i == 1 || i == 2) ? 1 : 0;
-//                y = (i == 2 || i == 3) ? 1 : 0;
-//                vertices->pushToExistingArray(origin +
-//                    glm::vec3(countX * sizeX + countX * padSeparationX, height * y,
-//                        countZ * sizeZ + countZ * padSeparationZ + sizeZ * z));
-//                addColorVertex(color);
-//                vertices->pushToExistingArray(origin +
-//                    glm::vec3(countX * sizeX + countX * padSeparationX + sizeX, height * y,
-//                        countZ * sizeZ + countZ * padSeparationZ + sizeZ * z));
-//                addColorVertex(color);
-//            }
-//            vertices->allocateNewArray();
-//            for (int i = 0; i < 2; i++) {
-//                y = (i == 1) ? 1 : 0;
-//                vertices->pushToExistingArray(origin +
-//                    glm::vec3(countX * sizeX + countX * padSeparationX, height * y,
-//                        countZ * sizeZ + countZ * padSeparationZ));
-//                addColorVertex(color);
-//                vertices->pushToExistingArray(origin + 
-//                    glm::vec3(countX * sizeX + countX * padSeparationX, height * y,
-//                        countZ * sizeZ + countZ * padSeparationZ + sizeZ));
-//                addColorVertex(color);
-//            }
-//            vertices->allocateNewArray();
-//            for (int i = 0; i < 2; i++) {
-//                y = (i == 1) ? 1 : 0;
-//                vertices->pushToExistingArray(origin + 
-//                    glm::vec3(countX * sizeX + countX * 
-//                    padSeparationX + sizeX, height * y, 
-//                    countZ * sizeZ + countZ * padSeparationZ));
-//                addColorVertex(color);
-//                vertices->pushToExistingArray(origin + 
-//                    glm::vec3(countX * sizeX + countX *
-//                        padSeparationX + sizeX, height * y, 
-//                        countZ * sizeZ + countZ * padSeparationZ + sizeZ));
-//                addColorVertex(color);
-//            }
-//        }
-//	}
-//    if (edgesOn) {
-//        buildEdges();
-//    }
-//}
-
-//void CuboidArray_POT::buildVAOs()
-//{
-//    for (int i = 0; i < vertices->getSize(); i++) {
-//        unsigned int VAO;
-//        glGenVertexArrays(1, &VAO);
-//        glBindVertexArray(VAO);
-//        unsigned int VBO;
-//        glGenBuffers(1, &VBO);
-//        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices->at(i)->size(), vertices->at(i)->data(), GL_STATIC_DRAW);
-//        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-//        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(GLfloat)));
-//        glEnableVertexAttribArray(0);
-//        glEnableVertexAttribArray(1);
-//        VAOs->push(VAO);
-//    }
-//}
-
-
 void CuboidArray_POT::setInstancePositions()
 {
     for (int countZ = 0; countZ < numPadsZ; countZ++)
@@ -82,12 +10,6 @@ void CuboidArray_POT::setInstancePositions()
             instancePositions->push_back(translation);
         }
     }
-    //std::cout << "numPadsZ: " << numPadsZ << std::endl;
-    //std::cout << "numPadsX: " << numPadsX << std::endl;
-    //for (int i = 0; i < instancePositions->size(); i++)
-    //{
-    //    std::cout << "#" << i << ": " << glm::to_string(instancePositions->at(i)) << std::endl;
-    //}
 }
 
 void CuboidArray_POT::buildVertices()
@@ -97,62 +19,25 @@ void CuboidArray_POT::buildVertices()
     for (int i = 0; i < 5; i++) {
         z = (i == 1 || i == 2) ? 1 : 0;
         y = (i == 2 || i == 3) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(0, height * y, sizeZ * z));
+        vertices->pushToExistingArray(glm::vec3(0, y, 1 * z));
         addColorVertex(color);
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, sizeZ * z));
-        addColorVertex(color);
-    }
-    for (int i = 0; i < 2; i++) {
-        y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(0, height * y, 0));
-        addColorVertex(color);
-        vertices->pushToExistingArray(origin + glm::vec3(0, height * y, sizeZ));
+        vertices->pushToExistingArray(glm::vec3(1, y, 1 * z));
         addColorVertex(color);
     }
     for (int i = 0; i < 2; i++) {
         y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, 0));
+        vertices->pushToExistingArray(glm::vec3(0, y, 0));
         addColorVertex(color);
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, sizeZ));
+        vertices->pushToExistingArray(glm::vec3(0, y, 1));
         addColorVertex(color);
     }
-
-    //for (int i = 0; i < 4; i++) {
-    //    z = (i == 1 || i == 2) ? 1 : 0;
-    //    y = (i == 2 || i == 3) ? 1 : 0;
-    //    vertices->pushToExistingArray(origin + glm::vec3(0, height * y, sizeZ * z));
-    //    addColorVertex(color);
-    //    vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, sizeZ * z));
-    //    addColorVertex(color);
-    //}
-    //for (int i = 0; i < 2; i++) {
-    //    y = (i == 1) ? 1 : 0;
-    //    vertices->pushToExistingArray(origin + glm::vec3(0, height * y, 0));
-    //    addColorVertex(color);
-    //    vertices->pushToExistingArray(origin + glm::vec3(0, height * y, sizeZ));
-    //    addColorVertex(color);
-    //}
-    //for (int i = 0; i < 2; i++) {
-    //    z = (i == 1) ? 1 : 0;
-    //    vertices->pushToExistingArray(origin + glm::vec3(0, 0, sizeZ * z));
-    //    addColorVertex(color);
-    //    vertices->pushToExistingArray(origin + glm::vec3(0, height, sizeZ * z));
-    //    addColorVertex(color);
-    //}
-    //for (int i = 0; i < 2; i++) {
-    //    y = (i == 1) ? 1 : 0;
-    //    vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, 0));
-    //    addColorVertex(color);
-    //    vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, sizeZ));
-    //    addColorVertex(color);
-    //}
-    //for (int i = 0; i < 2; i++) {
-    //    z = (i == 1) ? 1 : 0;
-    //    vertices->pushToExistingArray(origin + glm::vec3(sizeX, 0, sizeZ * z));
-    //    addColorVertex(color);
-    //    vertices->pushToExistingArray(origin + glm::vec3(sizeX, height, sizeZ * z));
-    //    addColorVertex(color);
-    //}
+    for (int i = 0; i < 2; i++) {
+        y = (i == 1) ? 1 : 0;
+        vertices->pushToExistingArray(glm::vec3(1, y, 0));
+        addColorVertex(color);
+        vertices->pushToExistingArray(glm::vec3(1, y, 1));
+        addColorVertex(color);
+    }
     if (edgesOn) {
         buildEdges();
     }
@@ -163,7 +48,7 @@ void CuboidArray_POT::buildVAOs()
 {
     for (int i = 0; i < vertices->getSize(); i++)
     {
-        unsigned int VAO, VBO, instanceVBO;
+        unsigned int VAO, VBO;
 
         // Generate a VAO and bind
         glGenVertexArrays(1, &VAO);
@@ -181,10 +66,13 @@ void CuboidArray_POT::buildVAOs()
         glEnableVertexAttribArray(1);
 
         // Generate a VBO for the instance positions
-        glGenBuffers(1, &instanceVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-        glBufferData(GL_ARRAY_BUFFER, instancePositions->size() * sizeof(glm::vec3), instancePositions->data(), GL_STATIC_DRAW);
-
+        glGenBuffers(1, &(instanceVBO[i]));
+        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO[i]);
+        glBufferData(GL_ARRAY_BUFFER, MAX_NUM_PADS * MAX_NUM_PADS * sizeof(glm::vec3), 
+            nullptr, GL_STATIC_DRAW);
+        /*glBufferSubData(GL_ARRAY_BUFFER, 0, instancePositions->size() * sizeof(glm::vec3), 
+            instancePositions->data());*/
+        
         // Set the instance positions in attribute 2
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(2);
@@ -203,163 +91,102 @@ void CuboidArray_POT::buildEdges()
     for (int i = 0; i < 4; i++) {
         z = (i == 1 || i == 2) ? 1 : 0;
         y = (i == 2 || i == 3) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(0, height * y, sizeZ * z));
+        vertices->pushToExistingArray(glm::vec3(0, y, 1 * z));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, sizeZ * z));
-        addColorVertex(glm::vec3(.1f));
-    }
-    for (int i = 0; i < 2; i++) {
-        y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(0, height * y, 0));
-        addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(origin + glm::vec3(0, height * y, sizeZ));
-        addColorVertex(glm::vec3(.1f));
-    }
-    for (int i = 0; i < 2; i++) {
-        z = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(0, 0, sizeZ * z));
-        addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(origin + glm::vec3(0, height, sizeZ * z));
+        vertices->pushToExistingArray(glm::vec3(1, y, 1 * z));
         addColorVertex(glm::vec3(.1f));
     }
     for (int i = 0; i < 2; i++) {
         y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, 0));
+        vertices->pushToExistingArray(glm::vec3(0, y, 0));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, height * y, sizeZ));
+        vertices->pushToExistingArray(glm::vec3(0, y, 1));
         addColorVertex(glm::vec3(.1f));
     }
     for (int i = 0; i < 2; i++) {
         z = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, 0, sizeZ * z));
+        vertices->pushToExistingArray(glm::vec3(0, 0, 1 * z));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(origin + glm::vec3(sizeX, height, sizeZ * z));
+        vertices->pushToExistingArray(glm::vec3(0, 1, 1 * z));
+        addColorVertex(glm::vec3(.1f));
+    }
+    for (int i = 0; i < 2; i++) {
+        y = (i == 1) ? 1 : 0;
+        vertices->pushToExistingArray(glm::vec3(1, y, 0));
+        addColorVertex(glm::vec3(.1f));
+        vertices->pushToExistingArray(glm::vec3(1, y, 1));
+        addColorVertex(glm::vec3(.1f));
+    }
+    for (int i = 0; i < 2; i++) {
+        z = (i == 1) ? 1 : 0;
+        vertices->pushToExistingArray(glm::vec3(1, 0, 1 * z));
+        addColorVertex(glm::vec3(.1f));
+        vertices->pushToExistingArray(glm::vec3(1, 1, 1 * z));
         addColorVertex(glm::vec3(.1f));
     }
 }
-
-//void CuboidArray_POT::buildEdges()
-    //for (int countZ = 0; countZ < numPadsZ; countZ++)
-    //{
-    //    for (int countX = 0; countX < numPadsX; countX++)
-    //    {
-    //        vertices->allocateNewArray();
-    //        int x = 0, y = 0, z = 0;
-    //        for (int i = 0; i < 4; i++) {
-    //            z = (i == 1 || i == 2) ? 1 : 0;
-    //            y = (i == 2 || i == 3) ? 1 : 0;
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX,
-    //                height * y, countZ * sizeZ + countZ * padSeparationZ + z * sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX + sizeX,
-    //                height * y, countZ * sizeZ + countZ * padSeparationZ + z * sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //        }
-    //        for (int i = 0; i < 2; i++) {
-    //            y = (i == 1) ? 1 : 0;
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX,
-    //                height * y, countZ * sizeZ + countZ * padSeparationZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX,
-    //                height * y, countZ * sizeZ + countZ * padSeparationZ + sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //        }
-    //        for (int i = 0; i < 2; i++) {
-    //            z = (i == 1) ? 1 : 0;
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX,
-    //                0, countZ * sizeZ + countZ * padSeparationZ + z * sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX,
-    //                height, countZ * sizeZ + countZ * padSeparationZ + z * sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //        }
-    //        for (int i = 0; i < 2; i++) {
-    //            y = (i == 1) ? 1 : 0;
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX + sizeX,
-    //                height * y, countZ * sizeZ + countZ * padSeparationZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX + sizeX,
-    //                height * y, countZ * sizeZ + countZ * padSeparationZ + z * sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //        }
-    //        for (int i = 0; i < 2; i++) {
-    //            z = (i == 1) ? 1 : 0;
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX + sizeX,
-    //                0, countZ * sizeZ + countZ * padSeparationZ + z * sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //            vertices->pushToExistingArray(origin + glm::vec3(countX * sizeX + countX * padSeparationX + sizeX,
-    //                height, countZ * sizeZ + countZ * padSeparationZ + z * sizeZ));
-    //            addColorVertex(glm::vec3(.1f));
-    //        }
-    //    }
-    //}
-//}
 
 void CuboidArray_POT::build()
 {
-    instancePositions->clear();
-    vertices->clear();
     VAOs->clear();
     buildVertices();
     buildVAOs();
+    rebuiltExpected = true;
 }
+
+void CuboidArray_POT::rebuild()
+{
+    instancePositions->clear();
+    setInstancePositions();
+
+    for (int i = 0; i < vertices->getSize(); i++)
+    {
+        glBindVertexArray(VAOs->at(i));
+        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO[i]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, 
+            instancePositions->size() * sizeof(glm::vec3), 
+            instancePositions->data());
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    translationVector = origin;
+    scalingVector = glm::vec3(1.0f, height, 1.0f);
+
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, translationVector);
+    modelMatrix = glm::scale(modelMatrix, scalingVector);
+}
+
 
 void CuboidArray_POT::draw()
 {
+    shader->bind();
     if (rebuiltExpected) {
-        build();
+        rebuild();
         rebuiltExpected = false;
     }
-    shader->bind();
-    //std::cout << vertices->getSize() << std::endl;
-    glBindVertexArray(VAOs->at(0));  // Bind the VAO
 
-    // Use instanced drawing here, e.g., glDrawArraysInstanced
+    glUniformMatrix4fv(shader->getUniformLocation("model"), 1, GL_FALSE, 
+        glm::value_ptr(modelMatrix));
+    shader->setUniform1f("sizeX", sizeX);
+    shader->setUniform1f("sizeZ", sizeZ);
+
+    glBindVertexArray(VAOs->at(0));
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0,
         static_cast<GLsizei>(vertices->at(0)->size() / 2),
         numPadsX * numPadsZ);
     glBindVertexArray(0);
 
-
-    glBindVertexArray(VAOs->at(1));  // Bind the VAO
-    glDrawArraysInstanced(GL_LINES, 0,
-        static_cast<GLsizei>(vertices->at(1)->size() / 2),
-        numPadsX * numPadsZ);
-    glBindVertexArray(0);
-
-
-    //if (edgesOn) {
-    //    for (int i = numPadsX * numPadsZ * 3; i < vertices->getSize(); i++) {
-    //        glBindVertexArray(VAOs->at(i));
-    //        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(i)->size()));
-    //        glBindVertexArray(0);
-    //    }
-    //}
+    if (edgesOn) {
+        glBindVertexArray(VAOs->at(1));
+        glDrawArraysInstanced(GL_LINES, 0,
+            static_cast<GLsizei>(vertices->at(1)->size() / 2),
+            numPadsX * numPadsZ);
+        glBindVertexArray(0);
+    }
     shader->unbind();
 }
-
-//void CuboidArray_POT::draw()
-//{
-//    if (rebuiltExpected) {
-//        build();
-//        rebuiltExpected = false;
-//    }
-//    shader->bind();
-//    //std::cout << vertices->getSize() << std::endl;
-//    for (int i = 0; i < numPadsX * numPadsZ * 3; i++) {
-//        glBindVertexArray(VAOs->at(i));
-//        glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
-//        glBindVertexArray(0);
-//    }
-//    //if (edgesOn) {
-//    //    for (int i = numPadsX * numPadsZ * 3; i < vertices->getSize(); i++) {
-//    //        glBindVertexArray(VAOs->at(i));
-//    //        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(i)->size()));
-//    //        glBindVertexArray(0);
-//    //    }
-//    //}
-//    shader->unbind();
-//}
 
 bool CuboidArray_POT::intersectionCheck(glm::vec3 v)
 {
@@ -393,10 +220,24 @@ void CuboidArray_POT::setScaleL(float l)
 {
     float totalPadSeparation = l - sizeX * numPadsX;
     padSeparationX = totalPadSeparation / (numPadsX - 1);
+    if (padSeparationX < MIN_PAD_SEPARATION_SIZE) {
+        padSeparationX = MIN_PAD_SEPARATION_SIZE;
+    }
+    else if (padSeparationX > MAX_PAD_SEPARATION_SIZE) {
+        padSeparationX = MAX_PAD_SEPARATION_SIZE;
+    }
+    length = sizeX * numPadsX + padSeparationX * (numPadsX - 1);
 }
 
 void CuboidArray_POT::setScaleW(float w)
 {
     float totalPadSeparation = w - sizeZ * numPadsZ;
     padSeparationZ = totalPadSeparation / (numPadsZ - 1);
+    if (padSeparationZ < MIN_PAD_SEPARATION_SIZE) {
+        padSeparationZ = MIN_PAD_SEPARATION_SIZE;
+    }
+    else if (padSeparationZ > MAX_PAD_SEPARATION_SIZE) {
+        padSeparationZ = MAX_PAD_SEPARATION_SIZE;
+    }
+    width = sizeZ * numPadsZ + padSeparationZ * (numPadsZ - 1);
 }

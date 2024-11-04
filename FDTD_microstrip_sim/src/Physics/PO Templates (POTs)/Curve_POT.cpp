@@ -38,9 +38,14 @@ void Curve_POT::build()
     buildVAOs();
 }
 
+void Curve_POT::rebuild()
+{
+    buildVAOs();
+}
+
 void Curve_POT::draw()
 {
-    build();
+    rebuild();
     shader->bind();
     shader->setUniform3f("color", 0.0f, 0.0f, 1.0f);
     for (int i = 0; i < VAOs->getSize(); i++) {

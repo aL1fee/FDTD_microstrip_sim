@@ -101,10 +101,18 @@ void Cuboid_POT::build()
     buildVAOs();
 }
 
+void Cuboid_POT::rebuild()
+{
+    vertices->clear();
+    VAOs->clear();
+    buildVertices();
+    buildVAOs();
+}
+
 void Cuboid_POT::draw()
 {
     if (rebuiltExpected) {
-        build();
+        rebuild();
         rebuiltExpected = false;
     }
     shader->bind();

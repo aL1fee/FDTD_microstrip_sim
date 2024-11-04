@@ -14,13 +14,20 @@ PhysicalObject::PhysicalObject()
 	color = glm::vec3(1.0f, 0.0f, 0.0f);
 	permittivity = 0.0f;
 	conductivity = 0.0f;
-	rebuiltExpected = true;
+	rebuiltExpected = false;
+	builtExpected = true;
 	isInteractable = true;
 	edgesOn = true;
 	shader = nullptr;
 	propertyMap = new std::vector<std::pair<std::string, float*>>();
 	propertyMapInt = new std::vector<std::pair<std::string, int*>>();
 	id = physicalObjectNextId++;
+
+	translationVector = glm::vec3(1.0f);
+	scalingVector = glm::vec3(1.0f);
+	rotationVector = glm::vec3(1.0f);
+	rotationAngle = 0.0f;
+	modelMatrix = glm::mat4(1.0f);
 }
 
 PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh)
@@ -35,13 +42,20 @@ PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3
 	color = col;
 	permittivity = perm;
 	conductivity = cond;
-	rebuiltExpected = true;
+	rebuiltExpected = false;
+	builtExpected = true;
 	isInteractable = true;
 	edgesOn = true;
 	shader = sh;
 	propertyMap = new std::vector<std::pair<std::string, float*>>();
 	propertyMapInt = new std::vector<std::pair<std::string, int*>>();
 	id = physicalObjectNextId++;
+
+	translationVector = glm::vec3(1.0f);
+	scalingVector = glm::vec3(1.0f);
+	rotationVector = glm::vec3(1.0f);
+	rotationAngle = 0.0f;
+	modelMatrix = glm::mat4(1.0f);
 }
 
 PhysicalObject::~PhysicalObject()

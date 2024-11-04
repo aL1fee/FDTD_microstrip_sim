@@ -31,16 +31,21 @@ Plan:
 #cuboid scaling
 #delete all lines option
 #implement x-direction cylindrical power sources and detectors
+#restructure tuning pads drawing: use instanced rendering or batching to lower vao# from 10000 to 2 (50x50 case)
+#implement another method of not rebuilding the same object w/ transformations. use the model matrix
+#tuning pads fix pad size rendering
+#implement tuning pads (scaling issues, test edge cases)
 
 
 
-*restructure tuning pads drawing: use instanced rendering or batching to lower vao# from 10000 (50x50 case)
-*implement another model of not rebuilding the same object w/ transformations. use the model matrix
-*implement tuning pads (scaling issues, edge cases)
 
 
 
+*implement the model matrix for modyfing vectors and stop deleting its shader on update. take care of memory leaks on deselecting objs.
 *implement wires
+
+
+
 
 
 *implement ribbon

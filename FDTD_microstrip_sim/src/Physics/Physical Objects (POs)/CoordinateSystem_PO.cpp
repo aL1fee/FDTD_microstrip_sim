@@ -79,8 +79,20 @@ void CoordinateSystem_PO::build()
     buildVAOs();
 }
 
+void CoordinateSystem_PO::rebuild()
+{
+    vertices->clear();
+    VAOs->clear();
+    buildVertices();
+    buildVAOs();
+}
+
 void CoordinateSystem_PO::draw()
 {
+    if (rebuiltExpected) {
+        rebuild();
+        rebuiltExpected = false;
+    }
     shader->bind();
     for (int i = 0; i < vertices->getSize(); i++) {
         glBindVertexArray(VAOs->at(i));

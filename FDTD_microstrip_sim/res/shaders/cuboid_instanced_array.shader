@@ -7,13 +7,20 @@ layout (location = 2) in vec3 aOffset;
 
 out vec3 vertexColor;
 
-
+uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+uniform float sizeX;
+uniform float sizeZ;
+
 void main()
 {
-    vec4 worldPosition = vec4(aPos + aOffset, 1.0);
+    vec3 scaledPos = aPos;
+    scaledPos.x *= sizeX;
+    scaledPos.z *= sizeZ;
+
+    vec4 worldPosition = model * vec4(scaledPos, 1.0) + vec4(aOffset, 0.0);
     gl_Position = proj * view * worldPosition;
 
     vertexColor = aColor;

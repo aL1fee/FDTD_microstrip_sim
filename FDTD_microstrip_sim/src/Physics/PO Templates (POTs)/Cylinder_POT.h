@@ -24,6 +24,9 @@ protected:
 	void buildVAOs() override;
 	void buildEdges() override;
 
+	void rebuild() override;
+
+
 public:
 	Cylinder_POT(glm::vec3 o, glm::vec3 dir, float r, float l,
 		glm::vec3 col, float perm, float cond, Shader* sh) :

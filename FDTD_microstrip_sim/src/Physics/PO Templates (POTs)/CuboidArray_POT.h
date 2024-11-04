@@ -12,6 +12,8 @@ protected:
 	float padSeparationX;
 	float padSeparationZ;
 
+	unsigned int instanceVBO[2];
+
 	std::vector<glm::vec3>* instancePositions;
 
 	void buildVertices() override;
@@ -34,10 +36,13 @@ public:
 		length = numPadsX * sizeX + (numPadsX - 1) * padSeparationX;
 		width = numPadsZ * sizeZ + (numPadsZ - 1) * padSeparationZ;
 		instancePositions = new std::vector<glm::vec3>();
+		instanceVBO[0] = 0;
+		instanceVBO[1] = 1;
 		//objectType = CUBOID;
 	}
 
 	void build() override;
+	void rebuild() override;
 	void draw() override;
 	bool intersectionCheck(glm::vec3 v) override;
 	void clear() override {}

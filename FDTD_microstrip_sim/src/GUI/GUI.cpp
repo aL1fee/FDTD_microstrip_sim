@@ -180,7 +180,7 @@ void GUI::buildMenuUpperPanel()
 				_acceptingLeftClickBufferInput = true;
 
 				s = "> Adding a tuning pad array";
-				_scene_main->addTuningPadArray(s, glm::vec3(.5f, .1f, 1.0), 19, 2,
+				_scene_main->addTuningPadArray(s, glm::vec3(0.0f, .0f, 1.0), 19, 2,
 					.15f, .1f, .08f, .08f, glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
 				//_scene_main->addTuningPadArray(s, glm::vec3(0.0f), 3, 2, .2f, .2f, .2f, .2f,
 				//	glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
@@ -444,14 +444,21 @@ void GUI::buildLeftPanel()
 					if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue)) {
 						// TODO only rebuild the object which property had been updated
 						if (it->first == "Length" || it->first == "Width" ||
-							it->first == "Height" || it->first == "Radius" ||
-							it->first == "X pad size" || it->first == "Z pad size" ||
-							it->first == "X pad separation" || it->first == "Z pad separation") {
+							it->first == "Height" || it->first == "Radius") {
 							if (*propertyValue < MIN_OBJECT_SIZE) {
 								*propertyValue = MIN_OBJECT_SIZE;
 							}
 							if (*propertyValue > MAX_OBJECT_SIZE) {
 								*propertyValue = MAX_OBJECT_SIZE;
+							}
+						}
+						if (it->first == "X pad separation" || it->first == "Z pad separation" ||
+							it->first == "X pad size" || it->first == "Z pad size") {
+							if (*propertyValue < MIN_PAD_SEPARATION_SIZE) {
+								*propertyValue = MIN_PAD_SEPARATION_SIZE;
+							}
+							if (*propertyValue > MAX_PAD_SEPARATION_SIZE) {
+								*propertyValue = MAX_PAD_SEPARATION_SIZE;
 							}
 						}
 						activeObj->setRebuiltExpected(true);

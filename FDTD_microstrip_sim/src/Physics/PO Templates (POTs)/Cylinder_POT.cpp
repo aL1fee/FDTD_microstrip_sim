@@ -77,10 +77,18 @@ void Cylinder_POT::build()
     buildVAOs();
 }
 
+void Cylinder_POT::rebuild()
+{
+    vertices->clear();
+    VAOs->clear();
+    buildVertices();
+    buildVAOs();
+}
+
 void Cylinder_POT::draw()
 {
     if (rebuiltExpected) {
-        build();
+        rebuild();
         rebuiltExpected = false;
     }
     shader->bind();

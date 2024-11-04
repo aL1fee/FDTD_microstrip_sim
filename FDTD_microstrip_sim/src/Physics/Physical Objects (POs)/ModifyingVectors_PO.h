@@ -40,6 +40,8 @@ private:
 	void constructTranslationArrows();
 	void constructScalingArrows();
 
+	void rebuild() override;
+
 
 public:
 	ModifyingVectors_PO(float s, ModyfingVectorType t, glm::vec3 c, Shader* sh);

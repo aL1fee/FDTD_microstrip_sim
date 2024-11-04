@@ -10,9 +10,12 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "glm.hpp"
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 #include <gtx/string_cast.hpp>
 
+#include "../Macros.h"
 
 #include "../Geometry/GeometricalObject.h"
 #include "../Setup/Shader.h"
@@ -36,6 +39,7 @@ protected:
 	float permittivity;
 	float conductivity;
 	bool rebuiltExpected;
+	bool builtExpected;
 	bool isInteractable;
 	Shader* shader;
 	std::vector<std::pair<std::string, float*>>* propertyMap;
@@ -52,8 +56,10 @@ public:
 	std::vector<std::pair<std::string, int*>>* getPropertyMapInt() { return propertyMapInt; }
 
 	bool needsRebuilding() { return rebuiltExpected; }
+	bool needsBuilding() { return builtExpected; }
 	bool interactable() const { return isInteractable; }
 	void setRebuiltExpected(bool b) { rebuiltExpected = b; }
+	void setBuiltExpected(bool b) { builtExpected = b; }
 
 	std::string getShaderName() const { return shader->getName(); }
 	unsigned int getId() const { return id; }

@@ -9,6 +9,9 @@ protected:
 	void buildVAOs() override;
 	void buildEdges() override;
 
+	void rebuild() override;
+
+
 public:
 	Cuboid_POT(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh) :
 		PhysicalObject(o, l, w, h, col, perm, cond, sh) 

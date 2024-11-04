@@ -26,6 +26,8 @@ protected:
 	void buildVAOs() override;
 	void buildEdges() override {}
 
+	void rebuild() override;
+
 
 public:
 	Curve_POT(Shader* sh);

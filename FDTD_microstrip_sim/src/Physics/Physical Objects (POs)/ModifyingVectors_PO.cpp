@@ -241,8 +241,20 @@ void ModifyingVectors_PO::build()
     buildVAOs();
 }
 
+void ModifyingVectors_PO::rebuild()
+{
+    vertices->clear();
+    VAOs->clear();
+    buildVertices();
+    buildVAOs();
+}
+
 void ModifyingVectors_PO::draw()
 {
+    if (rebuiltExpected) {
+        rebuild();
+        rebuiltExpected = false;
+    }
     glDisable(GL_DEPTH_TEST);
     shader->bind();
     switch (type) {
