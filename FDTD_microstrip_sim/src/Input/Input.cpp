@@ -23,6 +23,12 @@ extern bool _selectingObjectPressed;
 extern bool _resizing;
 extern bool _rayExpected;
 
+extern bool _wireInputExpected;
+extern bool _wireInputPressed;
+extern bool _wireFirstXZPlanePoint;
+extern glm::vec3 _wireFirstPoint;
+
+
 extern bool _windowS1On;
 extern bool _windowS2On;
 
@@ -45,7 +51,7 @@ Input::Input(GLFWwindow* w)
 {
 	window = w;
     potentialPressedGLFWButtons = new std::vector<int>();
-    inputBuffer = new InputBuffer();
+    inputBuffer = new InputBuffer(window);
 }
 
 void Input::processInput()
@@ -56,6 +62,8 @@ void Input::processInput()
     _cameraRotationAboutPointOn = false;
     _cameraVerticalRotationAboutPointOn = false;
     _cameraTranslationalMotionOn = false;
+
+    inputBuffer->processKeyStates();
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cam->moveForward(_deltaTime);
@@ -69,13 +77,17 @@ void Input::processInput()
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         cam->moveRight(_deltaTime);
     }
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && 
+        !inputBuffer->checkKeyState(GLFW_KEY_T)) {
         _scene_main->deleteModifyingVectors();
         _scene_main->buildModifyingVectors(_scene_main->getActiveObject(), Translation);
+        inputBuffer->setKeyState(GLFW_KEY_T, true);
     }
-    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS &&
+        !inputBuffer->checkKeyState(GLFW_KEY_Y)) {
         _scene_main->deleteModifyingVectors();
         _scene_main->buildModifyingVectors(_scene_main->getActiveObject(), Scaling);
+        inputBuffer->setKeyState(GLFW_KEY_Y, true);
     }
     if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
         _scene_main->deleteActiveObject();
@@ -107,6 +119,70 @@ void Input::processInput()
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_RELEASE) {
         _middleMouseReleaseExpected = false;
     }
+
+
+
+
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
+        _wireInputExpected)
+    {
+        _wireInputPressed = true;
+
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        glm::vec3 rayNDC = Utility::screenToNDC(window,
+            static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
+        glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+        glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+        glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+
+        //calculate intersection of the mouse with x-z plane
+        glm::vec3 rayOrigin = cam->getPos();
+        glm::vec3 rayDir = glm::vec3(rayWorld);
+
+        glm::vec3 planeNormal = glm::vec3(1.0f, 0.0f, 0.0f);
+        glm::vec3 planePoint = _wireFirstPoint;
+
+        if (_wireFirstXZPlanePoint) 
+        {
+            planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+            planePoint = _scene_main->getHighestClickedObjPoint();
+            //planePoint = glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+
+
+        float denom = glm::dot(planeNormal, rayDir);
+        glm::vec3 intersectionPoint = glm::vec3(0.0f);
+        if (fabs(denom) > 1e-6) {
+            float t = glm::dot(planeNormal, (planePoint - rayOrigin)) / denom;
+            intersectionPoint = rayOrigin + t * rayDir;
+        }
+        if (_wireFirstXZPlanePoint)
+        {
+            _wireFirstXZPlanePoint = false;
+            _wireFirstPoint = intersectionPoint;
+        }
+
+        _scene_main->getActiveWire()->addPoint(intersectionPoint);
+
+
+
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _wireInputPressed)
+    {
+
+        _scene_main->getTestingLine()->terminateLine();
+        _wireInputExpected = false;
+        _wireInputPressed = false;
+        _wireFirstXZPlanePoint = true;
+    }
+
+
+
+
+
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _testingLineExpected)
     {
         _testingLinePressed = true;

@@ -2,9 +2,10 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
-//#include <GLFW/glfw3.h>
-////#include <glad/glad.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -13,17 +14,14 @@
 class InputBuffer
 {
 private:
-	std::vector<glm::vec3>* leftClickBuffer;
-
+	std::unordered_map<int, bool> keyStateMap;
+	GLFWwindow* window;
+	void initializeKeys();
 
 public:
-	InputBuffer();
+	InputBuffer(GLFWwindow* w);
 
-	void addLeftClick(glm::vec3 v);
-	void clearLeftClickBuffer();
-	glm::vec3 getLeftClick(int i) const;
-
-
-
-
+	void processKeyStates();
+	bool checkKeyState(int key);
+	void setKeyState(int key, bool val);
 };

@@ -15,6 +15,7 @@
 #include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
 #include "../Physics/Physical Objects (POs)/TuningPadArray_PO.h"
 #include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
+#include "../Physics//PO Templates (POTs)/DimensionalCurve_POT.h"
 
 #include "../Data Structures/VertexVectorDS.h"
 #include "../Data Structures/VAOVectorDS.h"
@@ -39,6 +40,10 @@ private:
 
 	float nearPlaneValue;
 	float farPlaneValue;
+
+	DimensionalCurve_POT* activeWire;
+
+	glm::vec3 highestClickedObjPoint;
 
 	//VertexVectorDS* modifyingVectorsVertices;
 	//VAOVectorDS* modifyingVectorsVAOs;
@@ -71,7 +76,8 @@ public:
 	void addTuningPadArray(std::string& s, glm::vec3 o, int npX, int npZ,
 		float padSepX, float padSepZ, float sX, float sZ, glm::vec3 col,
 		float perm, float cond);
-
+	void addWire(std::string& s, glm::vec3 o, float l, float w, float h, 
+		glm::vec3 col, float perm, float cond);
 
 	void deleteActiveObject();
 	void deleteAllObjects();
@@ -103,4 +109,10 @@ public:
 	void postObjectInsertionSetup();
 
 	void clearLines();
+
+	DimensionalCurve_POT* getActiveWire();
+
+	glm::vec3 getHighestClickedObjPoint();
+
+
 };

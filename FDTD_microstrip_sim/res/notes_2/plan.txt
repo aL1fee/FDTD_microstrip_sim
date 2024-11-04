@@ -26,7 +26,7 @@ Plan:
 #make a camera that rotates around a given object when you click on scrolling button
 #added near/far plane settigns to the view
 #ability to translate objects 
-#ray casting at plane
+#ray casting at planes
 #add vertical rotation at left shift + middle mouse
 #cuboid scaling
 #delete all lines option
@@ -35,26 +35,23 @@ Plan:
 #implement another method of not rebuilding the same object w/ transformations. use the model matrix
 #tuning pads fix pad size rendering
 #implement tuning pads (scaling issues, test edge cases)
+#stop deleting mod vecs shader on update. handle its button presses efficiently
 
 
 
 
 
-
-*implement the model matrix for modyfing vectors and stop deleting its shader on update. take care of memory leaks on deselecting objs.
 *implement wires
+*Wires RAM issues
 
 
 
 
 
-*implement ribbon
 
 *implement a hierarchy data structure to store elements & its properties of a scene
 
-
 *add secondary lines to all objects
-
 
 *test the program on another PC
 
@@ -70,12 +67,14 @@ Plan:
 
 *copying and pasting
 
+*consider undoing
+
 *differentiate b/n noninteractable and nondeletable
 
 
 
 
-start with/ FDTD
+start with/ FDTD (11/18 at the latest!)
 pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 
@@ -87,7 +86,8 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 
 ======Memory leaks and performance TODO:
 1. delete heap elements in object destructors that are children of physicalObject
-
+2. Memory leaks from some objects
+3. RAM issues from some objects
 
 ======Not a priority improvements TODO:
 -1. GPU model matrix manipulation for CPU usage reduction
@@ -103,6 +103,13 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 9. issues w/ y translation
 10. apply textures to carriers, substrates, traces
 11. implement all directions cylindrical power sources and detectors
+12. implement the model matrix for modyfing vectors 
+13. undo
+14. redo
+15. implement ribbons
+
+
+
 
 ------
 future:

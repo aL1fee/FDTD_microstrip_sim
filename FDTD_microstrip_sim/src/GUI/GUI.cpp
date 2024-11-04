@@ -118,6 +118,20 @@ void GUI::buildMenuUpperPanel()
 				_testingLineExpected = true;
 
 			}
+			if (ImGui::MenuItem("Wire"))
+			{
+				//extern bool _acceptingLeftClickBufferInput;
+				//extern bool _testingLineExpected;
+				//_testingLineExpected = true;
+				extern bool _wireInputExpected;
+				_wireInputExpected = true;
+
+				s = "> Adding a wire";
+				_scene_main->addWire(s, glm::vec3(0.0f), 0.0f, 0.0f, 0.0f,
+					glm::vec3(1.0f, 0.0f, 0.0f), 25, 560);
+
+
+			}
 			if (ImGui::MenuItem("Carrier"))
 			{
 				extern bool _acceptingLeftClickBufferInput;

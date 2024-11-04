@@ -17,6 +17,8 @@ MainScene::MainScene(GLFWwindow* w)
 	nearPlaneValue = INITIAL_NEAR_PLANE_VALUE;
 	farPlaneValue = INITIAL_FAR_PLANE_VALUE;
 	modifyingVectors = nullptr;
+	activeWire = nullptr;
+	highestClickedObjPoint = glm::vec3(0.0f);
 	init();
 }
 
@@ -214,9 +216,7 @@ void MainScene::addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, flo
 void MainScene::addTuningPadArray(std::string& s, glm::vec3 o, int npX, int npZ,
 	float padSepX, float padSepZ, float sX, float sZ, glm::vec3 col, float perm, float cond)
 {
-	extern unsigned int physicalObjectNextId;
 	Shader* shader;
-	//std::string name = "Cuboid Instanced Array" + std::to_string(physicalObjectNextId);
 	std::string name = "Cuboid Instanced Array";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
@@ -232,6 +232,30 @@ void MainScene::addTuningPadArray(std::string& s, glm::vec3 o, int npX, int npZ,
 	tuningArrayPaw_PO->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(tuningArrayPaw_PO->getId(), tuningArrayPaw_PO));
 	postObjectInsertionSetup();
+}
+
+void MainScene::addWire(std::string& s, glm::vec3 o, float l, float w, 
+	float h, glm::vec3 col, float perm, float cond)
+{
+	Shader* shader;
+	std::string name = "Wire";
+	if (shaderMap->find(name) == shaderMap->end())
+	{
+		shader = new Shader("res/shaders/testingline.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
+	}
+	else {
+		shader = shaderMap->at(name);
+	}
+	shader->incrNumObjectsServed();
+	DimensionalCurve_POT* wire = new DimensionalCurve_POT(o, l, w, h, col, perm, cond, shader);
+	//powerSourcePO->updatePropertyMap();
+	physicalObjectBuffer->insert(std::make_pair(wire->getId(), wire));
+	postObjectInsertionSetup();
+
+
+
+	activeWire = wire;
 }
 
 void MainScene::eraseShaderMapOneInstance(std::string name)
@@ -324,6 +348,8 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 			}
 			if (obj->intersectionCheck(rayPos)) {
 				std::cout << "object selected!" << std::endl;
+				highestClickedObjPoint = *obj->getOrigin() +
+					glm::vec3(0.0f, *obj->getHeight(), 0.0f);
 				propertyWindow->addPropertyMap(obj->getPropertyMap());
 				propertyWindow->addPropertyMapInt(obj->getPropertyMapInt());
 				propertyWindow->updateActiveObject(obj);
@@ -345,6 +371,7 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 	propertyWindow->setDefaultPropertyMap();
 	propertyWindow->updateActiveObject(nullptr);
 	deleteModifyingVectors();
+	highestClickedObjPoint = glm::vec3(0.0f);
 	std::cout << "no objects found!" << std::endl;
 }
 
@@ -356,7 +383,17 @@ void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType ty
 	}
 	ModifyingVectors_PO* ret = nullptr;
 
-	Shader* shader = new Shader("res/shaders/generic.shader", 1, "Generic shader");
+	Shader* shader;
+	std::string name = "Generic shader";
+	if (shaderMap->find(name) == shaderMap->end())
+	{
+		shader = new Shader("res/shaders/generic.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
+	}
+	else {
+		shader = shaderMap->at(name);
+	}
+
 	switch (type) {
 	case Translation:
 		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
@@ -376,6 +413,8 @@ void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType ty
 	if (ret != nullptr)
 	{
 		modifyingVectors = ret;
+		//increment twice not to recreate the same shader each time
+		shader->incrNumObjectsServed();
 		shader->incrNumObjectsServed();
 		physicalObjectBuffer->insert(std::make_pair(ret->getId(), ret));
 		shaderMap->insert(std::make_pair(shader->getName(), shader));
@@ -409,4 +448,17 @@ void MainScene::postObjectInsertionSetup()
 void MainScene::clearLines()
 {
 	testingLine->clear();
+}
+
+DimensionalCurve_POT* MainScene::getActiveWire()
+{
+	if (activeWire != nullptr)
+	{
+		return activeWire;
+	}
+}
+
+glm::vec3 MainScene::getHighestClickedObjPoint()
+{
+	return highestClickedObjPoint;
 }

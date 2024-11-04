@@ -138,6 +138,9 @@
     <ClInclude Include="src\Physics\PO Templates (POTs)\CuboidArray_POT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Physics\PO Templates (POTs)\DimensionalCurve_POT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.cpp">
@@ -252,6 +255,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics\Physical Objects (POs)\TuningPadArray_PO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\PO Templates (POTs)\DimensionalCurve_POT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

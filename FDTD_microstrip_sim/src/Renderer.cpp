@@ -18,6 +18,11 @@ bool _cameraVerticalRotationAboutPointOn = false;
 
 bool _rayExpected = false;
 
+bool _wireInputExpected = false;
+bool _wireInputPressed = false;
+bool _wireFirstXZPlanePoint = true;
+glm::vec3 _wireFirstPoint = glm::vec3(0.0f);
+
 bool _windowS1On = false;
 bool _windowS2On = false;
 

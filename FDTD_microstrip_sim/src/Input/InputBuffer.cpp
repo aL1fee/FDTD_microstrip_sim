@@ -1,21 +1,39 @@
 #include "InputBuffer.h"
 
-InputBuffer::InputBuffer()
+InputBuffer::InputBuffer(GLFWwindow* w)
 {
-	leftClickBuffer = new std::vector<glm::vec3>();
+    window = w;
+	initializeKeys();
 }
 
-void InputBuffer::addLeftClick(glm::vec3 v)
+void InputBuffer::initializeKeys()
 {
-	leftClickBuffer->push_back(v);
+    keyStateMap[GLFW_KEY_T] = false;
+    keyStateMap[GLFW_KEY_Y] = false;
 }
 
-void InputBuffer::clearLeftClickBuffer()
+void InputBuffer::processKeyStates()
 {
-	leftClickBuffer->clear();
+    for (const auto& key : keyStateMap)
+    {
+        int currentState = glfwGetKey(window, key.first);
+        if (currentState == GLFW_RELEASE)
+        {
+            keyStateMap[key.first] = false;
+        }
+    }
 }
 
-glm::vec3 InputBuffer::getLeftClick(int i) const
+bool InputBuffer::checkKeyState(int key)
 {
-	return leftClickBuffer->at(i);
+    return keyStateMap[key];
 }
+
+void InputBuffer::setKeyState(int key, bool val)
+{
+    keyStateMap[key] = val;
+}
+
+
+
+
