@@ -15,7 +15,9 @@
 #include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
 #include "../Physics/Physical Objects (POs)/TuningPadArray_PO.h"
 #include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
-#include "../Physics//PO Templates (POTs)/DimensionalCurve_POT.h"
+#include "../Physics/Physical Objects (POs)/Wire_PO.h"
+
+//#include "../Physics//PO Templates (POTs)/DimensionalCurve_POT.h"
 
 #include "../Data Structures/VertexVectorDS.h"
 #include "../Data Structures/VAOVectorDS.h"
@@ -114,5 +116,7 @@ public:
 
 	glm::vec3 getHighestClickedObjPoint();
 
+	void updateHighestClickedObjPoint(glm::vec3 pos, glm::vec3 dir);
+	PhysicalObject* higherPointObject(glm::vec3 v, glm::vec3 maxV);
 
 };

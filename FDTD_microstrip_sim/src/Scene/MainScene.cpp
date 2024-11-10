@@ -248,8 +248,8 @@ void MainScene::addWire(std::string& s, glm::vec3 o, float l, float w,
 		shader = shaderMap->at(name);
 	}
 	shader->incrNumObjectsServed();
-	DimensionalCurve_POT* wire = new DimensionalCurve_POT(o, l, w, h, col, perm, cond, shader);
-	//powerSourcePO->updatePropertyMap();
+	Wire_PO* wire = new Wire_PO(o, l, w, h, col, perm, cond, shader);
+	wire->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(wire->getId(), wire));
 	postObjectInsertionSetup();
 
@@ -456,9 +456,72 @@ DimensionalCurve_POT* MainScene::getActiveWire()
 	{
 		return activeWire;
 	}
+	return nullptr;
 }
 
 glm::vec3 MainScene::getHighestClickedObjPoint()
 {
 	return highestClickedObjPoint;
 }
+
+void MainScene::updateHighestClickedObjPoint(glm::vec3 pos, glm::vec3 dir)
+{
+	glm::vec3 rayPos = pos;
+	float count = 0.0f;
+	if (modifyingVectors != nullptr)
+	{
+		while (count < SELECTING_OBJECT_RANGE)
+		{
+			glm::vec3 v = modifyingVectors->intersectionDirection(rayPos);
+			if (v != glm::vec3(0.0f))
+			{
+				_modifyingVectorsActivated = true;
+				_modifyingVectorsDirection = v;
+				return;
+			}
+			rayPos += dir * SELECTING_OBJECT_PRECISION;
+			count += SELECTING_OBJECT_PRECISION;
+		}
+	}
+	_modifyingVectorsActivated = false;
+	rayPos = pos;
+	count = 0.0f;
+	// checking for the rest of the objects
+	while (count < SELECTING_OBJECT_RANGE) {
+		for (auto& pair : *physicalObjectBuffer) {
+			PhysicalObject* obj = pair.second;
+			// make sure this check works
+			if (obj == modifyingVectors || obj->getObjectType() == CURVE) {
+				continue;
+			}
+			if (obj->intersectionCheck(rayPos)) {
+				highestClickedObjPoint = *obj->getOrigin() +
+					glm::vec3(0.0f, *obj->getHeight(), 0.0f);
+				return;
+			}
+		}
+		rayPos += dir * SELECTING_OBJECT_PRECISION;
+		count += SELECTING_OBJECT_PRECISION;
+	}
+}
+
+// ignores wires
+PhysicalObject* MainScene::higherPointObject(glm::vec3 v, glm::vec3 maxV)
+{
+	for (auto& pair : *physicalObjectBuffer) {
+		PhysicalObject* obj = pair.second;
+		if (obj == modifyingVectors || obj->getObjectType() == CURVE) {
+			continue;
+		}
+		if (obj->intersectionCheck(v)) {
+			float objYLoc = *obj->getOriginY() + *obj->getHeight();
+			if (objYLoc >= v.y &&
+				objYLoc < maxV.y)
+			{
+				return obj;
+			}
+		}
+	}
+	return nullptr;
+}
+

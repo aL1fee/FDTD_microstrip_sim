@@ -146,6 +146,7 @@
     <ClInclude Include="src\Physics\Physical Objects (POs)\PowerSource_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Trace_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\TuningPadArray_PO.h" />
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Wire_PO.h" />
     <ClInclude Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.h" />
     <ClInclude Include="src\Geometry\GeometricalObject.h" />
     <ClInclude Include="src\GUI\GUI.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="src\Physics\Physical Objects (POs)\Substrate_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\Trace_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\TuningPadArray_PO.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Wire_PO.cpp" />
     <ClCompile Include="src\Physics\PO Templates %28POTs%29\Cuboid_POT.cpp" />
     <ClCompile Include="src\GUI\GUI.cpp" />
     <ClCompile Include="src\GUI\PropertyWindow.cpp" />

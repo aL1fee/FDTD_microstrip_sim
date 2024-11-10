@@ -26,6 +26,7 @@ public:
 	void pushToIndArray(int i, glm::vec3 v);
 	void allocateNewArray();
 	void allocateNewEmptyArray();
+	void allocateNEmptyArrays(int n);
 
 	std::vector<glm::vec3>* at(int i) const;
 

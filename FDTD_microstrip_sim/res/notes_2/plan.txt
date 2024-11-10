@@ -36,40 +36,53 @@ Plan:
 #tuning pads fix pad size rendering
 #implement tuning pads (scaling issues, test edge cases)
 #stop deleting mod vecs shader on update. handle its button presses efficiently
+#implemented VAO and VBO deletion
+#implement wires
+#Wires RAM issues
+#polish wires; solve major issues. wires still very bad.
 
 
 
 
-
-*implement wires
-*Wires RAM issues
+	*implement ribbons
 
 
 
+	*implement a hierarchy data structure to store elements & its properties of a scene
+
+	*add secondary lines to all objects
+	*add string properties: name
+	*add bool properties: an option to turn on/off the edges
+	*add color properties
+
+	*test the program on another PC
 
 
 
-*implement a hierarchy data structure to store elements & its properties of a scene
 
-*add secondary lines to all objects
+11/11 - 11/16
 
-*test the program on another PC
+	*fix property window bugs, add features and appearance. apply units
 
+	*testingline and other curves rebuilding
 
-*?build cut corner-shaped surfaces
-*fix property window bugs, add features and appearance. apply units
+	*do status window (latest messages appear at the top; time, scroll history features)
 
-*draw custom polygons w/ properties
+	*copying and pasting
 
-*testingline and other curves rebuilding
+	*consider undoing
 
-*do status window (latest messages appear at the top; time, scroll history features)
+	*saving & loading feature
 
-*copying and pasting
+	*address RAM in allobjects
 
-*consider undoing
+	*implement ecosorbs
 
-*differentiate b/n noninteractable and nondeletable
+	*implement T attenuators
+
+	*create more systems
+
+	
 
 
 
@@ -80,8 +93,17 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 
 
 
+
+
+
+
+
+
+
+
 ======Bugs TODO:
 1. translation changes direction in y at certain cam angles
+2. stub array scaling after you modify parameters in the property window
 
 
 ======Memory leaks and performance TODO:
@@ -106,10 +128,10 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 12. implement the model matrix for modyfing vectors 
 13. undo
 14. redo
-15. implement ribbons
-
-
-
+16. build cut corner-shaped surfaces
+17. implement custom polygons w/ properties
+18. ?differentiate b/n noninteractable and nondeletable?
+19. implement better wires system; add model matrix, scaling, rotation, translation
 
 ------
 future:

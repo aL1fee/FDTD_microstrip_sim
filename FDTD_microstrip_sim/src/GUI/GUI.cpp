@@ -128,7 +128,7 @@ void GUI::buildMenuUpperPanel()
 
 				s = "> Adding a wire";
 				_scene_main->addWire(s, glm::vec3(0.0f), 0.0f, 0.0f, 0.0f,
-					glm::vec3(1.0f, 0.0f, 0.0f), 25, 560);
+					glm::vec3(1.0f, .843f, 0.0f), 25, 560);
 
 
 			}
@@ -473,6 +473,14 @@ void GUI::buildLeftPanel()
 							}
 							if (*propertyValue > MAX_PAD_SEPARATION_SIZE) {
 								*propertyValue = MAX_PAD_SEPARATION_SIZE;
+							}
+						}
+						if (it->first == "Diameter") {
+							if (*propertyValue < WIRE_MIN_DIAMETER) {
+								*propertyValue = WIRE_MIN_DIAMETER;
+							}
+							if (*propertyValue > WIRE_MAX_DIAMETER) {
+								*propertyValue = WIRE_MAX_DIAMETER;
 							}
 						}
 						activeObj->setRebuiltExpected(true);

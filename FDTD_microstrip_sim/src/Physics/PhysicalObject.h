@@ -29,7 +29,8 @@ enum PhysicalObjectType {
 	UNDEFINED,
 	CUBOID,
 	TRACE,
-	CYLINDER
+	CYLINDER,
+	CURVE
 };
 
 class PhysicalObject : public GeometricalObject
