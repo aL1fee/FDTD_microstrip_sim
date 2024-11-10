@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wires:
+	delete unfinished wires
+	start & end vertically
+	move the mouse slowly, espesically when close to finishing a bond

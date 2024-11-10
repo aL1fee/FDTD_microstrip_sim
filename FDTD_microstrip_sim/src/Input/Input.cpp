@@ -152,9 +152,7 @@ void Input::processInput()
             _scene_main->updateHighestClickedObjPoint(rayOrigin, rayDir);
             planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
             planePoint = _scene_main->getHighestClickedObjPoint();
-            //planePoint = glm::vec3(1.0f, 0.0f, 0.0f);
         }
-
 
         float denom = glm::dot(planeNormal, rayDir);
         glm::vec3 intersectionPoint = glm::vec3(0.0f);
@@ -171,56 +169,25 @@ void Input::processInput()
         PhysicalObject* higherPointObject = _scene_main->higherPointObject(intersectionPoint - glm::vec3(
             0.0f, CURVE_CHECK_HIGHER_POINT_OBJ_MARGIN , 0.0f), _scene_main->getActiveWire()->getMaxPoint());
 
-
         if (higherPointObject == nullptr && !_scene_main->getActiveWire()->isTerminated())
         {
             _scene_main->getActiveWire()->updateUnprocessedVertex(intersectionPoint);
         }
         else if (!_scene_main->getActiveWire()->isTerminated()) 
         {
-            ///std::cout << "bbb" << std::endl;
-
             if (!_scene_main->getActiveWire()->isLastPointEntered())
             {
-                //std::cout << "ccc" << std::endl;
-
                 curveTerminationPoint = glm::vec3(intersectionPoint.x,
                     *higherPointObject->getOriginY() + *higherPointObject->getHeight(),
                     intersectionPoint.z);
 
-                //std::cout << "curveTerminationPoint: " << glm::to_string(curveTerminationPoint) << std::endl; 
+                std::cout << "curveTerminationPoint: " << glm::to_string(curveTerminationPoint) << std::endl; 
 
                 _scene_main->getActiveWire()->setLastVertex(curveTerminationPoint);
                 _scene_main->getActiveWire()->updateUnprocessedVertex(curveTerminationPoint);
                 _scene_main->getActiveWire()->lastPointEntered(true);
             }
-            //_scene_main->getActiveWire()->updateUnprocessedVertex(curveTerminationPoint);
         }
-
-
-        //if (higherPointObject == nullptr && !_scene_main->getActiveWire()->isTerminated())
-        //{
-        //    _scene_main->getActiveWire()->updateUnprocessedVertex(intersectionPoint);
-        //}
-        //else if (!_scene_main->getActiveWire()->isTerminated())
-        //{
-        //    ///std::cout << "bbb" << std::endl;
-
-        //    if (!_scene_main->getActiveWire()->isLastPointEntered())
-        //    {
-        //        /// std::cout << "ccc" << std::endl;
-
-        //        curveTerminationPoint = glm::vec3(intersectionPoint.x,
-        //            *higherPointObject->getOriginY() + *higherPointObject->getHeight(),
-        //            intersectionPoint.z);
-        //        _scene_main->getActiveWire()->setLastVertex(curveTerminationPoint);
-        //        _scene_main->getActiveWire()->updateUnprocessedVertex(curveTerminationPoint);
-        //        _scene_main->getActiveWire()->lastPointEntered(true);
-
-        //    }
-        //    //_scene_main->getActiveWire()->updateUnprocessedVertex(curveTerminationPoint);
-        //}
-
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _wireInputPressed)
     {
@@ -230,11 +197,6 @@ void Input::processInput()
         _wireInputPressed = false;
         _wireFirstXZPlanePoint = true;
     }
-
-
-
-
-
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _testingLineExpected)
     {
         _testingLinePressed = true;

@@ -39,23 +39,27 @@ Plan:
 #implemented VAO and VBO deletion
 #implement wires
 #Wires RAM issues
-#polish wires; solve major issues. wires still very bad.
+#polish wires to a workable state; solve major issues. will need to redesign late
 
 
 
 
-	*implement ribbons
+
+
+implement ribbons
 
 
 
-	*implement a hierarchy data structure to store elements & its properties of a scene
 
-	*add secondary lines to all objects
-	*add string properties: name
-	*add bool properties: an option to turn on/off the edges
-	*add color properties
 
-	*test the program on another PC
+*add string properties: name
+*add bool properties: an option to turn on/off the edges
+*add color properties
+*add secondary lines to all objects
+*test the program on another PC
+
+
+*implement a hierarchy data structure to store elements & its properties of a scene
 
 
 
@@ -70,7 +74,7 @@ Plan:
 
 	*copying and pasting
 
-	*consider undoing
+	*undoing
 
 	*saving & loading feature
 
@@ -132,6 +136,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 17. implement custom polygons w/ properties
 18. ?differentiate b/n noninteractable and nondeletable?
 19. implement better wires system; add model matrix, scaling, rotation, translation
+20. implement wires in all directions
 
 ------
 future:

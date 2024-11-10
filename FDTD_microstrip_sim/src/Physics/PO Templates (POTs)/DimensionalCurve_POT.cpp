@@ -1,7 +1,6 @@
 #include "DimensionalCurve_POT.h"
 
-// process vertices 
-
+// process vertices to be more accurate
 void DimensionalCurve_POT::buildVertices()
 {
     if (processedVertices.size() == 0 && movementStarted)
@@ -10,8 +9,9 @@ void DimensionalCurve_POT::buildVertices()
         prevNormal1 = glm::vec3(1.0f, 0.0f, 0.0f);
         prevNormal2 = glm::vec3(0.0f, 0.0f, -1.0f);
         prevCenter = unprocessedVertex;
+        glm::vec3 prevTangent(0.0f);
         return;
-    } 
+    }
     else if (movementStarted && !curveTerminated)
     {
         glm::vec3 lastUnprocessedVertex = unprocessedVertex;
@@ -25,151 +25,14 @@ void DimensionalCurve_POT::buildVertices()
 
             processedVertices.push_back(newProcessedVec);
 
-            //if (curveTerminated && !lastVertexEntered)
-            //{
-            //    processedVertices.push_back(newProcessedVec);
-            //    lastVertexEntered = true;
-            //}
-
-            cylindersVertices->allocateNewArray();
-            crossSecVertices->allocateNewArray();
-
-            glm::vec3 tangent = glm::normalize(processedVertices.at(processedVertices.size() - 1) -
-                processedVertices.at(processedVertices.size() - 2));
-            glm::vec3 arbitraryUp(0.0f, 1.0f, 1.0f);
-
-            if (glm::abs(glm::dot(tangent, arbitraryUp)) > 0.99f) {
-                arbitraryUp = glm::vec3(1.0f, 0.0f, 0.0f);
-            }
-
-            glm::vec3 normal1 = glm::normalize(glm::cross(tangent, arbitraryUp));
-            glm::vec3 normal2 = glm::normalize(glm::cross(tangent, normal1));
-
-            glm::vec3 center = processedVertices.at(processedVertices.size() - 1);
-               
-
-            /*std::cout << "lastVtx: " << glm::to_string(lastVertex) << std::endl;
-            std::cout << "centr: " << glm::to_string(center) << std::endl;*/
-
-           // std::cout << "LKLLLL: " << glm::to_string(lastVertex) << std::endl;
-
-
-            //std::cout << "u: " << unprocessedVertex.y << std::endl;
-            //std::cout << "l: " << lastVertex.y << std::endl;
-
-
             if (unprocessedVertex.y <= lastVertex.y)
             {
                 curveTerminated = true;
-                crossSecVertices->allocateNewEmptyArray();
+                beingDrawn = false;
             }
-            //if (unprocessedVertex.y < 0.0f)
-            //{
-            //    curveTerminated = true;
-            //    lastVertex = glm::vec3(0.0f);
-            //    crossSecVertices->allocateNewEmptyArray();
-            //}
 
 
-            for (int i = 0; i <= DIMENSIONAL_CURVE_CIRCLE_NUM_SEGMENTS; i++)
-            {
-
-                float angle = 2.0f * static_cast<float>(M_PI) * i / DIMENSIONAL_CURVE_CIRCLE_NUM_SEGMENTS;
-
-                glm::vec3 circlePoint1= prevCenter + diameter / 2.0f *
-                    (prevNormal1 * cos(angle) + prevNormal2 * sin(angle));
-
-                glm::vec3 circlePoint2 = center + diameter / 2.0f *
-                    (normal1 * cos(angle) + normal2 * sin(angle));
-
-                if (!curveTerminated)
-                {
-                    cylindersVertices->pushToExistingArray(circlePoint1);
-                    cylindersVertices->pushToExistingArray(circlePoint2);
-                }
-
-                if (i % 4 == 0)
-                {
-                    edgesVertices->pushToIndArray(i / 4, circlePoint1);
-                }
-
-                //std::cout << "L: " << glm::length(lastVertex - center) << std::endl;
-
-
-                if (processedVertices.size() == 2)
-                {
-                    glm::vec3 originCrossSec = glm::vec3(prevCenter + diameter * 1.5f *
-                        (prevNormal1 * cos(angle) + prevNormal2 * sin(angle)));
-
-                    ballFootVertices->pushToIndArray(0, originCrossSec);
-                    ballFootVertices->pushToIndArray(0, circlePoint2);
-                    
-                    crossSecVertices->pushToIndArray(0, originCrossSec);
-                    crossSecVertices->pushToIndArray(1, circlePoint2);
-
-                }
-
-
-
-                else if (curveTerminated)
-                {
-                //else if (curveTerminated &&
-                //    glm::length(lastVertex - center) < DIMENSIONAL_CURVE_DELTA_LENGTH)
-                //{
-                    //curveTerminated = true;
-
-                    //center.y = lastUnprocessedVertex.y;
-                    
-                    
-                    //std::cout << "lastVtx: " << glm::to_string(lastVertex) << std::endl;
-                    //std::cout << "centr: " << glm::to_string(center) << std::endl;
-
-                    beingDrawn = false;
-
-                    glm::vec3 lastNormal1 = glm::vec3(1.0f, 0.0f, 0.0f);
-                    glm::vec3 lastNormal2 = glm::vec3(0.0f, 0.0f, -1.0f);
-
-
-
-
-                    glm::vec3 endCrossSec = glm::vec3(center + diameter * 1.5f *
-                        (lastNormal1 * cos(angle) + lastNormal2 * sin(angle)));
-
-                    endCrossSec.y = lastVertex.y;
-
-
-                    ballFootVertices->pushToIndArray(1, circlePoint1);
-                    ballFootVertices->pushToIndArray(1, endCrossSec);
-
-                    crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 2, circlePoint1);
-                    crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 1, endCrossSec);
-
-                }
-                else {
-                    crossSecVertices->pushToExistingArray(circlePoint2);
-                }
-                if (maxX < circlePoint2.x) {
-                    maxX = std::max(maxX, std::max(circlePoint1.x, circlePoint2.x));
-                }
-                if (minX > circlePoint2.x) {
-                    minX = std::min(minX, std::min(circlePoint1.x, circlePoint2.x));
-                }
-                if (maxY < circlePoint2.y) {
-                    maxY = std::max(maxY, std::max(circlePoint1.y, circlePoint2.y));
-                }
-                if (minY > circlePoint2.y) {
-                    minY = std::min(minY, std::min(circlePoint1.y, circlePoint2.y));
-                }
-                if (maxZ < circlePoint2.z) {
-                    maxZ = std::max(maxZ, std::max(circlePoint1.z, circlePoint2.z));
-                }
-                if (minZ > circlePoint2.z) {
-                    minZ = std::min(minZ, std::min(circlePoint1.z, circlePoint2.z));
-                }
-            }
-            prevCenter = center;
-            prevNormal1 = normal1;
-            prevNormal2 = normal2;
+            rebuildVertices();
         }
     }
 }
@@ -178,29 +41,41 @@ void DimensionalCurve_POT::rebuildVertices()
 {
     cylindersVertices->clear();
     edgesVertices->clear();
-    edgesVertices->allocateNEmptyArrays(3);
+    edgesVertices->allocateNEmptyArrays(4);
     crossSecVertices->clear();
     crossSecVertices->allocateNEmptyArrays(1);
     ballFootVertices->clear();
     ballFootVertices->allocateNewEmptyArray();
     ballFootVertices->allocateNewEmptyArray();
+
+    glm::vec3 prevCenter = processedVertices.at(0);
+    glm::vec3 prevTangent(0.0f);
+    glm::vec3 prevNormal1(1.0f, 0.0f, 0.0f);
+    glm::vec3 prevNormal2(0.0f, 0.0f, -1.0f);
+
+    std::cout << "diamter" << diameter << std::endl;
     for (int j = 1; j < processedVertices.size(); j++)
     {
-        //glm::vec3 normalDirVec = glm::normalize(processedVertices.at(i) - processedVertices.at(i - 1));
-        //glm::vec3 newProcessedVec = processedVertices.at(i - 1) + DIMENSIONAL_CURVE_DELTA_LENGTH * normalDirVec;
-
         cylindersVertices->allocateNewArray();
         crossSecVertices->allocateNewArray();
 
         glm::vec3 tangent = glm::normalize(processedVertices.at(j) -
             processedVertices.at(j - 1));
-        glm::vec3 arbitraryUp(0.0f, 1.0f, 1.0f);
 
-        if (glm::abs(glm::dot(tangent, arbitraryUp)) > 0.99f) {
-            arbitraryUp = glm::vec3(1.0f, 0.0f, 0.0f);
+        glm::vec3 normal1, normal2;
+        if (j == 1) {
+            normal1 = prevNormal1;
+            normal2 = prevNormal2;
         }
-        glm::vec3 normal1 = glm::normalize(glm::cross(tangent, arbitraryUp));
-        glm::vec3 normal2 = glm::normalize(glm::cross(tangent, normal1));
+        else 
+        {
+            glm::vec3 rotationAxis = glm::cross(prevTangent, tangent);
+            float rotationAngle = acos(glm::dot(prevTangent, tangent));
+            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotationAngle, rotationAxis);
+
+            normal1 = glm::vec3(rotationMatrix * glm::vec4(prevNormal1, 1.0f));
+            normal2 = glm::vec3(rotationMatrix * glm::vec4(prevNormal2, 1.0f));
+        }
 
         glm::vec3 center = processedVertices.at(j);
 
@@ -212,9 +87,8 @@ void DimensionalCurve_POT::rebuildVertices()
         {
             float angle = 2.0f * static_cast<float>(M_PI) * i / DIMENSIONAL_CURVE_CIRCLE_NUM_SEGMENTS;
 
-            glm::vec3 circlePoint1 = processedVertices.at(j - 1) + diameter / 2.0f *
+            glm::vec3 circlePoint1 = prevCenter + diameter / 2.0f *
                 (prevNormal1 * cos(angle) + prevNormal2 * sin(angle));
-
             glm::vec3 circlePoint2 = center + diameter / 2.0f *
                 (normal1 * cos(angle) + normal2 * sin(angle));
 
@@ -231,8 +105,9 @@ void DimensionalCurve_POT::rebuildVertices()
             {
                 prevNormal1 = glm::vec3(1.0f, 0.0f, 0.0f);
                 prevNormal2 = glm::vec3(0.0f, 0.0f, -1.0f);
-                glm::vec3 originCrossSec = glm::vec3(processedVertices.at(j - 1) + diameter * 1.5f *
-                    (prevNormal1 * cos(angle) + prevNormal2 * sin(angle)));
+
+                glm::vec3 originCrossSec = prevCenter + diameter * 1.5f *
+                    (prevNormal1 * cos(angle) + prevNormal2 * sin(angle));
 
                 ballFootVertices->pushToIndArray(0, originCrossSec);
                 ballFootVertices->pushToIndArray(0, circlePoint2);
@@ -243,25 +118,53 @@ void DimensionalCurve_POT::rebuildVertices()
             }
             else if (j == processedVertices.size() - 1)
             {
-                glm::vec3 lastNormal1 = glm::vec3(1.0f, 0.0f, 0.0f);
-                glm::vec3 lastNormal2 = glm::vec3(0.0f, 0.0f, -1.0f);
+                if (curveTerminated)
+                {
+                    glm::vec3 lastNormal1 = prevNormal1;
+                    glm::vec3 lastNormal2 = prevNormal2;
 
+                    //optional
+                    lastNormal1 = glm::normalize(lastNormal1 + glm::vec3(0.01f, 0.01f, 0.0f));
+                    lastNormal2 = glm::normalize(lastNormal2 + glm::vec3(0.0f, 0.01f, 0.01f));
 
-                glm::vec3 endCrossSec = glm::vec3(center + diameter * 1.5f *
-                    (lastNormal1 * cos(angle) + lastNormal2 * sin(angle)));
-                endCrossSec.y = lastVertex.y;
+                    glm::vec3 endCrossSec = center + diameter * 1.5f *
+                        (lastNormal1 * cos(angle) + lastNormal2 * sin(angle));
+                    endCrossSec.y = lastVertex.y;
 
+                    crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 2, circlePoint1);
+                    crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 1, endCrossSec);
 
-                ballFootVertices->pushToIndArray(1, circlePoint1);
-                ballFootVertices->pushToIndArray(1, endCrossSec);
+                    //edgesVertices->pushToIndArray(i / 4, endCrossSec);
 
-                crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 2, circlePoint1);
-                crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 1, endCrossSec);
+                    ballFootVertices->pushToIndArray(1, circlePoint1);
+                    ballFootVertices->pushToIndArray(1, endCrossSec);
+
+                    beingDrawn = false;
+                }
             }
             else {
                 crossSecVertices->pushToExistingArray(circlePoint2);
             }
+            if (maxX < circlePoint2.x) {
+                maxX = std::max(maxX, std::max(circlePoint1.x, circlePoint2.x));
+            }
+            if (minX > circlePoint2.x) {
+                minX = std::min(minX, std::min(circlePoint1.x, circlePoint2.x));
+            }
+            if (maxY < circlePoint2.y) {
+                maxY = std::max(maxY, std::max(circlePoint1.y, circlePoint2.y));
+            }
+            if (minY > circlePoint2.y) {
+                minY = std::min(minY, std::min(circlePoint1.y, circlePoint2.y));
+            }
+            if (maxZ < circlePoint2.z) {
+                maxZ = std::max(maxZ, std::max(circlePoint1.z, circlePoint2.z));
+            }
+            if (minZ > circlePoint2.z) {
+                minZ = std::min(minZ, std::min(circlePoint1.z, circlePoint2.z));
+            }
         }
+        prevTangent = tangent;
         prevCenter = center;
         prevNormal1 = normal1;
         prevNormal2 = normal2;
@@ -347,11 +250,7 @@ void DimensionalCurve_POT::buildVAOs()
     }
 }
 
-void DimensionalCurve_POT::buildEdges()
-{
-
-
-}
+void DimensionalCurve_POT::buildEdges() {}
 
 void DimensionalCurve_POT::rebuild()
 {
@@ -382,26 +281,18 @@ void DimensionalCurve_POT::build()
 
 void DimensionalCurve_POT::draw()
 {
-    //std::cout << "start" << std::endl;
-    //for (int i = 0; i < processedVertices.size(); i++)
-    //{
-    //    std::cout << glm::to_string(processedVertices[i]) << std::endl;
-    //}
-    //std::cout << "finish" << std::endl;
-
     if (beingDrawn)
     {
+        std::cout << "being drawn" << std::endl;
         build();
         rebuiltExpected = false;
     }
     if (rebuiltExpected)
     {
+        std::cout << "rebuilding" << std::endl;
         rebuild();
         rebuiltExpected = false;
     }
-    
-
-
 
     shader->bind();
     shader->setUniform3f("color", color.x, color.y, color.z);
@@ -427,13 +318,12 @@ void DimensionalCurve_POT::draw()
             glBindVertexArray(0);
         }
     }
-
+    if (crossSectionsOn)
     for (int i = 0; i < crossSecVAOs->getSize(); i++) {
         glBindVertexArray(crossSecVAOs->at(i));
         glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(crossSecVertices->at(i)->size()));
         glBindVertexArray(0);
     }
-
     shader->setUniform3f("color", color.x, color.y, color.z);
 
     for (int i = 0; i < ballFootVAOs->getSize(); i++) {

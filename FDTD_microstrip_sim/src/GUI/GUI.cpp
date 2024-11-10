@@ -118,7 +118,7 @@ void GUI::buildMenuUpperPanel()
 				_testingLineExpected = true;
 
 			}
-			if (ImGui::MenuItem("Wire"))
+			if (ImGui::MenuItem("Wire (in z-y plane)"))
 			{
 				//extern bool _acceptingLeftClickBufferInput;
 				//extern bool _testingLineExpected;
@@ -477,10 +477,10 @@ void GUI::buildLeftPanel()
 						}
 						if (it->first == "Diameter") {
 							if (*propertyValue < WIRE_MIN_DIAMETER) {
-								*propertyValue = WIRE_MIN_DIAMETER;
+								*propertyValue = static_cast<float>(WIRE_MIN_DIAMETER);
 							}
 							if (*propertyValue > WIRE_MAX_DIAMETER) {
-								*propertyValue = WIRE_MAX_DIAMETER;
+								*propertyValue = static_cast<float>(WIRE_MAX_DIAMETER);
 							}
 						}
 						activeObj->setRebuiltExpected(true);

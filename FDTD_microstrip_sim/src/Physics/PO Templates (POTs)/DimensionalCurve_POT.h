@@ -26,9 +26,12 @@ protected:
 
 	bool beingDrawn;
 
+	bool crossSectionsOn;
+
 	glm::vec3 prevNormal1;
 	glm::vec3 prevNormal2;
 	glm::vec3 prevCenter;
+	glm::vec3 prevTangent;
 
 	glm::vec3 lastVertex;
 
@@ -93,12 +96,13 @@ public:
 		prevNormal1 = glm::vec3(0.0f);
 		prevNormal2 = glm::vec3(0.0f);
 		prevCenter = glm::vec3(0.0f);
-		edgesOn = false;
+		prevTangent = glm::vec3(0.0f);
+		edgesOn = true;
+		crossSectionsOn = true;
 		curveTerminated = false;
 		lastVertexEntered = false;
 		beingDrawn = true;
 		lastVertex = glm::vec3(0.0f);
-
 	}
 
 	void addPoint(glm::vec3 v);

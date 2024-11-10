@@ -271,6 +271,7 @@
     <Text Include="res\notes_2\concepts.txt" />
     <Text Include="res\notes_2\notes.txt" />
     <Text Include="res\notes_2\plan.txt" />
+    <Text Include="res\notes_2\commands_and_directions.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\coordinate_system.shader" />
