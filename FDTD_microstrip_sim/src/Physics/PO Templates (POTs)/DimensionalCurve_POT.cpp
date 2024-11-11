@@ -18,10 +18,12 @@ void DimensionalCurve_POT::buildVertices()
         glm::vec3 lastProcessedVertex = processedVertices.at(processedVertices.size() - 1);
         float lengthSinceLastProcessedVertex =
             glm::length(lastUnprocessedVertex - lastProcessedVertex);
+
         if (lengthSinceLastProcessedVertex > DIMENSIONAL_CURVE_DELTA_LENGTH || lastVertexEntered)
         {
             glm::vec3 normalDirVec = glm::normalize(lastUnprocessedVertex - lastProcessedVertex);
             glm::vec3 newProcessedVec = lastProcessedVertex + DIMENSIONAL_CURVE_DELTA_LENGTH * normalDirVec;
+
 
             processedVertices.push_back(newProcessedVec);
 
@@ -30,7 +32,6 @@ void DimensionalCurve_POT::buildVertices()
                 curveTerminated = true;
                 beingDrawn = false;
             }
-
 
             rebuildVertices();
         }
@@ -53,11 +54,10 @@ void DimensionalCurve_POT::rebuildVertices()
     glm::vec3 prevNormal1(1.0f, 0.0f, 0.0f);
     glm::vec3 prevNormal2(0.0f, 0.0f, -1.0f);
 
-    std::cout << "diamter" << diameter << std::endl;
     for (int j = 1; j < processedVertices.size(); j++)
     {
-        cylindersVertices->allocateNewArray();
-        crossSecVertices->allocateNewArray();
+        //cylindersVertices->allocateNewArray();
+        //crossSecVertices->allocateNewArray();
 
         glm::vec3 tangent = glm::normalize(processedVertices.at(j) -
             processedVertices.at(j - 1));
@@ -66,15 +66,25 @@ void DimensionalCurve_POT::rebuildVertices()
         if (j == 1) {
             normal1 = prevNormal1;
             normal2 = prevNormal2;
+            crossSecVertices->allocateNewArray();
         }
         else 
         {
             glm::vec3 rotationAxis = glm::cross(prevTangent, tangent);
-            float rotationAngle = acos(glm::dot(prevTangent, tangent));
-            glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotationAngle, rotationAxis);
+            if (glm::length(rotationAxis) < 1e-6f) {
+                //the tangents are parallel (no rotation needed)
+            }
+            else {
+                rotationAxis = glm::normalize(rotationAxis);
+                float dotProduct = glm::dot(prevTangent, tangent);
+                dotProduct = glm::clamp(dotProduct, -1.0f, 1.0f);  // Ensure the value is within the valid range
+                float rotationAngle = acos(dotProduct);
+                glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotationAngle, rotationAxis);
 
-            normal1 = glm::vec3(rotationMatrix * glm::vec4(prevNormal1, 1.0f));
-            normal2 = glm::vec3(rotationMatrix * glm::vec4(prevNormal2, 1.0f));
+                normal1 = glm::vec3(rotationMatrix * glm::vec4(prevNormal1, 1.0f));
+                normal2 = glm::vec3(rotationMatrix * glm::vec4(prevNormal2, 1.0f));
+            }
+
         }
 
         glm::vec3 center = processedVertices.at(j);
@@ -92,6 +102,9 @@ void DimensionalCurve_POT::rebuildVertices()
             glm::vec3 circlePoint2 = center + diameter / 2.0f *
                 (normal1 * cos(angle) + normal2 * sin(angle));
 
+
+
+
             if (j != processedVertices.size() - 1)
             {
                 cylindersVertices->pushToExistingArray(circlePoint1);
@@ -100,6 +113,7 @@ void DimensionalCurve_POT::rebuildVertices()
             if (i % 4 == 0)
             {
                 edgesVertices->pushToIndArray(i / 4, circlePoint1);
+
             }
             if (j == 1)
             {
@@ -115,6 +129,12 @@ void DimensionalCurve_POT::rebuildVertices()
                 crossSecVertices->pushToIndArray(0, originCrossSec);
                 crossSecVertices->pushToIndArray(1, circlePoint2);
 
+                if (i % 4 == 0)
+                {
+                    edgesVertices->pushToIndArray(i / 4, originCrossSec);
+
+                }
+
             }
             else if (j == processedVertices.size() - 1)
             {
@@ -124,8 +144,8 @@ void DimensionalCurve_POT::rebuildVertices()
                     glm::vec3 lastNormal2 = prevNormal2;
 
                     //optional
-                    lastNormal1 = glm::normalize(lastNormal1 + glm::vec3(0.01f, 0.01f, 0.0f));
-                    lastNormal2 = glm::normalize(lastNormal2 + glm::vec3(0.0f, 0.01f, 0.01f));
+                    //lastNormal1 = glm::normalize(lastNormal1 + glm::vec3(0.01f, 0.01f, 0.0f));
+                    //lastNormal2 = glm::normalize(lastNormal2 + glm::vec3(0.0f, 0.01f, 0.01f));
 
                     glm::vec3 endCrossSec = center + diameter * 1.5f *
                         (lastNormal1 * cos(angle) + lastNormal2 * sin(angle));
@@ -134,7 +154,7 @@ void DimensionalCurve_POT::rebuildVertices()
                     crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 2, circlePoint1);
                     crossSecVertices->pushToIndArray(crossSecVertices->getSize() - 1, endCrossSec);
 
-                    //edgesVertices->pushToIndArray(i / 4, endCrossSec);
+                    edgesVertices->pushToIndArray(i / 4, endCrossSec);
 
                     ballFootVertices->pushToIndArray(1, circlePoint1);
                     ballFootVertices->pushToIndArray(1, endCrossSec);
@@ -168,6 +188,14 @@ void DimensionalCurve_POT::rebuildVertices()
         prevCenter = center;
         prevNormal1 = normal1;
         prevNormal2 = normal2;
+        //if (glm::isnan(prevNormal1.x) || glm::isnan(prevNormal1.y) ||
+        //    glm::isnan(prevNormal1.z))
+        //{}
+        //if (glm::isnan(prevNormal2.x) || glm::isnan(prevNormal2.y) ||
+        //    glm::isnan(prevNormal2.z))
+        //{}
+
+
     }
 }
 
@@ -283,13 +311,11 @@ void DimensionalCurve_POT::draw()
 {
     if (beingDrawn)
     {
-        std::cout << "being drawn" << std::endl;
         build();
         rebuiltExpected = false;
     }
     if (rebuiltExpected)
     {
-        std::cout << "rebuilding" << std::endl;
         rebuild();
         rebuiltExpected = false;
     }
@@ -318,6 +344,7 @@ void DimensionalCurve_POT::draw()
             glBindVertexArray(0);
         }
     }
+
     if (crossSectionsOn)
     for (int i = 0; i < crossSecVAOs->getSize(); i++) {
         glBindVertexArray(crossSecVAOs->at(i));
@@ -331,7 +358,6 @@ void DimensionalCurve_POT::draw()
         glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(ballFootVertices->at(i)->size()));
         glBindVertexArray(0);
     }
-
 
     shader->unbind();
 }

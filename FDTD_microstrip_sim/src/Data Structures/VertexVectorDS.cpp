@@ -66,6 +66,7 @@ void VertexVectorDS::allocateNewEmptyArray()
 	data->push_back(vec);
 }
 
+//bugs. be careful using it.
 void VertexVectorDS::allocateNEmptyArrays(int n)
 {
 	if (getSize() != 0) {

@@ -171,6 +171,7 @@ void Input::processInput()
 
         if (higherPointObject == nullptr && !_scene_main->getActiveWire()->isTerminated())
         {
+            //std::cout << "ha" << std::endl;
             _scene_main->getActiveWire()->updateUnprocessedVertex(intersectionPoint);
         }
         else if (!_scene_main->getActiveWire()->isTerminated()) 
@@ -181,7 +182,7 @@ void Input::processInput()
                     *higherPointObject->getOriginY() + *higherPointObject->getHeight(),
                     intersectionPoint.z);
 
-                std::cout << "curveTerminationPoint: " << glm::to_string(curveTerminationPoint) << std::endl; 
+                //std::cout << "curveTerminationPoint: " << glm::to_string(curveTerminationPoint) << std::endl; 
 
                 _scene_main->getActiveWire()->setLastVertex(curveTerminationPoint);
                 _scene_main->getActiveWire()->updateUnprocessedVertex(curveTerminationPoint);
