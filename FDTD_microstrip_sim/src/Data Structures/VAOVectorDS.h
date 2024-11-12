@@ -10,6 +10,7 @@ class VAOVectorDS
 private:
 	std::vector<unsigned int>* data;
 	std::vector<unsigned int>* VBOs;
+	std::vector<unsigned int>* EBOs;
 
 public:
 	VAOVectorDS();
@@ -24,7 +25,9 @@ public:
 	int getSize() const;
 
 	void addVBO(unsigned int ui);
+	void addEBO(unsigned int ui);
 	void clearVBOs();
+	void clearEBOs();
 
 
 };

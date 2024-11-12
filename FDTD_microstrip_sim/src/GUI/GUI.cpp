@@ -132,6 +132,17 @@ void GUI::buildMenuUpperPanel()
 
 
 			}
+			if (ImGui::MenuItem("Ribbon"))
+			{
+				extern bool _ribbonInputExpected;
+				_ribbonInputExpected = true;
+
+				s = "> Adding a ribbon";
+				_scene_main->addRibbon(s, glm::vec3(0.0f), 0.0f, 0.0f, 0.0f,
+					glm::vec3(.95f, .69f, 0.21f), 25, 560);
+
+
+			}
 			if (ImGui::MenuItem("Carrier"))
 			{
 				extern bool _acceptingLeftClickBufferInput;

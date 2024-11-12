@@ -46,7 +46,7 @@ Plan:
 
 
 
-implement ribbons
+implement ribbons using Gausian curve equation
 
 
 
@@ -60,7 +60,7 @@ implement ribbons
 
 
 *implement a hierarchy data structure to store elements & its properties of a scene
-
+*hierarchy-level/many-object selection
 
 
 
@@ -79,6 +79,7 @@ implement ribbons
 	*saving & loading feature
 
 	*address RAM in allobjects
+	*esp RAM in lines and rays!
 
 	*implement ecosorbs
 

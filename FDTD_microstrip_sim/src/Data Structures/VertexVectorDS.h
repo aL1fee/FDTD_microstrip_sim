@@ -14,6 +14,7 @@ class VertexVectorDS
 private:
 	unsigned int lastIndex;
 	std::vector<std::vector<glm::vec3>*>* data;
+	std::vector<std::vector<unsigned int>*>* indices;
 
 public:
 	VertexVectorDS();
@@ -30,10 +31,16 @@ public:
 
 	std::vector<glm::vec3>* at(int i) const;
 
+	std::vector<unsigned int>* indicesAt(int i) const;
+	void pushIndices(std::vector<unsigned int>* inds);
+	void addIndicesToInd(int i, std::vector<unsigned int>* inds);
+	void allocateNewIndices();
+
 	int getSize() const;
 	int getLastIndex() const { return lastIndex; }
 
 	glm::vec3 peekAtLast() const;
+
 
 
 

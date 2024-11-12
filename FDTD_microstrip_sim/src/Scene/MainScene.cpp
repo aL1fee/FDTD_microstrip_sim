@@ -18,6 +18,7 @@ MainScene::MainScene(GLFWwindow* w)
 	farPlaneValue = INITIAL_FAR_PLANE_VALUE;
 	modifyingVectors = nullptr;
 	activeWire = nullptr;
+	activeRibbon = nullptr;
 	highestClickedObjPoint = glm::vec3(0.0f);
 	init();
 }
@@ -253,9 +254,34 @@ void MainScene::addWire(std::string& s, glm::vec3 o, float l, float w,
 	physicalObjectBuffer->insert(std::make_pair(wire->getId(), wire));
 	postObjectInsertionSetup();
 
-
-
 	activeWire = wire;
+}
+
+void MainScene::addRibbon(std::string& s, glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond)
+{
+	Shader* shader;
+	std::string name = "Wire";
+	if (shaderMap->find(name) == shaderMap->end())
+	{
+		shader = new Shader("res/shaders/testingline.shader", 1, name);
+		shaderMap->insert(std::make_pair(name, shader));
+	}
+	else {
+		shader = shaderMap->at(name);
+	}
+	shader->incrNumObjectsServed();
+	Ribbon_POT* ribbon = new Ribbon_POT(o, l, w, h, col, perm, cond, shader);
+	//ribbon->updatePropertyMap();
+	physicalObjectBuffer->insert(std::make_pair(ribbon->getId(), ribbon));
+	postObjectInsertionSetup();
+
+
+
+	activeRibbon = ribbon;
+
+
+
+
 }
 
 void MainScene::eraseShaderMapOneInstance(std::string name)
@@ -459,6 +485,11 @@ DimensionalCurve_POT* MainScene::getActiveWire()
 	return nullptr;
 }
 
+Ribbon_POT* MainScene::getActiveRibbon()
+{
+	return activeRibbon;
+}
+
 glm::vec3 MainScene::getHighestClickedObjPoint()
 {
 	return highestClickedObjPoint;
@@ -503,6 +534,7 @@ void MainScene::updateHighestClickedObjPoint(glm::vec3 pos, glm::vec3 dir)
 		rayPos += dir * SELECTING_OBJECT_PRECISION;
 		count += SELECTING_OBJECT_PRECISION;
 	}
+	highestClickedObjPoint = glm::vec3(0.0f);
 }
 
 // ignores wires

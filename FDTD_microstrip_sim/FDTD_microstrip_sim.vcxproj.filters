@@ -144,6 +144,9 @@
     <ClInclude Include="src\Physics\Physical Objects (POs)\Wire_PO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Physics\PO Templates (POTs)\Ribbon_POT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.cpp">
@@ -264,6 +267,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics\Physical Objects (POs)\Wire_PO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics\PO Templates (POTs)\Ribbon_POT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

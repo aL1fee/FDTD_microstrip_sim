@@ -162,6 +162,7 @@
     <ClInclude Include="src\Physics\PO Templates %28POTs%29\Cylinder_POT.h" />
     <ClInclude Include="src\Physics\PO Templates (POTs)\CuboidArray_POT.h" />
     <ClInclude Include="src\Physics\PO Templates (POTs)\DimensionalCurve_POT.h" />
+    <ClInclude Include="src\Physics\PO Templates (POTs)\Ribbon_POT.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Scene\MainScene.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="src\Physics\PO Templates (POTs)\CuboidArray_POT.cpp" />
     <ClCompile Include="src\Physics\PO Templates (POTs)\Cylinder_POT.cpp" />
     <ClCompile Include="src\Physics\PO Templates (POTs)\DimensionalCurve_POT.cpp" />
+    <ClCompile Include="src\Physics\PO Templates (POTs)\Ribbon_POT.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\MainScene.cpp" />

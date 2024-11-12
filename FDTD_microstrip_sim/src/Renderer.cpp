@@ -23,6 +23,12 @@ bool _wireInputPressed = false;
 bool _wireFirstXZPlanePoint = true;
 glm::vec3 _wireFirstPoint = glm::vec3(0.0f);
 
+bool _ribbonInputExpected = false;
+bool _ribbonInputPressed = false;
+//bool _ribbonFirstXZPlanePoint = true;
+//glm::vec3 _ribbonFirstPoint = glm::vec3(0.0f);
+
+
 bool _windowS1On = false;
 bool _windowS2On = false;
 

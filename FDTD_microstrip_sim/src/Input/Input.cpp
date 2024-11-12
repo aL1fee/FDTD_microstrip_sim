@@ -28,6 +28,10 @@ extern bool _wireInputPressed;
 extern bool _wireFirstXZPlanePoint;
 extern glm::vec3 _wireFirstPoint;
 
+extern bool _ribbonInputExpected;
+extern bool _ribbonInputPressed;
+//extern bool _ribbonFirstXZPlanePoint;
+//extern glm::vec3 _ribbonFirstPoint;
 
 extern bool _windowS1On;
 extern bool _windowS2On;
@@ -126,6 +130,78 @@ void Input::processInput()
 
 
 
+
+
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
+        _ribbonInputExpected)
+    {
+        _ribbonInputPressed = true;
+
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        glm::vec3 rayNDC = Utility::screenToNDC(window,
+            static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
+        glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
+        glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
+        glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
+
+        //calculate intersection of the mouse with x-z plane
+        glm::vec3 rayOrigin = cam->getPos();
+        glm::vec3 rayDir = glm::vec3(rayWorld);
+
+        glm::vec3 planeNormal = glm::vec3(1.0f, 0.0f, 0.0f);
+        glm::vec3 planePoint = glm::vec3(0.0f);
+
+
+        _scene_main->updateHighestClickedObjPoint(rayOrigin, rayDir);
+        planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+        planePoint = _scene_main->getHighestClickedObjPoint();
+
+
+        float denom = glm::dot(planeNormal, rayDir);
+        glm::vec3 intersectionPoint = glm::vec3(0.0f);
+        if (fabs(denom) > 1e-6) {
+            float t = glm::dot(planeNormal, (planePoint - rayOrigin)) / denom;
+            intersectionPoint = rayOrigin + t * rayDir;
+        }
+        
+
+
+        if (_scene_main->getActiveRibbon() == nullptr) 
+        {
+            _ribbonInputPressed = false;
+            _ribbonInputExpected = false;
+        }
+        else
+        {
+            if (!_scene_main->getActiveRibbon()->isTerminated())
+            {
+                if (!_scene_main->getActiveRibbon()->firstPointSelected())
+                {
+                    _scene_main->getActiveRibbon()->setFirstPoint(intersectionPoint);
+                }
+                else
+                {
+                    _scene_main->getActiveRibbon()->setSecondPotentialPoint(intersectionPoint);
+                    _scene_main->getActiveRibbon()->setSecondPointSelected(true);
+                }
+            }
+        }
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _ribbonInputPressed)
+    {
+        if (_scene_main->getActiveRibbon() != nullptr)
+        {
+            _scene_main->getActiveRibbon()->terminate();
+            _scene_main->getActiveRibbon()->setBeingDrawn(false);
+        }
+        _ribbonInputExpected = false;
+        _ribbonInputPressed = false;
+        //_ribbonFirstXZPlanePoint = true;
+        //_ribbonFirstPoint = glm::vec3(0.0f);
+    }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
         _wireInputExpected)
     {
@@ -192,7 +268,7 @@ void Input::processInput()
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _wireInputPressed)
     {
-
+        //BUG next line?
         _scene_main->getTestingLine()->terminateLine();
         _wireInputExpected = false;
         _wireInputPressed = false;

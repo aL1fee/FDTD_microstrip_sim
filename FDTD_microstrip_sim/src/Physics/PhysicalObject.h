@@ -30,7 +30,8 @@ enum PhysicalObjectType {
 	CUBOID,
 	TRACE,
 	CYLINDER,
-	CURVE
+	CURVE,
+	RIBBON
 };
 
 class PhysicalObject : public GeometricalObject

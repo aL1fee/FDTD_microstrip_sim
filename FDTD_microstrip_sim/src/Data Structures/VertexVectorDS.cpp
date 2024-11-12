@@ -3,6 +3,7 @@
 VertexVectorDS::VertexVectorDS()
 {
 	data = new std::vector<std::vector<glm::vec3>*>();
+	indices = new std::vector<std::vector<unsigned int>*>();
 	lastIndex = 0;
 }
 
@@ -12,6 +13,10 @@ VertexVectorDS::~VertexVectorDS()
 		delete data->at(i);
 	}
 	delete data;
+	for (int i = 0; i < indices->size(); i++) {
+		delete indices->at(i);
+	}
+	delete indices;
 }
 
 void VertexVectorDS::clear()
@@ -22,6 +27,10 @@ void VertexVectorDS::clear()
 	}
 	lastIndex = 0;
 	data->clear();
+	for (int i = 0; i < indices->size(); i++) {
+		delete indices->at(i);
+	}
+	indices->clear();
 }
 
 void VertexVectorDS::pushToExistingArray(glm::vec3 v)
@@ -84,9 +93,37 @@ std::vector<glm::vec3>* VertexVectorDS::at(int i) const
 	return data->at(i);
 }
 
+std::vector<unsigned int>* VertexVectorDS::indicesAt(int i) const
+{
+	return indices->at(i);
+}
+
+void VertexVectorDS::pushIndices(std::vector<unsigned int>* inds)
+{
+	indices->push_back(inds);
+}
+
+void VertexVectorDS::addIndicesToInd(int i, std::vector<unsigned int>* inds)
+{
+	if (indices->size() > i + 1)
+	{
+		std::cout << "VertexVectorDS Indicies out of bounds error!" << std::endl;
+		return;
+	}
+	std::vector<unsigned int>* oldInds = indices->at(i);
+	indices->at(i) = inds;
+	delete oldInds;
+}
+
+void VertexVectorDS::allocateNewIndices()
+{
+	std::vector<unsigned int>* newInds = new std::vector<unsigned int>();
+	indices->push_back(newInds);
+}
+
 int VertexVectorDS::getSize() const
 {
-	return data->size();
+	return static_cast<int>(data->size());
 }
 
 glm::vec3 VertexVectorDS::peekAtLast() const

@@ -4,6 +4,7 @@ VAOVectorDS::VAOVectorDS()
 {
     data = new std::vector<unsigned int>();
     VBOs = new std::vector<unsigned int>();
+    EBOs = new std::vector<unsigned int>();
 }
 
 VAOVectorDS::~VAOVectorDS()
@@ -16,8 +17,13 @@ VAOVectorDS::~VAOVectorDS()
     {
         glDeleteBuffers(static_cast<GLsizei>(VBOs->size()), VBOs->data());
     }
+    if (EBOs->size() > 0)
+    {
+        glDeleteBuffers(static_cast<GLsizei>(EBOs->size()), EBOs->data());
+    }
     delete data;
     delete VBOs;
+    delete EBOs;
 }
 
 void VAOVectorDS::push(unsigned int ui)
@@ -42,8 +48,13 @@ void VAOVectorDS::clear()
     {
         glDeleteBuffers(static_cast<GLsizei>(VBOs->size()), VBOs->data());
     }
+    if (EBOs->size() > 0)
+    {
+        glDeleteBuffers(static_cast<GLsizei>(EBOs->size()), EBOs->data());
+    }
     data->clear();
     VBOs->clear();
+    EBOs->clear();
 }
 
 void VAOVectorDS::setAt(int i, unsigned int ui)
@@ -66,10 +77,23 @@ void VAOVectorDS::addVBO(unsigned int ui)
     VBOs->push_back(ui);
 }
 
+void VAOVectorDS::addEBO(unsigned int ui)
+{
+    EBOs->push_back(ui);
+}
+
 void VAOVectorDS::clearVBOs()
 {
     if (VBOs->size() > 0)
     {
         glDeleteBuffers(static_cast<GLsizei>(VBOs->size()), VBOs->data());
+    }
+}
+
+void VAOVectorDS::clearEBOs()
+{
+    if (EBOs->size() > 0)
+    {
+        glDeleteBuffers(static_cast<GLsizei>(EBOs->size()), EBOs->data());
     }
 }

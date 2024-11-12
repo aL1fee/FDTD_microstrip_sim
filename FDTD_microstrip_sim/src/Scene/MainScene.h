@@ -17,7 +17,7 @@
 #include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
 #include "../Physics/Physical Objects (POs)/Wire_PO.h"
 
-//#include "../Physics//PO Templates (POTs)/DimensionalCurve_POT.h"
+#include "../Physics//PO Templates (POTs)/Ribbon_POT.h"
 
 #include "../Data Structures/VertexVectorDS.h"
 #include "../Data Structures/VAOVectorDS.h"
@@ -44,6 +44,7 @@ private:
 	float farPlaneValue;
 
 	DimensionalCurve_POT* activeWire;
+	Ribbon_POT* activeRibbon;
 
 	glm::vec3 highestClickedObjPoint;
 
@@ -80,6 +81,9 @@ public:
 		float perm, float cond);
 	void addWire(std::string& s, glm::vec3 o, float l, float w, float h, 
 		glm::vec3 col, float perm, float cond);
+	void addRibbon(std::string& s, glm::vec3 o, float l, float w, float h,
+		glm::vec3 col, float perm, float cond);
+
 
 	void deleteActiveObject();
 	void deleteAllObjects();
@@ -113,6 +117,7 @@ public:
 	void clearLines();
 
 	DimensionalCurve_POT* getActiveWire();
+	Ribbon_POT* getActiveRibbon();
 
 	glm::vec3 getHighestClickedObjPoint();
 
