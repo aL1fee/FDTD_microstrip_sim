@@ -159,6 +159,11 @@ void Input::processInput()
         planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
         planePoint = _scene_main->getHighestClickedObjPoint();
 
+        if (_scene_main->getActiveRibbon()->firstPointSelected())
+        {
+            planePoint = _scene_main->getActiveRibbon()->getFirstPoint();
+        }
+
 
         float denom = glm::dot(planeNormal, rayDir);
         glm::vec3 intersectionPoint = glm::vec3(0.0f);

@@ -138,6 +138,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 18. ?differentiate b/n noninteractable and nondeletable?
 19. implement better wires system; add model matrix, scaling, rotation, translation
 20. implement wires in all directions
+21. make multi-level ribbons
 
 ------
 future:

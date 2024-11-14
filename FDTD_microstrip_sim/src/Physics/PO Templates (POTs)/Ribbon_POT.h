@@ -31,6 +31,13 @@ protected:
 	glm::vec3 firstPoint;
 	glm::vec3 secondPoint;
 
+	float maxX;
+	float minX;
+	float maxY;
+	float minY;
+	float maxZ;
+	float minZ;
+
 	VertexVectorDS* feetVertices;
 	VAOVectorDS* feetVAOs;
 	VertexVectorDS* curveVertices;
@@ -48,6 +55,9 @@ protected:
 
 	void generateRibbonVertices();
 	float gaussian(float x, float A, float mu, float sigma);
+	void buildFeet();
+
+	void updateMaxXYZValues();
 
 public:
 	Ribbon_POT(glm::vec3 o, float l, float w, float h, glm::vec3 col,
@@ -75,6 +85,12 @@ public:
 		edgeVertices = new VertexVectorDS();
 		edgeVAOs = new VAOVectorDS();
 		edgesOn = true;
+		maxX = std::numeric_limits<float>::min();
+		minX = std::numeric_limits<float>::max();
+		maxY = std::numeric_limits<float>::min();
+		minY = std::numeric_limits<float>::max();
+		maxZ = std::numeric_limits<float>::min();
+		minZ = std::numeric_limits<float>::max();
 	}
 
 
@@ -93,5 +109,7 @@ public:
 	void terminate() { terminated = true; }
 
 	void setBeingDrawn(bool b) { beingDrawn = false; }
+
+	glm::vec3 getFirstPoint() const { return firstPoint; }
 
 };

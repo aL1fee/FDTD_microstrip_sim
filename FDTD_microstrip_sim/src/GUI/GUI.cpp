@@ -132,7 +132,7 @@ void GUI::buildMenuUpperPanel()
 
 
 			}
-			if (ImGui::MenuItem("Ribbon"))
+			if (ImGui::MenuItem("Ribbon (in x-z plane)"))
 			{
 				extern bool _ribbonInputExpected;
 				_ribbonInputExpected = true;
