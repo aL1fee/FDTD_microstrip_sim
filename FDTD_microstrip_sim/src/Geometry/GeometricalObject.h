@@ -35,7 +35,9 @@ protected:
 	glm::vec3 scalingVector;
 	glm::vec3 rotationVector;
 	float rotationAngle;
+	glm::vec3 rotationAxis;
 	glm::mat4 modelMatrix;
+	glm::mat4 inverseModelMatrix;
 
 	void addColorVertex(glm::vec3 v) { vertices->pushToExistingArray(v); }
 

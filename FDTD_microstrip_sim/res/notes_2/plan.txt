@@ -40,13 +40,17 @@ Plan:
 #implement wires
 #Wires RAM issues
 #polish wires to a workable state; solve major issues. will need to redesign late
+#implement ribbons using Gaussian curve equation
 
 
 
 
 
+add MVP mat to modifying vectors; add rotations
+add MVP vertex handling in all objects
+polish ribbons
 
-implement ribbons using Gausian curve equation
+
 
 
 
@@ -64,7 +68,7 @@ implement ribbons using Gausian curve equation
 
 
 
-11/11 - 11/16
+11/11 - 11/16 **scene finish
 
 	*fix property window bugs, add features and appearance. apply units
 
@@ -136,7 +140,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 16. build cut corner-shaped surfaces
 17. implement custom polygons w/ properties
 18. ?differentiate b/n noninteractable and nondeletable?
-19. implement better wires system; add model matrix, scaling, rotation, translation
+19. implement better wire system; add model matrix, scaling, rotation, translation
 20. implement wires in all directions
 21. make multi-level ribbons
 

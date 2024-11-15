@@ -144,6 +144,7 @@
     <ClInclude Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\PowerDetector_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\PowerSource_PO.h" />
+    <ClInclude Include="src\Physics\Physical Objects (POs)\Ribbon_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Trace_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\TuningPadArray_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Wire_PO.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="src\Physics\Physical Objects %28POs%29\ModifyingVectors_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\PowerDetector_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\PowerSource_PO.cpp" />
+    <ClCompile Include="src\Physics\Physical Objects (POs)\Ribbon_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\Substrate_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\Trace_PO.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\TuningPadArray_PO.cpp" />
@@ -236,6 +238,7 @@
     <None Include="res\shaders\cube.shader" />
     <None Include="res\shaders\cuboid_instanced_array.shader" />
     <None Include="res\shaders\generic.shader" />
+    <None Include="res\shaders\generic_MVP.shader" />
     <None Include="res\shaders\help.shader" />
     <None Include="res\shaders\housing.shader" />
     <None Include="res\shaders\substrate.shader" />

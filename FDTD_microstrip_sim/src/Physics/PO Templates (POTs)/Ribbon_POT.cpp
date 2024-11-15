@@ -5,6 +5,8 @@ void Ribbon_POT::buildVertices()
 {
     vertices->clear();
     //vertices->pushToExistingArray(firstPoint);
+    vertices->pushToExistingArray(glm::vec3(0.0f));
+
     if (secondPointSel)
     {
         //vertices->pushToExistingArray(secondPoint);
@@ -16,10 +18,29 @@ void Ribbon_POT::buildVertices()
         curveVertices->clear();
         edgeVertices->clear();
 
+        glm::vec3 diff = secondPoint - firstPoint;
+        float l = glm::length(diff);
+        length = l - 2 * tail_size;
+        origin = firstPoint;
+        translationVector = origin;
+
+        glm::vec3 normalX = glm::vec3(1.0f, 0.0f, 0.0f);
+        glm::vec3 normalV = glm::normalize(secondPoint - firstPoint);
+
+        rotationAngle = acos(glm::dot(normalX, normalV) /
+            glm::length(normalX) / glm::length(normalV));
+        rotationAxis = glm::normalize(glm::cross(normalX, normalV));
+
+        modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, translationVector);
+        modelMatrix = glm::rotate(modelMatrix, rotationAngle, rotationAxis);
+
+        inverseModelMatrix = glm::inverse(modelMatrix);
+        vertices->pushToExistingArray(glm::vec3(l, 0, 0));
+
         generateRibbonVertices();
 
-        // after length is updated:
-        updateMaxXYZValues();
+        //updateMaxXYZValues();
     }
 
 }
@@ -31,51 +52,47 @@ void Ribbon_POT::generateRibbonVertices()
         buildEdges();
     }
 
-
     int numSegments = RIBBON_NUM_SEGMENTS;
-    length = glm::length(firstPoint - secondPoint) - tail_size;
-    float delta = length / (numSegments - 1);
-    glm::vec3 normDir = glm::normalize(glm::vec3(secondPoint.x - firstPoint.x, 0.0f, secondPoint.z - firstPoint.z));
+    float l = glm::length(firstPoint - secondPoint) - tail_size * 2;
+    float delta = l / (numSegments - 1);
+    //glm::vec3 normDir = glm::normalize(glm::vec3(secondPoint.x - firstPoint.x, 0.0f, secondPoint.z - firstPoint.z));
+    glm::vec3 normDir = glm::vec3(1.0f, 0.0f, 0.0f);
 
     for (int j = 0; j < 2; j++)
     {
-        glm::vec3 pos = firstPoint + normDir * tail_size;
+        glm::vec3 pos = normDir * tail_size;
         curveVertices->allocateNewArray();
         for (int i = 0; i < numSegments; ++i) {
             float t = static_cast<float>(i) / (numSegments - 1);
-            float interpolatedHeight = firstPoint.y + t * (secondPoint.y - firstPoint.y);
-            float distanceFromCenter = (t - 0.5f) * length;
-            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, length / 8.0f);
+            float distanceFromCenter = (t - 0.5f) * l;
+            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, l / 6.5f);
             glm::vec3 perpDir = glm::normalize(glm::vec3(-normDir.z, 0.0f, normDir.x));
-            curveVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width / 2,
-                interpolatedHeight + gaussianHeight + j * height, pos.z + perpDir.z * width / 2));
-            curveVertices->pushToExistingArray(glm::vec3(pos.x - perpDir.x * width / 2,
-                interpolatedHeight + gaussianHeight + j * height, pos.z - perpDir.z * width / 2));
+            curveVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width,
+                + gaussianHeight + j * height, pos.z + perpDir.z * width));
+            curveVertices->pushToExistingArray(glm::vec3(pos.x - perpDir.x * width,
+                + gaussianHeight + j * height, pos.z));
             pos += normDir * delta;
         }
     }
 
     for (int j = 0; j < 2; j++)
     {
-        glm::vec3 pos = firstPoint + normDir * tail_size;
-        int k = (j == 0) ? -1 : 1;
+        glm::vec3 pos = normDir * tail_size;
+        int k = (j == 0) ? 0 : 1;
         curveVertices->allocateNewArray();
         for (int i = 0; i < numSegments; ++i) {
             float t = static_cast<float>(i) / (numSegments - 1);
-            float interpolatedHeight = firstPoint.y + t * (secondPoint.y - firstPoint.y);
-            float distanceFromCenter = (t - 0.5f) * length;
-            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, length / 8.0f);
+            float distanceFromCenter = (t - 0.5f) * l;
+            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, l / 6.5f);
             glm::vec3 perpDir = glm::normalize(glm::vec3(-normDir.z, 0.0f, normDir.x));
-            curveVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width / 2 * k,
-                interpolatedHeight + gaussianHeight, pos.z + perpDir.z * width / 2 * k));
-            curveVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width / 2 * k,
-                interpolatedHeight + gaussianHeight + height, pos.z + perpDir.z * width / 2 * k));
+            curveVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width * k,
+                + gaussianHeight, pos.z + perpDir.z * width * k));
+            curveVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width * k,
+                + gaussianHeight + height, pos.z + perpDir.z * width * k));
             pos += normDir * delta;
         }
     }
-    
     buildFeet();
-
 }
 
 float Ribbon_POT::gaussian(float x, float A, float mu, float sigma)
@@ -85,23 +102,21 @@ float Ribbon_POT::gaussian(float x, float A, float mu, float sigma)
 
 void Ribbon_POT::buildFeet()
 {
-    glm::vec3 dir = secondPoint - firstPoint;
-    dir = glm::normalize(glm::vec3(dir.x, 0.0f, dir.z));
-    glm::vec3 normalVec = glm::normalize(glm::cross(dir,
-        glm::vec3(0.0f, 1.0f, 0.0f)));
-    origin = firstPoint - normalVec * width / 2.0f;
+    glm::vec3 dir = glm::vec3(1.0f, 0.0f, 0.0f);
+    glm::vec3 normalVec = glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 localOrigin = glm::vec3(0.0f);
 
-    feetVertices->pushToExistingArray(origin);
-    feetVertices->pushToExistingArray(origin + normalVec * width);
-    feetVertices->pushToExistingArray(origin +
+    feetVertices->pushToExistingArray(localOrigin);
+    feetVertices->pushToExistingArray(localOrigin + normalVec * width);
+    feetVertices->pushToExistingArray(localOrigin +
         glm::vec3(0.0f, height, 0.0f) + normalVec * width);
-    feetVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f));
+    feetVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f));
 
-    feetVertices->pushToExistingArray(origin + tail_size * dir);
-    feetVertices->pushToExistingArray(origin + normalVec * width + tail_size * dir);
-    feetVertices->pushToExistingArray(origin +
+    feetVertices->pushToExistingArray(localOrigin + tail_size * dir);
+    feetVertices->pushToExistingArray(localOrigin + normalVec * width + tail_size * dir);
+    feetVertices->pushToExistingArray(localOrigin +
         glm::vec3(0.0f, height, 0.0f) + normalVec * width + tail_size * dir);
-    feetVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f) + tail_size * dir);
+    feetVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f) + tail_size * dir);
 
     std::vector<unsigned int>* inds = new std::vector<unsigned int>();
     inds->insert(inds->end(), {0,3,1,2,5,6,4,7,0,3,0,1,4,5,6,6,7,2,3});
@@ -110,19 +125,20 @@ void Ribbon_POT::buildFeet()
 
     feetVertices->allocateNewArray();
 
-    origin = secondPoint - normalVec * width / 2.0f;
+    localOrigin = glm::vec3(glm::length(secondPoint - firstPoint) 
+        - tail_size, 0.0f, 0.0f);
 
-    feetVertices->pushToExistingArray(origin);
-    feetVertices->pushToExistingArray(origin + normalVec * width);
-    feetVertices->pushToExistingArray(origin +
+    feetVertices->pushToExistingArray(localOrigin);
+    feetVertices->pushToExistingArray(localOrigin + normalVec * width);
+    feetVertices->pushToExistingArray(localOrigin +
         glm::vec3(0.0f, height, 0.0f) + normalVec * width);
-    feetVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f));
+    feetVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f));
 
-    feetVertices->pushToExistingArray(origin + tail_size * dir);
-    feetVertices->pushToExistingArray(origin + normalVec * width + tail_size * dir);
-    feetVertices->pushToExistingArray(origin +
+    feetVertices->pushToExistingArray(localOrigin + tail_size * dir);
+    feetVertices->pushToExistingArray(localOrigin + normalVec * width + tail_size * dir);
+    feetVertices->pushToExistingArray(localOrigin +
         glm::vec3(0.0f, height, 0.0f) + normalVec * width + tail_size * dir);
-    feetVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f) + tail_size * dir);
+    feetVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f) + tail_size * dir);
 
     std::vector<unsigned int>* inds2 = new std::vector<unsigned int>();
     inds2->insert(inds2->end(), { 0,3,1,2,5,6,4,7,0,3,0,1,4,5,6,6,7,2,3 });
@@ -156,8 +172,31 @@ void Ribbon_POT::updateMaxXYZValues()
 void Ribbon_POT::rebuildVertices()
 {
 
+}
+
+void Ribbon_POT::setupModelMatrix()
+{
+
+    //glm::vec3 diff = secondPoint - firstPoint;
+    //float l = glm::length(diff);
+    //origin = firstPoint;
+    //translationVector = origin;
+
+    //glm::vec3 normalX = glm::vec3(1.0f, 0.0f, 0.0f);
+    //glm::vec3 normalV = glm::normalize(secondPoint - firstPoint);
+
+    //rotationAngle = acos(glm::dot(normalX, normalV) /
+    //    glm::length(normalX) / glm::length(normalV));
+    //rotationAxis = glm::normalize(glm::cross(normalX, normalV));
+
+    //modelMatrix = glm::mat4(1.0f);
+    //modelMatrix = glm::translate(modelMatrix, translationVector);
+    //modelMatrix = glm::rotate(modelMatrix, rotationAngle, rotationAxis);
+
+    //vertices->pushToExistingArray(glm::vec3(l, 0, 0));
 
 
+    inverseModelMatrix = glm::inverse(modelMatrix);
 
 }
 
@@ -169,6 +208,7 @@ void Ribbon_POT::buildVAOs()
         curveVAOs->clear();
         edgeVAOs->clear();
         VAOs->clear();
+
         //unsigned int VAO;
         //glGenVertexArrays(1, &VAO);
         //glBindVertexArray(VAO);
@@ -180,23 +220,6 @@ void Ribbon_POT::buildVAOs()
         //glEnableVertexAttribArray(0);
         //VAOs->push(VAO);
         //VAOs->addVBO(VBO);
-
-        /*for (int i = 0; i < edgeVertices->getSize(); i++)
-        {
-            unsigned int VAO;
-            glGenVertexArrays(1, &VAO);
-            glBindVertexArray(VAO);
-            unsigned int VBO;
-            glGenBuffers(1, &VBO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * edgeVertices->at(i)->size(), edgeVertices->at(i)->data(), GL_STATIC_DRAW);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-            edgeVAOs->push(VAO);
-            edgeVAOs->addVBO(VBO);
-        }*/
-
-
 
         for (int i = 0; i < 2; i++)
         {
@@ -248,8 +271,9 @@ void Ribbon_POT::buildVAOs()
             curveVAOs->push(VAO);
             curveVAOs->addVBO(VBO);
         }
+        
 
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < feetVertices->getSize(); i++)
         {
             unsigned int VAO, VBO, EBO;
             glGenVertexArrays(1, &VAO);
@@ -275,44 +299,40 @@ void Ribbon_POT::buildVAOs()
 
 void Ribbon_POT::buildEdges() 
 {
-    glm::vec3 dir = secondPoint - firstPoint;
-    dir = glm::normalize(glm::vec3(dir.x, 0.0f, dir.z));
-    glm::vec3 normalVec = glm::normalize(glm::cross(dir,
-        glm::vec3(0.0f, 1.0f, 0.0f)));
-    origin = firstPoint - normalVec * width / 2.0f;
+    glm::vec3 localOrigin = glm::vec3(0.0f);
 
-    edgeVertices->pushToExistingArray(origin);
-    edgeVertices->pushToExistingArray(origin + normalVec * width);
-    edgeVertices->pushToExistingArray(origin +
-        glm::vec3(0.0f, height, 0.0f) + normalVec * width);
-    edgeVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f));
+    edgeVertices->pushToExistingArray(localOrigin);
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, 0.0f, 1.0f) * width);
+    edgeVertices->pushToExistingArray(localOrigin +
+        glm::vec3(0.0f, height, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f) * width);
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f));
 
-    edgeVertices->pushToExistingArray(origin + tail_size * dir);
-    edgeVertices->pushToExistingArray(origin + normalVec * width + tail_size * dir);
-    edgeVertices->pushToExistingArray(origin +
-        glm::vec3(0.0f, height, 0.0f) + normalVec * width + tail_size * dir);
-    edgeVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f) + tail_size * dir);
+    edgeVertices->pushToExistingArray(localOrigin + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, 0.0f, 1.0f) * width + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
+    edgeVertices->pushToExistingArray(localOrigin +
+        glm::vec3(0.0f, height, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f) * width + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f) + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
 
     std::vector<unsigned int>* inds = new std::vector<unsigned int>();
     inds->insert(inds->end(), { 0,1,2,3,0,4,7,3,2,6,5,1,5,4,7,6,5 });
     edgeVertices->pushIndices(inds);
 
+
     edgeVertices->allocateNewArray();
 
+    localOrigin = glm::vec3(glm::length(secondPoint - firstPoint) - tail_size, 0.0f, 0.0f);
 
-    origin = secondPoint - normalVec * width / 2.0f;
+    edgeVertices->pushToExistingArray(localOrigin);
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, 0.0f, 1.0f) * width);
+    edgeVertices->pushToExistingArray(localOrigin +
+        glm::vec3(0.0f, height, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f) * width);
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f));
 
-    edgeVertices->pushToExistingArray(origin);
-    edgeVertices->pushToExistingArray(origin + normalVec * width);
-    edgeVertices->pushToExistingArray(origin +
-        glm::vec3(0.0f, height, 0.0f) + normalVec * width);
-    edgeVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f));
-
-    edgeVertices->pushToExistingArray(origin + tail_size * dir);
-    edgeVertices->pushToExistingArray(origin + normalVec * width + tail_size * dir);
-    edgeVertices->pushToExistingArray(origin +
-        glm::vec3(0.0f, height, 0.0f) + normalVec * width + tail_size * dir);
-    edgeVertices->pushToExistingArray(origin + glm::vec3(0.0f, height, 0.0f) + tail_size * dir);
+    edgeVertices->pushToExistingArray(localOrigin + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, 0.0f, 1.0f) * width + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
+    edgeVertices->pushToExistingArray(localOrigin +
+        glm::vec3(0.0f, height, 0.0f) + glm::vec3(0.0f, 0.0f, 1.0f) * width + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
+    edgeVertices->pushToExistingArray(localOrigin + glm::vec3(0.0f, height, 0.0f) + tail_size * glm::vec3(1.0f, 0.0f, 0.0f));
 
     std::vector<unsigned int>* inds2 = new std::vector<unsigned int>();
     inds2->insert(inds2->end(), { 0,1,2,3,0,4,7,3,2,6,5,1,5,4,7,6,5 });
@@ -320,37 +340,36 @@ void Ribbon_POT::buildEdges()
 
 
     int numSegments = RIBBON_NUM_SEGMENTS;
-    float length = glm::length(firstPoint - secondPoint) - tail_size;
+    float length = glm::length(firstPoint - secondPoint) - tail_size * 2;
     float delta = length / (numSegments - 1);
-    glm::vec3 normDir = glm::normalize(glm::vec3(secondPoint.x - firstPoint.x, 0.0f, secondPoint.z - firstPoint.z));
+    glm::vec3 normDir = glm::vec3(1.0f, 0.0f, 0.0f);
 
     for (int j = 0; j < 4; j++)
     {
-        glm::vec3 pos = firstPoint + normDir * tail_size;
+        glm::vec3 pos = normDir * tail_size;
         edgeVertices->allocateNewArray();
         for (int i = 0; i < numSegments; ++i) {
             float t = static_cast<float>(i) / (numSegments - 1);
-            float interpolatedHeight = firstPoint.y + t * (secondPoint.y - firstPoint.y);
             float distanceFromCenter = (t - 0.5f) * length;
-            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, length / 8.0f);
-            glm::vec3 perpDir = glm::normalize(glm::vec3(-normDir.z, 0.0f, normDir.x));
+            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, length / 6.5f);
+            glm::vec3 perpDir = glm::vec3(0.0f, 0.0f, 1.0f);
             switch (j)
             {
                 case 0:
-                edgeVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width / 2,
-                    interpolatedHeight + gaussianHeight, pos.z + perpDir.z * width / 2));
+                edgeVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width,
+                    gaussianHeight, pos.z + perpDir.z * width));
                 break;
                 case 1:
-                edgeVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width / 2,
-                    interpolatedHeight + gaussianHeight + height, pos.z + perpDir.z * width / 2));
+                edgeVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width,
+                    gaussianHeight + height, pos.z + perpDir.z * width));
                 break;
-                case 2:
-                edgeVertices->pushToExistingArray(glm::vec3(pos.x - perpDir.x * width / 2,
-                    interpolatedHeight + gaussianHeight, pos.z - perpDir.z * width / 2));
+               case 2:
+                edgeVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width,
+                    gaussianHeight, pos.z));
                 break;
                 case 3:
-                edgeVertices->pushToExistingArray(glm::vec3(pos.x - perpDir.x * width / 2,
-                    interpolatedHeight + gaussianHeight + height, pos.z - perpDir.z * width / 2));
+                edgeVertices->pushToExistingArray(glm::vec3(pos.x + perpDir.x * width,
+                    gaussianHeight + height, pos.z));
                 break;
             }
             pos += normDir * delta;
@@ -362,12 +381,14 @@ void Ribbon_POT::rebuild()
 {
     rebuildVertices();
     buildVAOs();
+    //setupModelMatrix();
 }
 
 void Ribbon_POT::build()
 {
     buildVertices();
     buildVAOs();
+    rebuiltExpected = false;
 }
 
 void Ribbon_POT::draw()
@@ -384,7 +405,16 @@ void Ribbon_POT::draw()
         rebuiltExpected = false;
     }
     
+    
     shader->bind();
+
+    setupModelMatrix();
+
+    glUniformMatrix4fv(shader->getUniformLocation("model"), 1, GL_FALSE,
+        glm::value_ptr(modelMatrix));
+
+
+
     //shader->setUniform3f("color", color.x, color.y, color.z);
 
     //if (secondPointSel)
@@ -436,46 +466,43 @@ void Ribbon_POT::draw()
 
 bool Ribbon_POT::intersectionCheck(glm::vec3 v)
 {
-    float max_X = MAX_COORD_VALUE;
-    float min_X = MIN_COORD_VALUE;
-    float max_Y = MAX_COORD_VALUE;
-    float min_Y = MIN_COORD_VALUE;
-    float max_Z = MAX_COORD_VALUE;
-    float min_Z = MIN_COORD_VALUE;
-    if (v.x < maxX && v.x > minX && v.y < maxY && v.y > minY && v.z < maxZ && v.z > minZ)
+    glm::vec4 vLocalFrame = inverseModelMatrix * glm::vec4(v, 1.0f);
+    if (vLocalFrame.x > 0.0f && vLocalFrame.x < length + 2 * tail_size &&
+        vLocalFrame.y > 0.0f && vLocalFrame.y < height + curve_height &&
+        vLocalFrame.z > 0.0f && vLocalFrame.z < width)
     {
-        glm::vec3 dir = secondPoint - firstPoint;
-        dir = glm::normalize(glm::vec3(dir.x, 0.0f, dir.z));
-        glm::vec3 normalVec = glm::normalize(glm::cross(dir,
-            glm::vec3(0.0f, 1.0f, 0.0f)));
-        origin = firstPoint - normalVec * width / 2.0f;
-        //for (int i = 1; i <= RIBBON_BOUNDARY_CHECK_FEET_NUM; i++)
-        //{
-        //    glm::vec3 extreme1 = origin + (tail_size * (i - 1) /
-        //        static_cast<float>(RIBBON_BOUNDARY_CHECK_FEET_NUM)) * dir;
-        //    glm::vec3 extreme2 = origin + (tail_size * (i - 1) /
-        //        static_cast<float>(RIBBON_BOUNDARY_CHECK_FEET_NUM)) * dir + width * normalVec;
-        //    glm::vec3 extreme3 = origin + (tail_size * i /
-        //        static_cast<float>(RIBBON_BOUNDARY_CHECK_FEET_NUM)) * dir;
-        //    glm::vec3 extreme4 = origin + (tail_size * i /
-        //        static_cast<float>(RIBBON_BOUNDARY_CHECK_FEET_NUM)) * dir + width * normalVec;
+        if (vLocalFrame.x < tail_size && vLocalFrame.y < height)
+        {
+            return true;
+        }
+        if (vLocalFrame.x > length + tail_size && 
+            vLocalFrame.x < length + tail_size * 2 &&
+            vLocalFrame.y < height)
+        {
+            return true;
+        }
 
-        //    min_Z = min(extreme1.z, min(extreme2.z, min(extreme3.z, extreme4.z)));
-        //    min_X = min(extreme1.x, min(extreme2.x, min(extreme3.x, extreme4.x)));
-        //    max_Z = max(extreme1.z, max(extreme2.z, max(extreme3.z, extreme4.z)));
-        //    max_X = max(extreme1.x, max(extreme2.x, max(extreme3.x, extreme4.x)));
+        int numSegments = RIBBON_BOUNDARY_CHECK_FEET_NUM;
+        float length = glm::length(firstPoint - secondPoint) - tail_size * 2;
+        float delta = length / (numSegments - 1);
+        glm::vec3 normDir = glm::vec3(1.0f, 0.0f, 0.0f);
+        glm::vec3 pos = normDir * tail_size;
+        for (int i = 0; i < numSegments; ++i) 
+        {
+            float t = static_cast<float>(i) / (numSegments - 1);
+            float distanceFromCenter = (t - 0.5f) * length;
+            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, length / 6.5f);
+            glm::vec3 perpDir = glm::vec3(0.0f, 0.0f, 1.0f);
 
-        //    if (v.z > min_Z && v.z < max_Z && v.x > min_X && v.x < max_X)
-        //    {
-        //        std::cout << "Ribbon detected!" << std::endl;
-        //        return true;
-        //    }
-
-        //}
-
-
-
-
+            if (vLocalFrame.x > pos.x + perpDir.x * width &&
+                vLocalFrame.x < normDir.x * delta + pos.x + perpDir.x * width &&
+                vLocalFrame.y > gaussianHeight &&
+                vLocalFrame.y < gaussianHeight + height)
+            {
+                return true;
+            }
+            pos += normDir * delta;
+        }
     }
     return false;
 }
@@ -489,4 +516,19 @@ void Ribbon_POT::setFirstPoint(glm::vec3 v)
 void Ribbon_POT::setSecondPotentialPoint(glm::vec3 v)
 {
     secondPoint = v;
+}
+
+glm::vec3 Ribbon_POT::getCenterLocation() const
+{
+    glm::vec4 ret = modelMatrix * glm::vec4((length + tail_size * 2) / 2.0f,
+        (height + curve_height) / 2.0f, width / 2.0f, 1.0f);
+    return glm::vec3(ret);
+}
+
+void Ribbon_POT::setScaleH(float h)
+{
+}
+
+void Ribbon_POT::setScaleW(float w)
+{
 }

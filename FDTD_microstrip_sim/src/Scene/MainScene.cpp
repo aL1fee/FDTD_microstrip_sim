@@ -260,18 +260,19 @@ void MainScene::addWire(std::string& s, glm::vec3 o, float l, float w,
 void MainScene::addRibbon(std::string& s, glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	std::string name = "Wire";
+	std::string name = "Generic MVP";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/testingline.shader", 1, name);
+		shader = new Shader("res/shaders/generic_MVP.shader", 1, name);
+		//shader = new Shader("res/shaders/testingline.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
 		shader = shaderMap->at(name);
 	}
 	shader->incrNumObjectsServed();
-	Ribbon_POT* ribbon = new Ribbon_POT(o, l, w, h, col, perm, cond, shader);
-	//ribbon->updatePropertyMap();
+	Ribbon_PO* ribbon = new Ribbon_PO(o, l, w, h, col, perm, cond, shader);
+	ribbon->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(ribbon->getId(), ribbon));
 	postObjectInsertionSetup();
 

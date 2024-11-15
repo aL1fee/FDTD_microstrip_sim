@@ -17,7 +17,7 @@
 #include "../Physics/Physical Objects (POs)/PowerDetector_PO.h"
 #include "../Physics/Physical Objects (POs)/Wire_PO.h"
 
-#include "../Physics//PO Templates (POTs)/Ribbon_POT.h"
+#include "../Physics/Physical Objects (POs)/Ribbon_PO.h"
 
 #include "../Data Structures/VertexVectorDS.h"
 #include "../Data Structures/VAOVectorDS.h"

@@ -57,6 +57,8 @@ protected:
 	float gaussian(float x, float A, float mu, float sigma);
 	void buildFeet();
 
+	void setupModelMatrix();
+
 	void updateMaxXYZValues();
 
 public:
@@ -111,5 +113,12 @@ public:
 	void setBeingDrawn(bool b) { beingDrawn = false; }
 
 	glm::vec3 getFirstPoint() const { return firstPoint; }
+
+	float* getTailLength() { return &tail_size; }
+	float* getCurveHeight() { return &curve_height; }
+
+	glm::vec3 getCenterLocation() const override;
+	void setScaleH(float h) override;
+	void setScaleW(float w) override;
 
 };
