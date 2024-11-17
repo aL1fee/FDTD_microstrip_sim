@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="src\Data Structures\VAOVectorDS.h" />
     <ClInclude Include="src\Data Structures\VertexVectorDS.h" />
+    <ClInclude Include="src\Macros and variables\Global variables.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Curve_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects %28POs%29\Substrate_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Housing_PO.h" />
@@ -155,7 +156,7 @@
     <ClInclude Include="src\GUI\StatusWindow.h" />
     <ClInclude Include="src\Input\Input.h" />
     <ClInclude Include="src\Input\InputBuffer.h" />
-    <ClInclude Include="src\Macros.h" />
+    <ClInclude Include="src\Macros and variables\Macros.h" />
     <ClInclude Include="src\Physics\Physical Objects %28POs%29\Carrier_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.h" />
     <ClInclude Include="src\Physics\PhysicalObject.h" />
@@ -184,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c" />
+    <ClCompile Include="src\Macros and variables\Global variables.cpp" />
     <ClCompile Include="src\Data Structures\VAOVectorDS.cpp" />
     <ClCompile Include="src\Data Structures\VertexVectorDS.cpp" />
     <ClCompile Include="src\Physics\Physical Objects (POs)\Housing_PO.cpp" />
@@ -233,12 +235,13 @@
     <Text Include="res\notes_2\plan.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\carrier.shader" />
+    <None Include="res\shaders\carrier_old.shader" />
     <None Include="res\shaders\coordinate_system.shader" />
     <None Include="res\shaders\cube.shader" />
     <None Include="res\shaders\cuboid_instanced_array.shader" />
     <None Include="res\shaders\generic.shader" />
     <None Include="res\shaders\generic_MVP.shader" />
+    <None Include="res\shaders\generic_pos_col_MVP.shader" />
     <None Include="res\shaders\help.shader" />
     <None Include="res\shaders\housing.shader" />
     <None Include="res\shaders\substrate.shader" />
@@ -253,6 +256,8 @@
     <Font Include="res\fonts\Helvetica.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\Ideas\FDTD first elaborate system example.png" />
+    <Image Include="res\Ideas\FDTD_microstrip_sim_GUI_plan.png" />
     <Image Include="res\misc\logo.ico" />
     <Image Include="res\misc\logo.png" />
   </ItemGroup>

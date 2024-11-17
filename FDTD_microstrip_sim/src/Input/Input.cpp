@@ -13,8 +13,6 @@ bool _middleMouseReleaseExpected = false;
 bool _firstMouseMovement = true;
 float _lastX = INITIAL_OPENGL_CONTEXT_SCREEN_WIDTH / 2.0f;
 float _lastY = INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT / 2.0f;
-//float _lastX = 1.0f;
-//float _lastY = 1.0f;
 
 extern bool _testingLinePressed;
 extern bool _testingLineExpected;
@@ -30,8 +28,6 @@ extern glm::vec3 _wireFirstPoint;
 
 extern bool _ribbonInputExpected;
 extern bool _ribbonInputPressed;
-//extern bool _ribbonFirstXZPlanePoint;
-//extern glm::vec3 _ribbonFirstPoint;
 
 extern bool _windowS1On;
 extern bool _windowS2On;

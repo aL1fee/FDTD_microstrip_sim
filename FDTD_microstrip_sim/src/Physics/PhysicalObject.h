@@ -15,7 +15,8 @@
 #include <gtc/type_ptr.hpp>
 #include <gtx/string_cast.hpp>
 
-#include "../Macros.h"
+#include "../Macros and variables/Macros.h"
+#include "../Macros and variables/Global variables.h"
 
 #include "../Geometry/GeometricalObject.h"
 #include "../Setup/Shader.h"
@@ -47,6 +48,9 @@ protected:
 	std::vector<std::pair<std::string, float*>>* propertyMap;
 	std::vector<std::pair<std::string, int*>>* propertyMapInt;
 	unsigned int id;
+
+	virtual void generateModelMatrix() {};
+	virtual void updateModelMatrix();
 
 public:
 	PhysicalObject();

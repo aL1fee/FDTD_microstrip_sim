@@ -26,6 +26,9 @@ protected:
 	float length;
 	float width;
 	float height;
+	float initial_length;
+	float initial_height;
+	float initial_width;
 	glm::vec3 color;
 	VertexVectorDS* vertices;
 	VAOVectorDS* VAOs;
@@ -61,6 +64,8 @@ public:
 	float* getOriginX() { return &origin.x; };
 	float* getOriginY() { return &origin.y; };
 	float* getOriginZ() { return &origin.z; };
+
+	float* getRotationAngle() { return &rotationAngle; }
 
 	glm::vec3* getColor() { return &color; }
 };

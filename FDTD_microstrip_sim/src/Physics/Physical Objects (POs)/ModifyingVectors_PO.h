@@ -13,7 +13,7 @@
 
 #include "../PhysicalObject.h"
 
-#include "../../Macros.h"
+#include "../../Macros and Variables/Macros.h"
 
 enum ModyfingVectorType {
 	Translation,

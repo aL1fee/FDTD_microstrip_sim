@@ -177,23 +177,6 @@ void Ribbon_POT::rebuildVertices()
 void Ribbon_POT::setupModelMatrix()
 {
 
-    //glm::vec3 diff = secondPoint - firstPoint;
-    //float l = glm::length(diff);
-    //origin = firstPoint;
-    //translationVector = origin;
-
-    //glm::vec3 normalX = glm::vec3(1.0f, 0.0f, 0.0f);
-    //glm::vec3 normalV = glm::normalize(secondPoint - firstPoint);
-
-    //rotationAngle = acos(glm::dot(normalX, normalV) /
-    //    glm::length(normalX) / glm::length(normalV));
-    //rotationAxis = glm::normalize(glm::cross(normalX, normalV));
-
-    //modelMatrix = glm::mat4(1.0f);
-    //modelMatrix = glm::translate(modelMatrix, translationVector);
-    //modelMatrix = glm::rotate(modelMatrix, rotationAngle, rotationAxis);
-
-    //vertices->pushToExistingArray(glm::vec3(l, 0, 0));
 
 
     inverseModelMatrix = glm::inverse(modelMatrix);
@@ -408,7 +391,7 @@ void Ribbon_POT::draw()
     
     shader->bind();
 
-    setupModelMatrix();
+    //setupModelMatrix();
 
     glUniformMatrix4fv(shader->getUniformLocation("model"), 1, GL_FALSE,
         glm::value_ptr(modelMatrix));

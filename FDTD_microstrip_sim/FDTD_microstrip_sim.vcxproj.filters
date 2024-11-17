@@ -33,7 +33,7 @@
     <ClInclude Include="src\Input\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Macros.h">
+    <ClInclude Include="src\Macros and variables\Macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Renderer.h">
@@ -148,6 +148,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics\Physical Objects (POs)\Ribbon_PO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Macros and variables\Global variables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -278,6 +281,9 @@
     <ClCompile Include="src\Physics\Physical Objects (POs)\Ribbon_PO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Macros and variables\Global variables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\notes_2\concepts.txt" />
@@ -290,7 +296,7 @@
     <None Include="res\shaders\cube.shader" />
     <None Include="res\shaders\help.shader" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
-    <None Include="res\shaders\carrier.shader" />
+    <None Include="res\shaders\carrier_old.shader" />
     <None Include="res\shaders\testingline.shader" />
     <None Include="res\shaders\substrate.shader" />
     <None Include="res\shaders\trace.shader" />
@@ -298,6 +304,7 @@
     <None Include="res\shaders\generic.shader" />
     <None Include="res\shaders\cuboid_instanced_array.shader" />
     <None Include="res\shaders\generic_MVP.shader" />
+    <None Include="res\shaders\generic_pos_col_MVP.shader" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />
@@ -310,6 +317,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\misc\logo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Ideas\FDTD_microstrip_sim_GUI_plan.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Ideas\FDTD first elaborate system example.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

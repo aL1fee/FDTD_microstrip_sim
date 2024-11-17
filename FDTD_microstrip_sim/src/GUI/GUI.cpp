@@ -149,8 +149,10 @@ void GUI::buildMenuUpperPanel()
 				_acceptingLeftClickBufferInput = true;
 
 				s = "> Adding a carrier";
-				_scene_main->addCarrier(s, glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
+				_scene_main->addCarrier(s, glm::vec3(0.5f, 0.2f, .5f), 2.0f, 1.0f, 0.45f,
 					glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
+				//_scene_main->addCarrier(s, glm::vec3(0.5f, 0.2f, .5f), 4.5f, 7.0f, 0.45f,
+				//	glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
 			}
 			if (ImGui::MenuItem("Substrate"))
 			{

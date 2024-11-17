@@ -90,7 +90,7 @@ void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
 	std::string name = "Carrier";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/carrier.shader", 1, name);
+		shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -105,6 +105,30 @@ void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
 	//physicalObjectBuffer->push_back(carrierPO);
 	postObjectInsertionSetup();
 }
+
+
+//void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
+//	float h, glm::vec3 col, float perm, float cond)
+//{
+//	Shader* shader;
+//	std::string name = "Carrier";
+//	if (shaderMap->find(name) == shaderMap->end())
+//	{
+//		shader = new Shader("res/shaders/carrier.shader", 1, name);
+//		shaderMap->insert(std::make_pair(name, shader));
+//	}
+//	else {
+//		shader = shaderMap->at(name);
+//	}
+//	shader->incrNumObjectsServed();
+//	/*Carrier_PO* carrierPO = new Carrier_PO(glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
+//		glm::vec3(1.0f, 1.0f, .66f), 1500, 600, shader);*/
+//	Carrier_PO* carrierPO = new Carrier_PO(o, l, w, h, col, perm, cond, shader);
+//	carrierPO->updatePropertyMap();
+//	physicalObjectBuffer->insert(std::make_pair(carrierPO->getId(), carrierPO));
+//	//physicalObjectBuffer->push_back(carrierPO);
+//	postObjectInsertionSetup();
+//}
 
 void MainScene::addSubstrate(std::string& s, glm::vec3 o, float l, float w,
 	float h, glm::vec3 col, float perm, float cond)

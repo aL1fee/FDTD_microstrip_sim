@@ -46,11 +46,12 @@ Plan:
 
 
 
+!think about problems with wires
 add MVP mat to modifying vectors; add rotations
-add MVP vertex handling in all objects
+add MVP vertex handling in all objects (except for wires for now?). specify the rotation angle with respect to x.
 polish ribbons
-
-
+add triangular substrates & traces
+add carrier with cut angles
 
 
 
@@ -68,7 +69,7 @@ polish ribbons
 
 
 
-11/11 - 11/16 **scene finish
+11/11 - 11/21 **scene finish
 
 	*fix property window bugs, add features and appearance. apply units
 
@@ -108,6 +109,8 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 
 
 
+=====Major features TODO:
+1. 2D top-view scene generation (another viewport)
 
 
 ======Bugs TODO:
