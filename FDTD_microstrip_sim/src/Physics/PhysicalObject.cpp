@@ -20,6 +20,7 @@ PhysicalObject::PhysicalObject()
 	rebuiltExpected = false;
 	builtExpected = true;
 	isInteractable = true;
+	isDeletable = true;
 	edgesOn = true;
 	shader = nullptr;
 	propertyMap = new std::vector<std::pair<std::string, float*>>();
@@ -32,6 +33,7 @@ PhysicalObject::PhysicalObject()
 	rotationAngle = __initial_rotation_angle;
 	modelMatrix = __initial_model_mat4;
 	inverseModelMatrix = __initial_inverse_model_mat4;
+	beingRendered = true;
 }
 
 PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh)
@@ -52,6 +54,7 @@ PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3
 	rebuiltExpected = false;
 	builtExpected = true;
 	isInteractable = true;
+	isDeletable = true;
 	edgesOn = true;
 	shader = sh;
 	propertyMap = new std::vector<std::pair<std::string, float*>>();
@@ -64,6 +67,7 @@ PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3
 	rotationAngle = __initial_rotation_angle;
 	modelMatrix = __initial_model_mat4;
 	inverseModelMatrix = __initial_inverse_model_mat4;
+	beingRendered = true;
 }
 
 PhysicalObject::~PhysicalObject()
@@ -90,15 +94,33 @@ glm::vec3 PhysicalObject::getCenterLocation() const
 	//	origin.y + height / 2.0f, origin.z + width / 2.0f);
 	//return ret;
 
-	glm::vec3 localCenter = glm::vec3(length / 2.0f, height / 2.0f, 
-		width / 2.0f);
-	glm::mat4 rotationMatrix = glm::rotate(__initial_model_mat4, 
-		glm::radians(rotationAngle), rotationAxis);
-	glm::vec4 rotatedCenter = rotationMatrix * 
-		glm::vec4(localCenter, 1.0f);
-	localCenter = glm::vec3(rotatedCenter);
-	glm::vec3 worldCenter = localCenter + origin;
-	return worldCenter;
+	//second version
+	//glm::vec3 localCenter = glm::vec3(length / 2.0f, height / 2.0f, 
+	//	width / 2.0f);
+	//glm::mat4 rotationMatrix = glm::rotate(__initial_model_mat4, 
+	//	glm::radians(rotationAngle), rotationAxis);
+	//glm::vec4 rotatedCenter = rotationMatrix * 
+	//	glm::vec4(localCenter, 1.0f);
+	//localCenter = glm::vec3(rotatedCenter);
+	//glm::vec3 worldCenter = localCenter + origin;
+	//return worldCenter;
+
+	glm::vec3 localCenter = glm::vec3((length / 2.0f) / scalingVector.x, 
+		(height / 2.0f) / scalingVector.y,
+		(width / 2.0f) / scalingVector.z);
+	return glm::vec3(modelMatrix * glm::vec4(localCenter, 1.0f));
+
+	//glm::vec3 localCenter = glm::vec3(length / 2.0f, height / 2.0f, 
+	//	width / 2.0f);
+	//glm::mat4 rotationMatrix = glm::rotate(__initial_model_mat4, 
+	//	glm::radians(rotationAngle), rotationAxis);
+	//glm::vec4 rotatedCenter = rotationMatrix * 
+	//	glm::vec4(localCenter, 1.0f);
+	//localCenter = glm::vec3(rotatedCenter);
+	//glm::vec3 worldCenter = localCenter + origin;
+	//return worldCenter;
+
+
 }
 
 void PhysicalObject::setScale(float l, float h, float w)

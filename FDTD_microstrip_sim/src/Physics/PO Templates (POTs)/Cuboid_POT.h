@@ -11,8 +11,6 @@ protected:
 
 	void rebuild() override;
 
-	void generateModelMatrix() override;
-
 public:
 	Cuboid_POT(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh) :
 		PhysicalObject(o, l, w, h, col, perm, cond, sh) 
@@ -24,5 +22,8 @@ public:
 	void draw() override;
 	bool intersectionCheck(glm::vec3 v) override;
 	void clear() override {}
+
+	void generateModelMatrix() override;
+
 
 };

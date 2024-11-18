@@ -151,8 +151,16 @@ void GUI::buildMenuUpperPanel()
 				s = "> Adding a carrier";
 				_scene_main->addCarrier(s, glm::vec3(0.5f, 0.2f, .5f), 2.0f, 1.0f, 0.45f,
 					glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
+
+				//_scene_main->addCarrier(s, glm::vec3(0.0f, 0.0f, .0f), 2.0f, 1.0f, 0.45f,
+					//glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
+
+
 				//_scene_main->addCarrier(s, glm::vec3(0.5f, 0.2f, .5f), 4.5f, 7.0f, 0.45f,
 				//	glm::vec3(1.0f, 1.0f, .66f), 1500, 600);
+
+
+
 			}
 			if (ImGui::MenuItem("Substrate"))
 			{
@@ -296,7 +304,7 @@ void GUI::buildMenuUpperPanel()
 					statusWindow->setMessage(s);
 				}
 				else {
-					_scene_main->buildModifyingVectors(obj, Translation);
+					_scene_main->showModifyingVectors(obj, Translation);
 				}
 			}
 			if (ImGui::MenuItem("Scale an object", "Y"))
@@ -308,7 +316,7 @@ void GUI::buildMenuUpperPanel()
 					statusWindow->setMessage(s);
 				}
 				else {
-					_scene_main->buildModifyingVectors(obj, Scaling);
+					_scene_main->showModifyingVectors(obj, Scaling);
 				}
 			}
 

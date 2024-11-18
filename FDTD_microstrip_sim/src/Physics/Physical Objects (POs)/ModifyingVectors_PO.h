@@ -39,6 +39,8 @@ private:
 
 	void constructTranslationArrows();
 	void constructScalingArrows();
+	void constructRotationArrows();
+
 
 	void rebuild() override;
 
@@ -54,4 +56,10 @@ public:
 	glm::vec3 intersectionDirection(glm::vec3 v);
 
 	ModyfingVectorType getType() const { return type; }
+	void setType(ModyfingVectorType t) { type = t; }
+
+	void generateModelMatrix() override;
+
+	//void setActiveObjectBound(PhysicalObject* obj);
+
 };

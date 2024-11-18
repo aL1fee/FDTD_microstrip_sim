@@ -26,6 +26,8 @@
 //  z: blue
 //  y: green
 
+extern bool __centerOrientedRotation;
+
 enum PhysicalObjectType {
 	UNDEFINED,
 	CUBOID,
@@ -44,12 +46,14 @@ protected:
 	bool rebuiltExpected;
 	bool builtExpected;
 	bool isInteractable;
+	bool isDeletable;
 	Shader* shader;
 	std::vector<std::pair<std::string, float*>>* propertyMap;
 	std::vector<std::pair<std::string, int*>>* propertyMapInt;
 	unsigned int id;
 
-	virtual void generateModelMatrix() {};
+	bool beingRendered;
+
 	virtual void updateModelMatrix();
 
 public:
@@ -64,6 +68,7 @@ public:
 	bool needsRebuilding() { return rebuiltExpected; }
 	bool needsBuilding() { return builtExpected; }
 	bool interactable() const { return isInteractable; }
+	bool deletable() const { return isDeletable; }
 	void setRebuiltExpected(bool b) { rebuiltExpected = b; }
 	void setBuiltExpected(bool b) { builtExpected = b; }
 
@@ -73,7 +78,10 @@ public:
 	virtual glm::vec3 getCenterLocation() const;
 	glm::vec3* getOrigin() { return &origin; }
 
+	void setRotationAxis(glm::vec3 v) { rotationAxis = v; }
 	void setOrigin(glm::vec3 v) { origin = v; }
+	void setRotationAngle(float angle) { rotationAngle = angle; }
+
 	virtual void setScale(float l, float h, float w);
 	virtual void setScaleL(float l) { length = l; }
 	virtual void setScaleH(float h) { height = h; }
@@ -88,5 +96,9 @@ public:
 	void setId(unsigned int ui) { id = ui; }
 
 	PhysicalObjectType getObjectType() const { return objectType; }
+
+	void setBeingRendered(bool b) { beingRendered = b; }
+
+	virtual void generateModelMatrix() {};
 
 };
