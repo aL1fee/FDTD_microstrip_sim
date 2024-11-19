@@ -361,17 +361,20 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 	// checking high priority objects first
 	if (modifyingVectors != nullptr)
 	{
-		while (count < SELECTING_OBJECT_RANGE)
+		if (modifyingVectors->isBeingRendered())
 		{
-			glm::vec3 v = modifyingVectors->intersectionDirection(rayPos);
-			if (v != glm::vec3(0.0f))
+			while (count < SELECTING_OBJECT_RANGE)
 			{
-				_modifyingVectorsActivated = true;
-				_modifyingVectorsDirection = v;
-				return;
+				glm::vec3 v = modifyingVectors->intersectionDirection(rayPos);
+				if (v != glm::vec3(0.0f))
+				{
+					_modifyingVectorsActivated = true;
+					_modifyingVectorsDirection = v;
+					return;
+				}
+				rayPos += dir * SELECTING_OBJECT_PRECISION;
+				count += SELECTING_OBJECT_PRECISION;
 			}
-			rayPos += dir * SELECTING_OBJECT_PRECISION;
-			count += SELECTING_OBJECT_PRECISION;
 		}
 	}
 	_modifyingVectorsActivated = false;

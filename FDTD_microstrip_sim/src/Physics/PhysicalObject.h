@@ -98,6 +98,7 @@ public:
 	PhysicalObjectType getObjectType() const { return objectType; }
 
 	void setBeingRendered(bool b) { beingRendered = b; }
+	bool isBeingRendered() { return beingRendered; }
 
 	virtual void generateModelMatrix() {};
 

@@ -48,7 +48,7 @@ Plan:
 
 
 
-incorrect mod vec rotations -> modifies translation vecs
+incorrect mod vec rotations -> modifies translation & scaling vecs
 
 solve problems with transformation for center rotations
 
