@@ -44,6 +44,9 @@ bool _modyfingVectorsMovementStart = false;
 glm::vec3 _modyfingVectorsMovementStartOrigin = glm::vec3(0.0f);
 bool _modyfingVectorsScalingStart = false;
 glm::vec3 _modyfingVectorsScalingStartOrigin = glm::vec3(0.0f);
+bool _modyfingVectorsRotationStart = false;
+glm::vec3 _modyfingVectorsRotationStartOrigin = glm::vec3(0.0f);
+float _modyfingVectorsRotationStartOriginAngle = 0.0f;
 
 glm::vec3 cameraRotationPoint = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -79,16 +82,22 @@ void Input::processInput()
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         cam->moveRight(_deltaTime);
     }
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS &&
+        !inputBuffer->checkKeyState(GLFW_KEY_R)) {
+        //    _scene_main->deleteModifyingVectors();
+        _scene_main->showModifyingVectors(_scene_main->getActiveObject(), ModyfingVectorType::Rotation);
+        inputBuffer->setKeyState(GLFW_KEY_R, true);
+    }
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && 
         !inputBuffer->checkKeyState(GLFW_KEY_T)) {
-        _scene_main->deleteModifyingVectors();
-        _scene_main->buildModifyingVectors(_scene_main->getActiveObject(), Translation);
+    //    _scene_main->deleteModifyingVectors();
+        _scene_main->showModifyingVectors(_scene_main->getActiveObject(), ModyfingVectorType::Translation);
         inputBuffer->setKeyState(GLFW_KEY_T, true);
     }
     if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS &&
         !inputBuffer->checkKeyState(GLFW_KEY_Y)) {
-        _scene_main->deleteModifyingVectors();
-        _scene_main->buildModifyingVectors(_scene_main->getActiveObject(), Scaling);
+    //    _scene_main->deleteModifyingVectors();
+        _scene_main->showModifyingVectors(_scene_main->getActiveObject(), ModyfingVectorType::Scaling);
         inputBuffer->setKeyState(GLFW_KEY_Y, true);
     }
     if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS) {
@@ -317,6 +326,7 @@ void Input::processInput()
         _selectingObjectExpected = true;
         _modyfingVectorsMovementStart = false;
         _modyfingVectorsScalingStart = false;
+        _modyfingVectorsRotationStart = false;
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _selectingObjectExpected)
     {
@@ -345,16 +355,19 @@ void Input::processInput()
                 _scene_main->selectObject(cam->getPos(), rayWorld);
             }
             else {
-                _scene_main->deleteModifyingVectors();
+                //_scene_main->deleteModifyingVectors();
+                _scene_main->hideModifyingVectors();
             }
         }
         else {
-            _scene_main->deleteModifyingVectors();
+            //_scene_main->deleteModifyingVectors();
+            _scene_main->hideModifyingVectors();
         }
     }
 }
 
 float lastScaleValue = 0.0f;
+float previousAngle = 0.0f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -432,45 +445,57 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         cam->processMouseRotationAboutPoint(offsetX, offsetY,
             _deltaTime, cameraRotationPoint, HORIZONTAL);
     }
+    
+    Input::updateModifyingVectors(window, xpos, ypos);
+}
+
+void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
+{
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _modifyingVectorsActivated)
     {
-        // painful hardcodes
-        if (_scene_main->getModifyingVectors() != nullptr)
+        if (_scene_main->getModifyingVectors()->isBeingRendered() && 
+            _scene_main->getModifyingVectors() != nullptr && 
+            _scene_main->getActiveObject() != nullptr)
         {
             ModyfingVectorType type = _scene_main->getModifyingVectors()->getType();
             double mouseX, mouseY;
             glfwGetCursorPos(window, &mouseX, &mouseY);
-            
+
             glm::vec3 rayNDC = Utility::screenToNDC(window,
                 static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
             glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
             glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
             glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
             glm::vec3 activeObjOrigin = *_scene_main->getActiveObject()->getOrigin();
-            
+
             glm::vec3 rayOrigin = cam->getPos();
             glm::vec3 rayDir = glm::vec3(rayWorld);
-            glm::vec3 planeNormal = glm::vec3(0.0f, 0.0f, 0.0f);
-            glm::vec3 planePoint = glm::vec3(0.0f, 0.0f, 0.0f);
+            glm::vec3 planeNormal = __zero_vec3;
+            glm::vec3 planePoint = __zero_vec3;
 
-            glm::vec3 intersectionPoint = glm::vec3(0.0f);
+            glm::vec3 intersectionPoint = __zero_vec3;
+
+            float currentRotAngle = *_scene_main->getActiveObject()->getRotationAngle();
+            //float currentRotAngle = std::fmod(*_scene_main->getActiveObject()->getRotationAngle(), 360.0f);
+            //if (currentRotAngle < 0.0f) {
+            //    currentRotAngle += 360.0f;
+            //}
+            
             if (type == Translation)
             {
-                if (_modifyingVectorsDirection == glm::vec3(1.0, 0.0, 0.0f))
+                if (_modifyingVectorsDirection == __x_norm_vec3)
                 {
                     planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
-                    planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                    planeNormal = __y_norm_vec3;
                 }
-                else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
+                else if (_modifyingVectorsDirection == __z_norm_vec3)
                 {
                     planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
-                    planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                    planeNormal = __y_norm_vec3;
                 }
-                else if (_modifyingVectorsDirection == glm::vec3(0.0, 1.0, 0.0f)) {
+                else if (_modifyingVectorsDirection == __y_norm_vec3) {
                     planePoint = glm::vec3(activeObjOrigin.x, 0.0f, activeObjOrigin.z);
-                    planeNormal = glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f));
-                    //planePoint = glm::vec3(activeObjOrigin.x, 0.0, activeObjOrigin.z);
-                    //planeNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+                    planeNormal = glm::normalize(rayDir);
                 }
                 else {
                     return;
@@ -485,43 +510,58 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                     }
                     intersectionPoint -= _modyfingVectorsMovementStartOrigin;
                 }
-                if (_modifyingVectorsDirection == glm::vec3(1.0, 0.0, 0.0f))
+                if (_modifyingVectorsDirection == __x_norm_vec3)
                 {
                     intersectionPoint.y = activeObjOrigin.y;
-                    intersectionPoint.z = activeObjOrigin.z;
+                    glm::vec3 rotationDir = glm::vec3(
+                        cos(glm::radians(currentRotAngle)),
+                        0.0f,
+                        -sin(glm::radians(currentRotAngle))
+                    );
+                    glm::vec3 displacement = intersectionPoint - activeObjOrigin;
+                    float distance = glm::dot(displacement, rotationDir);
+                    intersectionPoint = activeObjOrigin + rotationDir * distance;
                 }
-                else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
+                else if (_modifyingVectorsDirection == __z_norm_vec3)
                 {
                     intersectionPoint.y = activeObjOrigin.y;
-                    intersectionPoint.x = activeObjOrigin.x;
+                    glm::vec3 rotationDir = glm::vec3(
+                        cos(glm::radians(currentRotAngle - 90.0f)),
+                        0.0f,
+                        -sin(glm::radians(currentRotAngle - 90.0f))
+                    );
+                    glm::vec3 displacement = intersectionPoint - activeObjOrigin;
+                    float distance = glm::dot(displacement, rotationDir);
+                    intersectionPoint = activeObjOrigin + rotationDir * distance;
                 }
                 else {
                     intersectionPoint.z = activeObjOrigin.z;
                     intersectionPoint.x = activeObjOrigin.x;
                 }
                 _scene_main->getActiveObject()->setOrigin(intersectionPoint);
-                _scene_main->getActiveObject()->setRebuiltExpected(true);
+                _scene_main->getActiveObject()->generateModelMatrix();
                 _scene_main->getModifyingVectors()->setOrigin
                 (_scene_main->getActiveObject()->getCenterLocation());
                 _scene_main->getModifyingVectors()->setRebuiltExpected(true);
             }
             else if (type == Scaling)
             {
-                if (_modifyingVectorsDirection == glm::vec3(1.0, 0.0, 0.0f))
+                if (_modifyingVectorsDirection == __x_norm_vec3)
                 {
                     planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
-                    planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                    planeNormal = __y_norm_vec3;
                     lastScaleValue = *_scene_main->getActiveObject()->getLength();
                 }
-                else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
+                else if (_modifyingVectorsDirection == __z_norm_vec3)
                 {
                     planePoint = glm::vec3(0.0f, activeObjOrigin.y, 0.0f);
-                    planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                    planeNormal = __y_norm_vec3;
                     lastScaleValue = *_scene_main->getActiveObject()->getWidth();
                 }
-                else if (_modifyingVectorsDirection == glm::vec3(0.0, 1.0, 0.0f)) {
+                else if (_modifyingVectorsDirection == __y_norm_vec3) {
                     planePoint = glm::vec3(activeObjOrigin.x, 0.0f, activeObjOrigin.z);
-                    planeNormal = glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f));
+                    //planeNormal = glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f));
+                    planeNormal = glm::normalize(rayDir);
                     lastScaleValue = *_scene_main->getActiveObject()->getHeight();
                 }
                 else {
@@ -541,11 +581,20 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                     intersectionPoint -= _modyfingVectorsMovementStartOrigin;
                 }
                 float value = 0.0f;
-                if (_modifyingVectorsDirection == glm::vec3(1.0, 0.0, 0.0f))
+                if (_modifyingVectorsDirection == __x_norm_vec3)
                 {
                     intersectionPoint.y = activeObjOrigin.y;
-                    intersectionPoint.z = activeObjOrigin.z;
-                    value = intersectionPoint.x + _modyfingVectorsScalingStartOrigin.x;
+                    glm::vec3 rotationDir = glm::vec3(
+                        cos(glm::radians(currentRotAngle)),
+                        0.0f,
+                        -sin(glm::radians(currentRotAngle))
+                    );
+                    glm::vec3 displacement = intersectionPoint - activeObjOrigin;
+                    float distance = glm::dot(intersectionPoint, rotationDir);
+                    intersectionPoint = activeObjOrigin + rotationDir * distance;
+
+                    value = distance + _modyfingVectorsScalingStartOrigin.x;
+
                     if (value < MIN_OBJECT_SIZE) {
                         value = MIN_OBJECT_SIZE;
                     }
@@ -556,17 +605,23 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                     if (fabs(lastScaleValue - value) > MAX_DISTANCE_RESIZE_JUMP) {
                         return;
                     }
-                    /*_scene_main->getActiveObject()->setScale(
-                        value,
-                        *_scene_main->getActiveObject()->getHeight(),
-                        *_scene_main->getActiveObject()->getWidth());*/
+
                     _scene_main->getActiveObject()->setScaleL(value);
                 }
-                else if (_modifyingVectorsDirection == glm::vec3(0.0, 0.0, 1.0f))
+                else if (_modifyingVectorsDirection == __z_norm_vec3)
                 {
                     intersectionPoint.y = activeObjOrigin.y;
-                    intersectionPoint.x = activeObjOrigin.x;
-                    value = intersectionPoint.z + _modyfingVectorsScalingStartOrigin.z;
+                    glm::vec3 rotationDir = glm::vec3(
+                        cos(glm::radians(currentRotAngle - 90.0f)),
+                        0.0f,
+                        -sin(glm::radians(currentRotAngle - 90.0f))
+                    );
+                    glm::vec3 displacement = intersectionPoint - activeObjOrigin;
+                    float distance = glm::dot(intersectionPoint, rotationDir);
+                    intersectionPoint = activeObjOrigin + rotationDir * distance;
+
+                    value = distance + _modyfingVectorsScalingStartOrigin.z;
+                    
                     if (value < MIN_OBJECT_SIZE) {
                         value = MIN_OBJECT_SIZE;
                     }
@@ -579,13 +634,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                     }
 
                     _scene_main->getActiveObject()->setScaleW(value);
-
-                    //_scene_main->getActiveObject()->setScale(
-                    //    *_scene_main->getActiveObject()->getLength(),
-                    //    *_scene_main->getActiveObject()->getHeight(),
-                    //    value);
                 }
-                else if (_modifyingVectorsDirection == glm::vec3(0.0, 1.0, 0.0f)) 
+                else if (_modifyingVectorsDirection == __y_norm_vec3)
                 {
                     intersectionPoint.z = activeObjOrigin.z;
                     intersectionPoint.x = activeObjOrigin.x;
@@ -600,16 +650,119 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
                     if (fabs(lastScaleValue - value) > MAX_DISTANCE_RESIZE_JUMP) {
                         return;
                     }
-                    /*_scene_main->getActiveObject()->setScale(
-                        *_scene_main->getActiveObject()->getLength(),
-                        value,
-                        *_scene_main->getActiveObject()->getWidth());*/
                     _scene_main->getActiveObject()->setScaleH(value);
                 }
-                _scene_main->getActiveObject()->setRebuiltExpected(true);
+                _scene_main->getActiveObject()->generateModelMatrix();
                 _scene_main->getModifyingVectors()->setOrigin
                 (_scene_main->getActiveObject()->getCenterLocation());
                 _scene_main->getModifyingVectors()->setRebuiltExpected(true);
+            }
+            else if (type == Rotation)
+            {
+                planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+                planePoint = *_scene_main->getActiveObject()->getOrigin();
+
+                glm::vec3 normalX = glm::vec3(1.0f, 0.0f, 0.0f);
+
+                float denom = glm::dot(planeNormal, rayDir);
+                intersectionPoint = glm::vec3(0.0f);
+                if (fabs(denom) > 1e-6) {
+                    float t = glm::dot(planeNormal, (planePoint - rayOrigin)) / denom;
+                    intersectionPoint = rayOrigin + t * rayDir;
+                    if (!_modyfingVectorsRotationStart) {
+                        _modyfingVectorsRotationStartOriginAngle = *_scene_main->getActiveObject()->getRotationAngle();
+                        _modyfingVectorsRotationStartOrigin = intersectionPoint;
+                        _modyfingVectorsRotationStart = true;
+
+
+                        glm::vec3 vecDN = glm::normalize(intersectionPoint - planePoint);
+
+                        _modyfingVectorsRotationStartOriginAngle = acos(glm::dot(vecDN,
+                            normalX));
+
+                        glm::vec3 localClickedPos = _scene_main->getActiveObject()->
+                            getLocalFromWorldPos(intersectionPoint);
+                        _modyfingVectorsRotationStartOrigin = localClickedPos;
+
+                        _modyfingVectorsRotationStartOriginAngle = acos(glm::dot(glm::normalize(localClickedPos),
+                            normalX));
+
+                        /* std::cout << "_modyfingVectorsRotationStartOriginAngle: " <<
+                             glm::degrees(_modyfingVectorsRotationStartOriginAngle) << std::endl;
+ */
+
+                    }
+                }
+                else
+                {
+                    std::cout << "Rotation not completed in Input.cpp" << std::endl;
+                    return;
+                }
+
+                float oldAngle = _modyfingVectorsRotationStartOriginAngle;
+
+
+                glm::vec3 localClickedPos = _scene_main->getActiveObject()->
+                    getLocalFromWorldPos(intersectionPoint);
+
+                glm::vec3 vecDiffNorm = glm::normalize(intersectionPoint - planePoint);
+
+                //float clampedDot = glm::clamp(glm::dot(vecDiffNorm, normalX), -1.0f, 1.0f);
+
+                //float newAngle = atan2(glm::length(glm::cross(vecDiffNorm, normalX)),
+                //    glm::dot(vecDiffNorm, normalX));
+
+                glm::vec3 crossProduct = glm::cross(vecDiffNorm, normalX);
+                float clampedDot = glm::clamp(glm::dot(vecDiffNorm, normalX), -1.0f, 1.0f);
+
+                // Determine the sign of the angle based on the direction of the cross product
+                float sign = glm::dot(crossProduct, planeNormal) >= 0.0f ? 1.0f : -1.0f;
+
+                // Calculate the signed angle
+                float newAngle = atan2(sign * glm::length(crossProduct), clampedDot);
+
+                newAngle -= _modyfingVectorsRotationStartOriginAngle;
+
+                /*std::cout << "newAngle: " <<
+                    glm::degrees(newAngle) << std::endl;*/
+
+
+
+                glm::vec3 rotationAxis = glm::normalize(glm::cross(normalX, vecDiffNorm));
+                if (sign == -1) {
+                    rotationAxis = glm::normalize(glm::cross(-normalX, vecDiffNorm));
+                }
+
+                //glm::vec3 rotationAxis = glm::normalize(glm::cross(normalX, vecDiffNorm));
+
+                /*std::cout << "rotationAxis: " <<
+                    glm::to_string(rotationAxis) << std::endl;*/
+
+                    //if (glm::length(rotationAxis) < 1e-6) {
+                    //    // Default to an arbitrary perpendicular axis if cross product fails.
+                    //    rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // Example fallback.
+                    //}
+                    //else {
+                    //    rotationAxis = glm::normalize(rotationAxis);
+                    //}
+
+
+
+                    /*std::cout << "first angle: " <<
+                        glm::degrees(_modyfingVectorsRotationStartOriginAngle) << std::endl;*/
+
+
+                _scene_main->getActiveObject()->setRotationAngle(glm::degrees(newAngle));
+                _scene_main->getActiveObject()->setRotationAxis(rotationAxis);
+                _scene_main->getActiveObject()->generateModelMatrix();
+                _scene_main->getModifyingVectors()->setOrigin(_scene_main->getActiveObject()
+                    ->getCenterLocation());
+                _scene_main->getModifyingVectors()->setRotationAngle(glm::degrees(newAngle));
+                _scene_main->getModifyingVectors()->setRotationAxis(rotationAxis);
+                _scene_main->getModifyingVectors()->generateModelMatrix();
+
+
+
             }
         }
     }

@@ -110,13 +110,28 @@ void Cuboid_POT::rebuild()
 void Cuboid_POT::generateModelMatrix()
 {
     translationVector = origin;
-    scalingVector = glm::vec3(length / initial_length, 
+    scalingVector = glm::vec3(length / initial_length,
         height / initial_height, width / initial_width);
-
     modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, translationVector);
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
-    modelMatrix = glm::scale(modelMatrix, scalingVector);
+
+    if (!__centerOrientedRotation)
+    {
+        modelMatrix = glm::translate(modelMatrix, translationVector);
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
+        modelMatrix = glm::scale(modelMatrix, scalingVector);
+    }
+    // not implemented yet
+    else
+    {
+        glm::vec3 centerOffset = glm::vec3(length / scalingVector.x / 2.0f, height / scalingVector.y / 2.0f,
+            width / scalingVector.z / 2.0f);
+        modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, translationVector);
+        //modelMatrix = glm::translate(modelMatrix, centerOffset);
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
+        modelMatrix = glm::scale(modelMatrix, scalingVector);
+        modelMatrix = glm::translate(modelMatrix, -centerOffset);
+    }
 
     inverseModelMatrix = glm::inverse(modelMatrix);
 }

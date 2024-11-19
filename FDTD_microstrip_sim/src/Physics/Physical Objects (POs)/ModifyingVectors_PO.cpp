@@ -7,38 +7,68 @@ ModifyingVectors_PO::ModifyingVectors_PO(float s, ModyfingVectorType t,
     type = t;
     shader = sh;
     origin = c;
-    colorX = glm::vec3(1.0f, 0.0f, 0.0f);
-    colorY = glm::vec3(0.0f, 1.0f, 0.0f);
-    colorZ = glm::vec3(0.0f, 0.0f, 1.0f);
+    colorX = __color_red;
+    colorY = __color_green;
+    colorZ = __color_blue;
     arrowAngle = glm::radians(MODIFYING_VECTORS_ARROW_ANGLE);
+    isDeletable = false;
+    beingRendered = false;
 }
 
 void ModifyingVectors_PO::buildVertices()
 {
-    vertices->pushToExistingArray(origin);
+    vertices->pushToExistingArray(glm::vec3(0.0f));
     vertices->pushToExistingArray(colorX);
-    vertices->pushToExistingArray(origin + glm::vec3(size, .0f, .0f));
+    vertices->pushToExistingArray(glm::vec3(size, .0f, .0f));
     vertices->pushToExistingArray(colorX);
     vertices->allocateNewArray();
-    vertices->pushToExistingArray(origin);
+    vertices->pushToExistingArray(glm::vec3(0.0f));
     vertices->pushToExistingArray(colorY);
-    vertices->pushToExistingArray(origin + glm::vec3(.0f, size, .0f));
+    vertices->pushToExistingArray(glm::vec3(.0f, size, .0f));
     vertices->pushToExistingArray(colorY);
     vertices->allocateNewArray();
-    vertices->pushToExistingArray(origin);
+    vertices->pushToExistingArray(glm::vec3(0.0f));
     vertices->pushToExistingArray(colorZ);
-    vertices->pushToExistingArray(origin + glm::vec3(.0f, .0f, size));
+    vertices->pushToExistingArray(glm::vec3(.0f, .0f, size));
     vertices->pushToExistingArray(colorZ);
-    switch (type) {
-        case Translation:
-            constructTranslationArrows();
-            break;
-        case Scaling:
-            constructScalingArrows();
-            break;
-        case Rotation:
-            break;
+
+    constructTranslationArrows();
+    constructScalingArrows();
+
+
+
+
+    for (int j = 0; j < 2; j++) {
+        vertices->allocateNewArray();
+        glm::vec3 col = (j == 0) ? colorZ : colorX;
+
+        float startAngle = (j == 0) ? MODIFYING_VECTORS_ROTATION_CIRCLE_ANGLE_SEPARATION :
+            180.0f + MODIFYING_VECTORS_ROTATION_CIRCLE_ANGLE_SEPARATION;
+        float endAngle = (j == 0) ? 180.0f - MODIFYING_VECTORS_ROTATION_CIRCLE_ANGLE_SEPARATION :
+            360.0f - MODIFYING_VECTORS_ROTATION_CIRCLE_ANGLE_SEPARATION;
+
+        float angle = (endAngle - startAngle) / (MODIFYING_VECTORS_ROTATION_CIRCLE_SEGMENT_NUM - 1);
+
+        for (int i = 0; i < MODIFYING_VECTORS_ROTATION_CIRCLE_SEGMENT_NUM; i++) {
+            float currentAngleRad = glm::radians(startAngle + i * angle);
+            vertices->pushToExistingArray(glm::vec3(size / 2.0f * cos(currentAngleRad),
+                0.0f,
+                size / 2.0f * sin(currentAngleRad)));
+            vertices->pushToExistingArray(col);
+        }
     }
+
+
+
+
+
+
+    constructRotationArrows();
+
+
+
+
+
 }
 
 void ModifyingVectors_PO::buildVAOs()
@@ -87,7 +117,7 @@ void ModifyingVectors_PO::constructTranslationArrows()
                 col = colorZ;
                 break;
         }
-        point = origin + glm::vec3(x * size, y * size, z * size);
+        point = glm::vec3(x * size, y * size, z * size);
         vertices->allocateNewArray();
         vertices->pushToExistingArray(point);
         vertices->pushToExistingArray(col);
@@ -142,7 +172,7 @@ void ModifyingVectors_PO::constructScalingArrows()
             col = colorZ;
             break;
         }
-        point = origin + glm::vec3(x * size, y * size, z * size);
+        point = glm::vec3(x * size, y * size, z * size);
         int xInner = 0, yInner = 0, zInner = 0;
         if (i == 0)
         {
@@ -234,30 +264,76 @@ void ModifyingVectors_PO::constructScalingArrows()
     }
 }
 
+void ModifyingVectors_PO::constructRotationArrows()
+{
+
+
+
+
+
+
+
+
+
+}
+
+
 void ModifyingVectors_PO::build()
 {
     vertices->clear();
     VAOs->clear();
     buildVertices();
     buildVAOs();
+    generateModelMatrix();
 }
 
 void ModifyingVectors_PO::rebuild()
 {
-    vertices->clear();
-    VAOs->clear();
-    buildVertices();
-    buildVAOs();
+    generateModelMatrix();
+}
+
+void ModifyingVectors_PO::generateModelMatrix()
+{
+
+    translationVector = origin;
+    /*scalingVector = glm::vec3(length / initial_length,
+        height / initial_height, width / initial_width);*/
+
+    glm::vec3 centerOffset = glm::vec3(length / 2.0f, height / 2.0f, width / 2.0f);
+
+    modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, translationVector + centerOffset);
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
+    modelMatrix = glm::translate(modelMatrix, -centerOffset);
+   
+
+
+    //modelMatrix = glm::mat4(1.0f);
+    //modelMatrix = glm::translate(modelMatrix, translationVector);
+    //modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
+    
+    //modelMatrix = glm::scale(modelMatrix, scalingVector);
+
+
+    inverseModelMatrix = glm::inverse(modelMatrix);
+    
 }
 
 void ModifyingVectors_PO::draw()
 {
+    if (!beingRendered)
+    {
+        return;
+    }
     if (rebuiltExpected) {
         rebuild();
         rebuiltExpected = false;
     }
     glDisable(GL_DEPTH_TEST);
     shader->bind();
+    updateModelMatrix();
+
+
     switch (type) {
         case Translation:
         for (int i = 0; i < 3; i++) {
@@ -265,7 +341,7 @@ void ModifyingVectors_PO::draw()
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
             glBindVertexArray(0);
         }
-        for (int i = 3; i < vertices->getSize(); i++) {
+        for (int i = 3; i < 6; i++) {
             glBindVertexArray(VAOs->at(i));
             glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
             glBindVertexArray(0);
@@ -277,11 +353,23 @@ void ModifyingVectors_PO::draw()
                 glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
                 glBindVertexArray(0);
             }
-            for (int i = 3; i < vertices->getSize(); i++) {
+            for (int i = 6; i < 15; i++) {
                 glBindVertexArray(VAOs->at(i));
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
                 glBindVertexArray(0);
             }
+            break;
+        case Rotation:
+            for (int i = 15; i < 17; i++) {
+                glBindVertexArray(VAOs->at(i));
+                glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+                glBindVertexArray(0);
+            }
+            //for (int i = 6; i < 15; i++) {
+            //    glBindVertexArray(VAOs->at(i));
+            //    glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+            //    glBindVertexArray(0);
+            //}
             break;
     }
 
@@ -296,27 +384,28 @@ bool ModifyingVectors_PO::intersectionCheck(glm::vec3 v)
 
 glm::vec3 ModifyingVectors_PO::intersectionDirection(glm::vec3 v)
 {
-    if ((origin.x < v.x && origin.x + size > v.x) &&
-        (origin.y + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.y &&
-            origin.y - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.y) &&
-        (origin.z + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.z &&
-            origin.z - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.z))
+    glm::vec4 vLocalFrame = inverseModelMatrix * glm::vec4(v, 1.0f);
+    if ((0.0f < vLocalFrame.x && size > vLocalFrame.x) &&
+        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.y &&
+            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.y) &&
+        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.z &&
+            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.z))
     {
         return glm::vec3(1.0f, 0.0f, 0.0f);
     }
-    if ((origin.y < v.y && origin.y + size > v.y) &&
-        (origin.x + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.x &&
-            origin.x - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.x) &&
-        (origin.z + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.z &&
-            origin.z - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.z))
+    if ((0.0f < vLocalFrame.y && size > vLocalFrame.y) &&
+        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.x &&
+            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.x) &&
+        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.z &&
+            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.z))
     {
         return glm::vec3(0.0f, 1.0f, 0.0f);
     }
-    if ((origin.z < v.z && origin.z + size > v.z) &&
-        (origin.y + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.y &&
-            origin.y - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.y) &&
-        (origin.x + MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > v.x &&
-            origin.x - MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < v.x))
+    if ((0.0f < vLocalFrame.z && size > vLocalFrame.z) &&
+        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.y &&
+            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.y) &&
+        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.x &&
+            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.x))
     {
         // neg z dir
         return glm::vec3(0.0f, 0.0f, 1.0f);

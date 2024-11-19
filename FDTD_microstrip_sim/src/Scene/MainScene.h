@@ -107,8 +107,9 @@ public:
 
 	void updateProjMatrix() { _projMatrixChanged = true; }
 
-	void buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType type);
+	void showModifyingVectors(PhysicalObject* obj, ModyfingVectorType type);
 	void deleteModifyingVectors();
+	void hideModifyingVectors() { modifyingVectors->setBeingRendered(false); }
 	ModifyingVectors_PO* getModifyingVectors() { return modifyingVectors; }
 
 	void preObjectInsertionSetup();

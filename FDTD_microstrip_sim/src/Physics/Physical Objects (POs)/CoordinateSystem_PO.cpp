@@ -19,6 +19,7 @@ CoordinateSystem_PO::CoordinateSystem_PO(float l, float mls, Shader* sh)
     helperLineSeparation = mls;
     mainColor = glm::vec3(0.0f);
     helperColor = glm::vec3(0.72f);
+    isDeletable = false;
 }
 
 void CoordinateSystem_PO::buildVertices()
@@ -89,6 +90,7 @@ void CoordinateSystem_PO::rebuild()
 
 void CoordinateSystem_PO::draw()
 {
+
     if (rebuiltExpected) {
         rebuild();
         rebuiltExpected = false;

@@ -41,6 +41,17 @@ void MainScene::init()
 
 	testingLineShader = new Shader("res/shaders/testingLine.shader", 0, "Curve");
 	testingLine = new Curve_PO(testingLineShader);
+
+	std::string name = "Generic MVP shader";
+	Shader* modVecShader = new Shader("res/shaders/generic_pos_col_MVP.shader", 
+		1, name);
+	shaderMap->insert(std::make_pair(name, modVecShader));
+	modifyingVectors = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
+		Translation, __initial_origin, modVecShader);
+	modifyingVectors->setId(physicalObjectNextIdMax--);
+	modifyingVectors->setBeingRendered(false);
+	physicalObjectBuffer->insert(std::make_pair(modifyingVectors->getId(), modifyingVectors));
+	postObjectInsertionSetup();
 }
 
 void MainScene::render()
@@ -105,30 +116,6 @@ void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
 	//physicalObjectBuffer->push_back(carrierPO);
 	postObjectInsertionSetup();
 }
-
-
-//void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
-//	float h, glm::vec3 col, float perm, float cond)
-//{
-//	Shader* shader;
-//	std::string name = "Carrier";
-//	if (shaderMap->find(name) == shaderMap->end())
-//	{
-//		shader = new Shader("res/shaders/carrier.shader", 1, name);
-//		shaderMap->insert(std::make_pair(name, shader));
-//	}
-//	else {
-//		shader = shaderMap->at(name);
-//	}
-//	shader->incrNumObjectsServed();
-//	/*Carrier_PO* carrierPO = new Carrier_PO(glm::vec3(0.0f), 4.5f, 7.0f, 0.45f,
-//		glm::vec3(1.0f, 1.0f, .66f), 1500, 600, shader);*/
-//	Carrier_PO* carrierPO = new Carrier_PO(o, l, w, h, col, perm, cond, shader);
-//	carrierPO->updatePropertyMap();
-//	physicalObjectBuffer->insert(std::make_pair(carrierPO->getId(), carrierPO));
-//	//physicalObjectBuffer->push_back(carrierPO);
-//	postObjectInsertionSetup();
-//}
 
 void MainScene::addSubstrate(std::string& s, glm::vec3 o, float l, float w,
 	float h, glm::vec3 col, float perm, float cond)
@@ -331,7 +318,8 @@ void MainScene::deleteActiveObject()
 			delete activeObject;
 			activeObject = nullptr;
 			propertyWindow->nullify();
-			deleteModifyingVectors();
+			//deleteModifyingVectors();
+			hideModifyingVectors();
 			return;
 		}
 	}
@@ -343,7 +331,7 @@ void MainScene::deleteAllObjects()
 		it != physicalObjectBuffer->end();) {
 		PhysicalObject* obj = it->second;
 		std::cout << obj->getShaderName() << std::endl;
-		if (obj->interactable()) {
+		if (obj->interactable() && obj->deletable()) {
 			eraseShaderMapOneInstance(obj->getShaderName());
 			delete obj;
 			it = physicalObjectBuffer->erase(it); // Erase returns the next iterator
@@ -352,7 +340,7 @@ void MainScene::deleteAllObjects()
 			++it;
 		}
 	}
-	modifyingVectors = nullptr;
+	//modifyingVectors = nullptr;
 	activeObject = nullptr;
 	propertyWindow->nullify();
 }
@@ -373,17 +361,20 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 	// checking high priority objects first
 	if (modifyingVectors != nullptr)
 	{
-		while (count < SELECTING_OBJECT_RANGE)
+		if (modifyingVectors->isBeingRendered())
 		{
-			glm::vec3 v = modifyingVectors->intersectionDirection(rayPos);
-			if (v != glm::vec3(0.0f))
+			while (count < SELECTING_OBJECT_RANGE)
 			{
-				_modifyingVectorsActivated = true;
-				_modifyingVectorsDirection = v;
-				return;
+				glm::vec3 v = modifyingVectors->intersectionDirection(rayPos);
+				if (v != glm::vec3(0.0f))
+				{
+					_modifyingVectorsActivated = true;
+					_modifyingVectorsDirection = v;
+					return;
+				}
+				rayPos += dir * SELECTING_OBJECT_PRECISION;
+				count += SELECTING_OBJECT_PRECISION;
 			}
-			rayPos += dir * SELECTING_OBJECT_PRECISION;
-			count += SELECTING_OBJECT_PRECISION;
 		}
 	}
 	_modifyingVectorsActivated = false;
@@ -421,58 +412,73 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 	activeObject = nullptr;
 	propertyWindow->setDefaultPropertyMap();
 	propertyWindow->updateActiveObject(nullptr);
-	deleteModifyingVectors();
+	//deleteModifyingVectors();
+	hideModifyingVectors();
 	highestClickedObjPoint = glm::vec3(0.0f);
 	std::cout << "no objects found!" << std::endl;
 }
 
-void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType type)
+void MainScene::showModifyingVectors(PhysicalObject* obj, ModyfingVectorType type)
 {
-	if (modifyingVectors != nullptr || obj == nullptr)
+	if (modifyingVectors == nullptr || obj == nullptr)
 	{
 		return;
 	}
-	ModifyingVectors_PO* ret = nullptr;
-
-	Shader* shader;
-	std::string name = "Generic shader";
-	if (shaderMap->find(name) == shaderMap->end())
-	{
-		shader = new Shader("res/shaders/generic.shader", 1, name);
-		shaderMap->insert(std::make_pair(name, shader));
-	}
-	else {
-		shader = shaderMap->at(name);
-	}
-
-	switch (type) {
-	case Translation:
-		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
-			type, obj->getCenterLocation(), shader);
-		ret->setId(physicalObjectNextIdMax--);
-		//ret->setInteractable(false);
-		break;
-	case Scaling:
-		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
-			type, obj->getCenterLocation(), shader);
-		ret->setId(physicalObjectNextIdMax--);
-		break;
-	case Rotation:
-
-		break;
-	}
-	if (ret != nullptr)
-	{
-		modifyingVectors = ret;
-		//increment twice not to recreate the same shader each time
-		shader->incrNumObjectsServed();
-		shader->incrNumObjectsServed();
-		physicalObjectBuffer->insert(std::make_pair(ret->getId(), ret));
-		shaderMap->insert(std::make_pair(shader->getName(), shader));
-		_viewMatrixChanged = true;
-		_projMatrixChanged = true;
-	}
+	modifyingVectors->setType(type);
+	modifyingVectors->setOrigin(obj->getCenterLocation());
+	modifyingVectors->setRotationAngle(*obj->getRotationAngle());
+	modifyingVectors->generateModelMatrix();
+	//modifyingVectors->setActiveObjectBound(activeObject);
+	modifyingVectors->setBeingRendered(true);
 }
+
+//void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType type)
+//{
+//	if (modifyingVectors != nullptr || obj == nullptr)
+//	{
+//		return;
+//	}
+//	ModifyingVectors_PO* ret = nullptr;
+//
+//	Shader* shader;
+//	std::string name = "Generic MVP shader";
+//	if (shaderMap->find(name) == shaderMap->end())
+//	{
+//		shader = new Shader("res/shaders/generic.shader", 1, name);
+//		//shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
+//		shaderMap->insert(std::make_pair(name, shader));
+//	}
+//	else {
+//		shader = shaderMap->at(name);
+//	}
+//
+//	switch (type) {
+//	case Translation:
+//		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
+//			type, obj->getCenterLocation(), shader);
+//		ret->setId(physicalObjectNextIdMax--);
+//		//ret->setInteractable(false);
+//		break;
+//	case Scaling:
+//		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
+//			type, obj->getCenterLocation(), shader);
+//		ret->setId(physicalObjectNextIdMax--);
+//		break;
+//	case Rotation:
+//
+//		break;
+//	}
+//	if (ret != nullptr)
+//	{
+//		modifyingVectors = ret;
+//		//increment twice not to recreate the same shader each time
+//		shader->incrNumObjectsServed();
+//		shader->incrNumObjectsServed();
+//		physicalObjectBuffer->insert(std::make_pair(ret->getId(), ret));
+//		shaderMap->insert(std::make_pair(shader->getName(), shader));
+//		postObjectInsertionSetup();
+//	}
+//}
 
 void MainScene::deleteModifyingVectors()
 {
