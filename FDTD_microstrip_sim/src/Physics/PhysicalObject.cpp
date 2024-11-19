@@ -130,3 +130,8 @@ void PhysicalObject::setScale(float l, float h, float w)
 	height = h;
 }
 
+glm::vec3 PhysicalObject::getLocalFromWorldPos(glm::vec3 v)
+{
+	return inverseModelMatrix * glm::vec4(v, 1.0f);
+}
+

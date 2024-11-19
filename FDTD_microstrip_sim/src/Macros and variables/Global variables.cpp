@@ -3,6 +3,8 @@
 
 glm::vec3 __y_norm_vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 __x_norm_vec3(1.0f, 0.0f, 0.0f);
+glm::vec3 __z_norm_vec3(0.0f, 0.0f, 1.0f);
+
 
 glm::vec3 __color_main(0.0f);
 glm::vec3 __color_secondary(0.1f);
@@ -11,7 +13,7 @@ glm::vec3 __color_red(1.0f, 0.0f, 0.0f);
 glm::vec3 __color_green(0.0f, 1.0f, 0.0f);
 glm::vec3 __color_blue(0.0f, 0.0f, 1.0f);
 
-
+glm::vec3 __zero_vec3(0.0f);
 glm::vec3 __initial_origin(0.0f);
 
 glm::vec3 __initial_translation_vec3(1.0f);

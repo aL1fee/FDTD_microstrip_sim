@@ -120,6 +120,7 @@ void Cuboid_POT::generateModelMatrix()
         modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
         modelMatrix = glm::scale(modelMatrix, scalingVector);
     }
+    // not implemented yet
     else
     {
         glm::vec3 centerOffset = glm::vec3(length / scalingVector.x / 2.0f, height / scalingVector.y / 2.0f,

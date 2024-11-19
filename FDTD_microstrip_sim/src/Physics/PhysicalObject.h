@@ -101,4 +101,6 @@ public:
 
 	virtual void generateModelMatrix() {};
 
+	virtual glm::vec3 getLocalFromWorldPos(glm::vec3 v);
+
 };

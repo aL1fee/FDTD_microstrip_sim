@@ -40,7 +40,7 @@ void ModifyingVectors_PO::buildVertices()
 
     for (int j = 0; j < 2; j++) {
         vertices->allocateNewArray();
-        glm::vec3 col = (j == 0) ? colorX : colorZ;
+        glm::vec3 col = (j == 0) ? colorZ : colorX;
 
         float startAngle = (j == 0) ? MODIFYING_VECTORS_ROTATION_CIRCLE_ANGLE_SEPARATION :
             180.0f + MODIFYING_VECTORS_ROTATION_CIRCLE_ANGLE_SEPARATION;

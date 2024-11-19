@@ -11,6 +11,7 @@
 #include <gtc/type_ptr.hpp>
 
 #include "../Macros and Variables/Macros.h"
+#include "../Macros and Variables/Global variables.h"
 
 #include "../Scene/MainScene.h"
 #include "../Scene/Camera.h"
@@ -38,10 +39,14 @@ private:
 	InputBuffer* inputBuffer;
 
 
+
+
 public:
 	Input(GLFWwindow* w);
 
 	void processInput();
+
+	static void updateModifyingVectors(GLFWwindow* window, double xpos, double ypos);
 
 
 

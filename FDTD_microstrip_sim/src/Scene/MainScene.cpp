@@ -423,6 +423,8 @@ void MainScene::showModifyingVectors(PhysicalObject* obj, ModyfingVectorType typ
 	}
 	modifyingVectors->setType(type);
 	modifyingVectors->setOrigin(obj->getCenterLocation());
+	modifyingVectors->setRotationAngle(*obj->getRotationAngle());
+	modifyingVectors->generateModelMatrix();
 	//modifyingVectors->setActiveObjectBound(activeObject);
 	modifyingVectors->setBeingRendered(true);
 }

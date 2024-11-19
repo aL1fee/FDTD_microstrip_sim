@@ -41,19 +41,18 @@ Plan:
 #Wires RAM issues
 #polish wires to a workable state; solve major issues. will need to redesign late
 #implement ribbons using Gaussian curve equation
+#debug crashes w/ access restriction
 
 
 
 
 
 
-make another git branch
+incorrect mod vec rotations -> modifies translation vecs
 
 solve problems with transformation for center rotations
 
 address intersectionDirection for modvectors
-
-#debug crashes w/ access restriction
 
 improve mod vec dynamic input mechanics. fix inf position bugs. fix y-coord orientation.
 
@@ -63,12 +62,11 @@ add MVP vertex handling in all objects (except for wires for now?). specify the 
 
 
 
-
-
 polish ribbons
 ribbons sometimes fly away on a startup. check and debug.
 add triangular substrates & traces
 add carrier with cut angles
+
 
 
 
@@ -164,6 +162,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 20. implement wires in all directions
 21. make multi-level ribbons
 22. decrease num of VAOs of mod vectors
+23. center-based object manipulation (rather than left lower corner) feature
 
 ------
 future:

@@ -510,6 +510,8 @@ void GUI::buildLeftPanel()
 						{
 							_scene_main->getModifyingVectors()->setRebuiltExpected(true);
 							_scene_main->getModifyingVectors()->setOrigin(activeObj->getCenterLocation());
+							_scene_main->getModifyingVectors()->setRotationAngle(*activeObj->getRotationAngle());
+							_scene_main->getModifyingVectors()->generateModelMatrix();
 						}
 
 						std::cout << "One of the properties has been updated!" << std::endl;
