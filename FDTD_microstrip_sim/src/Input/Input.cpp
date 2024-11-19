@@ -47,6 +47,7 @@ glm::vec3 _modyfingVectorsScalingStartOrigin = glm::vec3(0.0f);
 bool _modyfingVectorsRotationStart = false;
 glm::vec3 _modyfingVectorsRotationStartOrigin = glm::vec3(0.0f);
 float _modyfingVectorsRotationStartOriginAngle = 0.0f;
+float _prevRotationAngle = 0.0f;
 
 glm::vec3 cameraRotationPoint = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -476,10 +477,6 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
             glm::vec3 intersectionPoint = __zero_vec3;
 
             float currentRotAngle = *_scene_main->getActiveObject()->getRotationAngle();
-            //float currentRotAngle = std::fmod(*_scene_main->getActiveObject()->getRotationAngle(), 360.0f);
-            //if (currentRotAngle < 0.0f) {
-            //    currentRotAngle += 360.0f;
-            //}
             
             if (type == Translation)
             {
@@ -659,38 +656,18 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
             }
             else if (type == Rotation)
             {
-                planeNormal = glm::vec3(0.0f, 1.0f, 0.0f);
-                planePoint = *_scene_main->getActiveObject()->getOrigin();
-
-                glm::vec3 normalX = glm::vec3(1.0f, 0.0f, 0.0f);
-
+                planeNormal = __y_norm_vec3;
+                planePoint = activeObjOrigin;
                 float denom = glm::dot(planeNormal, rayDir);
-                intersectionPoint = glm::vec3(0.0f);
-                if (fabs(denom) > 1e-6) {
+                //intersectionPoint = glm::vec3(0.0f);
+
+                if (fabs(denom) > 1e-8) {
                     float t = glm::dot(planeNormal, (planePoint - rayOrigin)) / denom;
                     intersectionPoint = rayOrigin + t * rayDir;
                     if (!_modyfingVectorsRotationStart) {
-                        _modyfingVectorsRotationStartOriginAngle = *_scene_main->getActiveObject()->getRotationAngle();
-                        _modyfingVectorsRotationStartOrigin = intersectionPoint;
+                        _modyfingVectorsMovementStartOrigin = intersectionPoint - activeObjOrigin;
                         _modyfingVectorsRotationStart = true;
-
-
-                        glm::vec3 vecDN = glm::normalize(intersectionPoint - planePoint);
-
-                        _modyfingVectorsRotationStartOriginAngle = acos(glm::dot(vecDN,
-                            normalX));
-
-                        glm::vec3 localClickedPos = _scene_main->getActiveObject()->
-                            getLocalFromWorldPos(intersectionPoint);
-                        _modyfingVectorsRotationStartOrigin = localClickedPos;
-
-                        _modyfingVectorsRotationStartOriginAngle = acos(glm::dot(glm::normalize(localClickedPos),
-                            normalX));
-
-                        /* std::cout << "_modyfingVectorsRotationStartOriginAngle: " <<
-                             glm::degrees(_modyfingVectorsRotationStartOriginAngle) << std::endl;
- */
-
+                        _prevRotationAngle = 0.0f;
                     }
                 }
                 else
@@ -699,70 +676,42 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
                     return;
                 }
 
-                float oldAngle = _modyfingVectorsRotationStartOriginAngle;
+                glm::vec3 currIntersecVec = intersectionPoint - activeObjOrigin;
+
+                float dotProd = glm::dot(currIntersecVec, _modyfingVectorsMovementStartOrigin);
+                float magnitudeCIV = glm::length(currIntersecVec);
+                float magnitudeMVMSO = glm::length(_modyfingVectorsMovementStartOrigin);
+
+                float cosTheta = glm::clamp(dotProd / (magnitudeCIV * magnitudeMVMSO), -1.0f, 1.0f);
+                float newAngle = acos(cosTheta);
+
+                glm::vec3 crossProd = glm::cross(_modyfingVectorsMovementStartOrigin, currIntersecVec);
+
+                float sign = glm::dot(crossProd, __y_norm_vec3);
+
+                if (sign < 0) {
+                    newAngle = -newAngle;
+                }
+                
+
+                float finalAngle = currentRotAngle + glm::degrees(newAngle - _prevRotationAngle);
+                _prevRotationAngle = newAngle;
 
 
-                glm::vec3 localClickedPos = _scene_main->getActiveObject()->
-                    getLocalFromWorldPos(intersectionPoint);
-
-                glm::vec3 vecDiffNorm = glm::normalize(intersectionPoint - planePoint);
-
-                //float clampedDot = glm::clamp(glm::dot(vecDiffNorm, normalX), -1.0f, 1.0f);
-
-                //float newAngle = atan2(glm::length(glm::cross(vecDiffNorm, normalX)),
-                //    glm::dot(vecDiffNorm, normalX));
-
-                glm::vec3 crossProduct = glm::cross(vecDiffNorm, normalX);
-                float clampedDot = glm::clamp(glm::dot(vecDiffNorm, normalX), -1.0f, 1.0f);
-
-                // Determine the sign of the angle based on the direction of the cross product
-                float sign = glm::dot(crossProduct, planeNormal) >= 0.0f ? 1.0f : -1.0f;
-
-                // Calculate the signed angle
-                float newAngle = atan2(sign * glm::length(crossProduct), clampedDot);
-
-                newAngle -= _modyfingVectorsRotationStartOriginAngle;
-
-                /*std::cout << "newAngle: " <<
-                    glm::degrees(newAngle) << std::endl;*/
-
-
-
-                glm::vec3 rotationAxis = glm::normalize(glm::cross(normalX, vecDiffNorm));
-                if (sign == -1) {
-                    rotationAxis = glm::normalize(glm::cross(-normalX, vecDiffNorm));
+                if (finalAngle < 0.0f) {
+                    finalAngle = std::fmod(finalAngle, 360.0f);
+                    finalAngle += 360.0f;
+                }
+                if(finalAngle > 360.0f) {
+                    finalAngle = std::fmod(finalAngle, 360.0f);
                 }
 
-                //glm::vec3 rotationAxis = glm::normalize(glm::cross(normalX, vecDiffNorm));
-
-                /*std::cout << "rotationAxis: " <<
-                    glm::to_string(rotationAxis) << std::endl;*/
-
-                    //if (glm::length(rotationAxis) < 1e-6) {
-                    //    // Default to an arbitrary perpendicular axis if cross product fails.
-                    //    rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // Example fallback.
-                    //}
-                    //else {
-                    //    rotationAxis = glm::normalize(rotationAxis);
-                    //}
-
-
-
-                    /*std::cout << "first angle: " <<
-                        glm::degrees(_modyfingVectorsRotationStartOriginAngle) << std::endl;*/
-
-
-                _scene_main->getActiveObject()->setRotationAngle(glm::degrees(newAngle));
-                _scene_main->getActiveObject()->setRotationAxis(rotationAxis);
+                _scene_main->getActiveObject()->setRotationAngle(finalAngle);
                 _scene_main->getActiveObject()->generateModelMatrix();
                 _scene_main->getModifyingVectors()->setOrigin(_scene_main->getActiveObject()
                     ->getCenterLocation());
-                _scene_main->getModifyingVectors()->setRotationAngle(glm::degrees(newAngle));
-                _scene_main->getModifyingVectors()->setRotationAxis(rotationAxis);
+                _scene_main->getModifyingVectors()->setRotationAngle(finalAngle);
                 _scene_main->getModifyingVectors()->generateModelMatrix();
-
-
-
             }
         }
     }

@@ -504,6 +504,16 @@ void GUI::buildLeftPanel()
 								*propertyValue = static_cast<float>(WIRE_MAX_DIAMETER);
 							}
 						}
+						if (it->first == "Rotation angle")
+						{
+							if (*propertyValue < 0.0f) {
+								*propertyValue = std::fmod(*propertyValue, 360.0f);
+								*propertyValue += 360.0f;
+							}
+							if (*propertyValue > 360.0f) {
+								*propertyValue = std::fmod(*propertyValue, 360.0f);
+							}
+						}
 						activeObj->setRebuiltExpected(true);
 						ModifyingVectors_PO* modVecs = _scene_main->getModifyingVectors();
 						if (modVecs != nullptr)

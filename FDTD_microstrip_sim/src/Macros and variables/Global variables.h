@@ -15,8 +15,10 @@ extern glm::vec3 __z_norm_vec3;
 extern glm::vec3 __color_red;
 extern glm::vec3 __color_green;
 extern glm::vec3 __color_blue;
+extern glm::vec3 __color_black;
 
 extern glm::vec3 __zero_vec3;
+
 extern glm::vec3 __initial_origin;
 
 extern glm::vec3 __initial_translation_vec3;
@@ -27,5 +29,3 @@ extern glm::mat4 __initial_inverse_model_mat4;
 
 extern float __initial_rotation_angle;
 extern float __initial_zero_value;
-
-extern bool __centerOrientedRotation;

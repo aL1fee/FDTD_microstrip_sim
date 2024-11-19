@@ -59,14 +59,7 @@ void ModifyingVectors_PO::buildVertices()
     }
 
 
-
-
-
-
     constructRotationArrows();
-
-
-
 
 
 }
@@ -146,7 +139,6 @@ void ModifyingVectors_PO::constructTranslationArrows()
     }
 }
 
-//nasty
 void ModifyingVectors_PO::constructScalingArrows()
 {
     float radius = MODIFYING_VECTORS_ARROW_LENGTH
@@ -266,15 +258,45 @@ void ModifyingVectors_PO::constructScalingArrows()
 
 void ModifyingVectors_PO::constructRotationArrows()
 {
+    glm::vec3 firstPoint = __zero_vec3;
+    glm::vec3 secondPoint = __zero_vec3;
+    float radius = MODIFYING_VECTORS_ARROW_LENGTH
+        * sin(arrowAngle);
+    glm::vec3 point = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 col = glm::vec3(0.0f);
+    int x = 0, y = 0, z = 0;
+    for (int i = 0; i < 2; i++)
+    {
+        switch (i) {
+        case 0:
+            firstPoint = vertices->at(15)->at(0);
+            secondPoint = vertices->at(15)->at(6);
+            col = __color_blue;
+            break;
+        case 1:
+            firstPoint = vertices->at(16)->at(0);
+            secondPoint = vertices->at(16)->at(6);
+            col = __color_red;
+            break;
+        }
+        glm::vec3 vecNormDir = glm::normalize(secondPoint - firstPoint);
+        point = firstPoint;
+        vertices->allocateNewArray();
+        vertices->pushToExistingArray(point);
+        vertices->pushToExistingArray(col);
+        glm::vec3 axis = glm::normalize(secondPoint - firstPoint);
+        glm::vec3 orthVec = __y_norm_vec3;
+        glm::vec3 perpVec = glm::normalize(glm::cross(axis, orthVec));
 
+        for (float j = 0.0f; j < 450.0f; j += MODIFYING_VECTORS_ARROW_CIRCLE_INTERVAL) {
+            float angle = glm::radians(j);
+            glm::vec3 offset = MODIFYING_VECTORS_ARROW_LENGTH * axis + radius * (cos(angle) * perpVec +
+                sin(angle) * orthVec);
+            vertices->pushToExistingArray(point + offset);
+            vertices->pushToExistingArray(col);
 
-
-
-
-
-
-
-
+        }
+    }
 }
 
 
@@ -365,11 +387,11 @@ void ModifyingVectors_PO::draw()
                 glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
                 glBindVertexArray(0);
             }
-            //for (int i = 6; i < 15; i++) {
-            //    glBindVertexArray(VAOs->at(i));
-            //    glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
-            //    glBindVertexArray(0);
-            //}
+            for (int i = 17; i < 19; i++) {
+                glBindVertexArray(VAOs->at(i));
+                glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+                glBindVertexArray(0);
+            }
             break;
     }
 
@@ -385,30 +407,53 @@ bool ModifyingVectors_PO::intersectionCheck(glm::vec3 v)
 glm::vec3 ModifyingVectors_PO::intersectionDirection(glm::vec3 v)
 {
     glm::vec4 vLocalFrame = inverseModelMatrix * glm::vec4(v, 1.0f);
-    if ((0.0f < vLocalFrame.x && size > vLocalFrame.x) &&
-        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.y &&
-            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.y) &&
-        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.z &&
-            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.z))
+    if (type == Translation || type == Scaling)
     {
-        return glm::vec3(1.0f, 0.0f, 0.0f);
+        if ((0.0f < vLocalFrame.x && size > vLocalFrame.x) &&
+            (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.y &&
+                -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.y) &&
+            (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.z &&
+                -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.z))
+        {
+            return glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+        if ((0.0f < vLocalFrame.y && size > vLocalFrame.y) &&
+            (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.x &&
+                -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.x) &&
+            (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.z &&
+                -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.z))
+        {
+            return glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+        if ((0.0f < vLocalFrame.z && size > vLocalFrame.z) &&
+            (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.y &&
+                -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.y) &&
+            (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.x &&
+                -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.x))
+        {
+            // neg z dir
+            return glm::vec3(0.0f, 0.0f, 1.0f);
+        }
+        return glm::vec3(0.0f);
     }
-    if ((0.0f < vLocalFrame.y && size > vLocalFrame.y) &&
-        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.x &&
-            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.x) &&
-        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.z &&
-            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.z))
+    else 
     {
-        return glm::vec3(0.0f, 1.0f, 0.0f);
+        float startAngle = 0.0f;
+        float endAngle = 360.f;
+        int numSegmentsAdjusted = 2 *
+            (MODIFYING_VECTORS_ROTATION_CIRCLE_SEGMENT_NUM - 1);
+        float angle = (endAngle - startAngle) / numSegmentsAdjusted;
+        for (int i = 0; i < numSegmentsAdjusted; i++) {
+            float currentAngleRad = glm::radians(startAngle + i * angle);
+
+            glm::vec3 point = glm::vec3(size / 2.0f * cos(currentAngleRad),
+                0.0f,
+                size / 2.0f * sin(currentAngleRad));
+            if (glm::length(point - glm::vec3(vLocalFrame)) < MODIFYING_VECTORS_ROTATION_BOUNDARY_DISTANCE_CHECK)
+            {
+                return glm::vec3(1.0f, 0.0f, 0.0f);
+            }
+        }
+        return glm::vec3(0.0f);
     }
-    if ((0.0f < vLocalFrame.z && size > vLocalFrame.z) &&
-        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.y &&
-            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.y) &&
-        (MODIFYING_VECTORS_BOUNDARY_HALF_SIZE > vLocalFrame.x &&
-            -MODIFYING_VECTORS_BOUNDARY_HALF_SIZE < vLocalFrame.x))
-    {
-        // neg z dir
-        return glm::vec3(0.0f, 0.0f, 1.0f);
-    }
-    return glm::vec3(0.0f);
 }
