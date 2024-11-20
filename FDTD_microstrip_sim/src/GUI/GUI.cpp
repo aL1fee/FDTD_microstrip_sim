@@ -220,7 +220,7 @@ void GUI::buildMenuUpperPanel()
 				//_scene_main->addTuningPadArray(s, glm::vec3(0.0f), 3, 2, .2f, .2f, .2f, .2f,
 				//	glm::vec3(1.0f, .843f, 0.0f), 5.2f, 410);
 			}
-			if (ImGui::MenuItem("A simple system"))
+			if (ImGui::MenuItem("System #1"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
@@ -236,7 +236,7 @@ void GUI::buildMenuUpperPanel()
 				_scene_main->addHousing(s, glm::vec3(0.0f, 0.0f, -.2f), 9.0f, .2f, 2.0f,
 					glm::vec3(.88f, .88f, .88f), 10.0f, 50);
 			}
-			if (ImGui::MenuItem("Another system"))
+			if (ImGui::MenuItem("System #2"))
 			{
 				extern bool _acceptingLeftClickBufferInput;
 				_acceptingLeftClickBufferInput = true;
@@ -295,6 +295,18 @@ void GUI::buildMenuUpperPanel()
 		}
 		if (ImGui::BeginMenu("Modify"))
 		{
+			if (ImGui::MenuItem("Rotate an object", "R"))
+			{
+				PhysicalObject* obj = _scene_main->getActiveObject();
+				// redundant check
+				if (obj == nullptr) {
+					string s = "> No object selected!\n";
+					statusWindow->setMessage(s);
+				}
+				else {
+					_scene_main->showModifyingVectors(obj, Rotation);
+				}
+			}
 			if (ImGui::MenuItem("Translate an object", "T"))
 			{
 				PhysicalObject* obj = _scene_main->getActiveObject();

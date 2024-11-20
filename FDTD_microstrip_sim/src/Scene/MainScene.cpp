@@ -124,7 +124,7 @@ void MainScene::addSubstrate(std::string& s, glm::vec3 o, float l, float w,
 	std::string name = "Substrate";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/substrate.shader", 1, name);
+		shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -147,7 +147,7 @@ void MainScene::addTrace(std::string& s, glm::vec3 o, float l, float w,
 	std::string name = "Trace";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/trace.shader", 1, name);
+		shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -169,7 +169,7 @@ void MainScene::addHousing(std::string& s, glm::vec3 o, float l, float w,
 	std::string name = "Housing";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/housing.shader", 1, name);
+		shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -189,10 +189,10 @@ void MainScene::addPowerSource(std::string& s, glm::vec3 o, glm::vec3 dir, float
 	float r, float l, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	std::string name = "Trace";
+	std::string name = "Power source";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/trace.shader", 1, name);
+		shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -209,10 +209,10 @@ void MainScene::addPowerDetector(std::string& s, glm::vec3 o, glm::vec3 dir, flo
 	float r, float l, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	std::string name = "Trace";
+	std::string name = "Power detector";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
-		shader = new Shader("res/shaders/trace.shader", 1, name);
+		shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
 		shaderMap->insert(std::make_pair(name, shader));
 	}
 	else {
@@ -271,7 +271,7 @@ void MainScene::addWire(std::string& s, glm::vec3 o, float l, float w,
 void MainScene::addRibbon(std::string& s, glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond)
 {
 	Shader* shader;
-	std::string name = "Generic MVP";
+	std::string name = "Ribbon";
 	if (shaderMap->find(name) == shaderMap->end())
 	{
 		shader = new Shader("res/shaders/generic_MVP.shader", 1, name);

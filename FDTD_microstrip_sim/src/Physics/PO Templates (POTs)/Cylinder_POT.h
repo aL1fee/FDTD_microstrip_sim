@@ -35,9 +35,14 @@ public:
 		radius = r;
 		direction = dir;
 		objectType = CYLINDER;
+		/*width = radius;
+		height = radius;*/
+		length = l;
+		initial_length = length;
 		width = radius;
 		height = radius;
-
+		initial_width = radius;
+		initial_height = radius;
 	}
 
 	void build() override;
@@ -52,6 +57,9 @@ public:
 	void setScaleW(float w) override;
 
 	float* getRadius() { return &radius; }
+
+	void generateModelMatrix() override;
+
 
 
 };

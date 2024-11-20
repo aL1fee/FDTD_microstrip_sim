@@ -42,28 +42,28 @@ Plan:
 #polish wires to a workable state; solve major issues. will need to redesign late
 #implement ribbons using Gaussian curve equation
 #debug crashes w/ access restriction
+#fix incorrect mod vec rotations -> modifies translation & scaling vecs. fix inf position bugs. fix y-coord orientation.
+#create arrows and boundary conditions for rotations
+#add MVP mat to modifying vectors; add rotations; fix remaining issues
 
 
 
-
-
-
-incorrect mod vec rotations -> modifies translation & scaling vecs
-
-solve problems with transformation for center rotations
-
-address intersectionDirection for modvectors
-
-improve mod vec dynamic input mechanics. fix inf position bugs. fix y-coord orientation.
-
-add MVP mat to modifying vectors; add rotations; fix issues
 add MVP vertex handling in all objects (except for wires for now?). specify the rotation angle with respect to x.
+redesign list:
+	tuning pad array
+	testing line
+	wire 
+	ribbon
+	System #1
+	System #2
 
 
 
 
-polish ribbons
-ribbons sometimes fly away on a startup. check and debug.
+
+add a feature to extend the gridline
+
+polish ribbons + solve bugs (fly away on a startup)
 add triangular substrates & traces
 add carrier with cut angles
 
