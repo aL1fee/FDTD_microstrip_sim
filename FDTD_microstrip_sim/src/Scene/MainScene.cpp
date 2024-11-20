@@ -432,54 +432,6 @@ void MainScene::showModifyingVectors(PhysicalObject* obj, ModyfingVectorType typ
 	modifyingVectors->setBeingRendered(true);
 }
 
-//void MainScene::buildModifyingVectors(PhysicalObject* obj, ModyfingVectorType type)
-//{
-//	if (modifyingVectors != nullptr || obj == nullptr)
-//	{
-//		return;
-//	}
-//	ModifyingVectors_PO* ret = nullptr;
-//
-//	Shader* shader;
-//	std::string name = "Generic MVP shader";
-//	if (shaderMap->find(name) == shaderMap->end())
-//	{
-//		shader = new Shader("res/shaders/generic.shader", 1, name);
-//		//shader = new Shader("res/shaders/generic_pos_col_MVP.shader", 1, name);
-//		shaderMap->insert(std::make_pair(name, shader));
-//	}
-//	else {
-//		shader = shaderMap->at(name);
-//	}
-//
-//	switch (type) {
-//	case Translation:
-//		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
-//			type, obj->getCenterLocation(), shader);
-//		ret->setId(physicalObjectNextIdMax--);
-//		//ret->setInteractable(false);
-//		break;
-//	case Scaling:
-//		ret = new ModifyingVectors_PO(MODIFYING_VECTORS_INITIAL_SIZE,
-//			type, obj->getCenterLocation(), shader);
-//		ret->setId(physicalObjectNextIdMax--);
-//		break;
-//	case Rotation:
-//
-//		break;
-//	}
-//	if (ret != nullptr)
-//	{
-//		modifyingVectors = ret;
-//		//increment twice not to recreate the same shader each time
-//		shader->incrNumObjectsServed();
-//		shader->incrNumObjectsServed();
-//		physicalObjectBuffer->insert(std::make_pair(ret->getId(), ret));
-//		shaderMap->insert(std::make_pair(shader->getName(), shader));
-//		postObjectInsertionSetup();
-//	}
-//}
-
 void MainScene::deleteModifyingVectors()
 {
 	if (modifyingVectors != nullptr)

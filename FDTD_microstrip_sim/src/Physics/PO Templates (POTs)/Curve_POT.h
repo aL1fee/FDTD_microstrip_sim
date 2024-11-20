@@ -17,6 +17,9 @@
 #include "../../Geometry/GeometricalObject.h"
 #include "../../Data Structures/VertexVectorDS.h"
 
+extern bool _testingLinePressed;
+extern bool _rayRendered;
+
 class Curve_POT : public PhysicalObject
 {
 protected:
@@ -27,7 +30,6 @@ protected:
 	void buildEdges() override {}
 
 	void rebuild() override;
-
 
 public:
 	Curve_POT(Shader* sh);

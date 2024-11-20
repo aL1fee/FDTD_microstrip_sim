@@ -111,13 +111,6 @@ void GUI::buildMenuUpperPanel()
 		if (ImGui::BeginMenu("Add"))
 		{
 			std::string s = "";
-			if (ImGui::MenuItem("Testing line"))
-			{
-				extern bool _acceptingLeftClickBufferInput;
-				extern bool _testingLineExpected;
-				_testingLineExpected = true;
-
-			}
 			if (ImGui::MenuItem("Wire (in z-y plane)"))
 			{
 				//extern bool _acceptingLeftClickBufferInput;
@@ -265,6 +258,13 @@ void GUI::buildMenuUpperPanel()
 		}
 		if (ImGui::BeginMenu("Select"))
 		{
+			if (ImGui::MenuItem("Testing line"))
+			{
+				extern bool _acceptingLeftClickBufferInput;
+				extern bool _testingLineExpected;
+				_testingLineExpected = true;
+
+			}
 			if (ImGui::MenuItem("Generate a ray"))
 			{
 				extern bool _rayExpected;

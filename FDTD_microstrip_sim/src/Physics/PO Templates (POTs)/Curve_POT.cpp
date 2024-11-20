@@ -18,6 +18,7 @@ void Curve_POT::buildVAOs()
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
         VAOs->setAt(i, VAO);
+        VAOs->addVBO(VBO);
     }
 }
 
@@ -45,7 +46,11 @@ void Curve_POT::rebuild()
 
 void Curve_POT::draw()
 {
-    rebuild();
+    if (_testingLinePressed || _rayRendered)
+    {
+        rebuild();
+        _rayRendered = false;
+    }
     shader->bind();
     shader->setUniform3f("color", 0.0f, 0.0f, 1.0f);
     for (int i = 0; i < VAOs->getSize(); i++) {

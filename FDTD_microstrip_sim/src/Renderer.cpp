@@ -17,6 +17,7 @@ bool _cameraRotationAboutPointOn = false;
 bool _cameraVerticalRotationAboutPointOn = false;
 
 bool _rayExpected = false;
+bool _rayRendered = false;
 
 bool _wireInputExpected = false;
 bool _wireInputPressed = false;

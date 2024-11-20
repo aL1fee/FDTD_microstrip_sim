@@ -20,6 +20,7 @@ extern bool _selectingObjectExpected;
 extern bool _selectingObjectPressed;
 extern bool _resizing;
 extern bool _rayExpected;
+extern bool _rayRendered;
 
 extern bool _wireInputExpected;
 extern bool _wireInputPressed;
@@ -280,7 +281,7 @@ void Input::processInput()
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _wireInputPressed)
     {
         //BUG next line?
-        _scene_main->getTestingLine()->terminateLine();
+        //_scene_main->getTestingLine()->terminateLine();
         _wireInputExpected = false;
         _wireInputPressed = false;
         _wireFirstXZPlanePoint = true;
@@ -300,7 +301,7 @@ void Input::processInput()
         glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
 
 
-        _scene_main->getTestingLine()->addPoint(cam->getPos() + rayWorld);
+        _scene_main->getTestingLine()->addPoint(cam->getPos() + rayWorld * 5.0f);
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && _testingLinePressed)
     {
@@ -310,6 +311,7 @@ void Input::processInput()
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _rayExpected)
     {
+        _rayRendered = true;
         _rayExpected = false;
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -719,6 +721,14 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+    double mouseX, mouseY;
+    glfwGetCursorPos(window, &mouseX, &mouseY);
+    glfwGetWindowSize(window, &screenWidth, &screenHeight);
+
+    if (mouseX < INITIAL_OPENGL_CONTEXT_POSITION_X || mouseY < INITIAL_OPENGL_CONTEXT_POSITION_Y || mouseY >(screenHeight - 160)) {
+        return;
+    }
+
     extern float _deltaTime;
     cam->processMouseScroll(static_cast<float>(yoffset), _deltaTime);
 }

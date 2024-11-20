@@ -48,20 +48,23 @@ Plan:
 
 
 
+
+
+
 add MVP vertex handling in all objects (except for wires for now?). specify the rotation angle with respect to x.
+address memory leaks in all objects
 redesign list:
 	tuning pad array
-	testing line
 	wire 
 	ribbon
-	System #1
-	System #2
+	System #1 (just check)
+	System #2 (just check)
 
 
 
 
 
-add a feature to extend the gridline
+add a feature to extend the gridlines
 
 polish ribbons + solve bugs (fly away on a startup)
 add triangular substrates & traces
@@ -80,15 +83,13 @@ add carrier with cut angles
 
 
 *implement a hierarchy data structure to store elements & its properties of a scene
-*hierarchy-level/many-object selection
+*hierarchy-level/multiple-object selection
 
 
 
 11/11 - 11/21 **scene finish
 
 	*fix property window bugs, add features and appearance. apply units
-
-	*testingline and other curves rebuilding
 
 	*do status window (latest messages appear at the top; time, scroll history features)
 
@@ -112,7 +113,7 @@ add carrier with cut angles
 
 
 
-start with/ FDTD (11/18 at the latest!)
+start with/ FDTD (11/25 at the latest!)
 pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 
@@ -163,6 +164,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 21. make multi-level ribbons
 22. decrease num of VAOs of mod vectors
 23. center-based object manipulation (rather than left lower corner) feature
+24. implement a better and more efficienty way of generating rays and lines 
 
 ------
 future:
