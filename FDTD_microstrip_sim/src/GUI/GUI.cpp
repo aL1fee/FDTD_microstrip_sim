@@ -507,6 +507,9 @@ void GUI::buildLeftPanel()
 							if (*propertyValue > MAX_PAD_SEPARATION_SIZE) {
 								*propertyValue = MAX_PAD_SEPARATION_SIZE;
 							}
+							activeObj->setInstancePositionsChanged(true);
+							activeObj->updateL();
+							activeObj->updateW();
 						}
 						if (it->first == "Diameter") {
 							if (*propertyValue < WIRE_MIN_DIAMETER) {
@@ -560,6 +563,9 @@ void GUI::buildLeftPanel()
 							if (*propertyValue > MAX_NUM_PADS) {
 								*propertyValue = MAX_NUM_PADS;
 							}
+							activeObj->setInstancePositionsChanged(true);
+							activeObj->updateL();
+							activeObj->updateW();
 						}
 						activeObj->setRebuiltExpected(true);
 						ModifyingVectors_PO* modVecs = _scene_main->getModifyingVectors();

@@ -347,7 +347,7 @@ void MainScene::deleteAllObjects()
 
 void MainScene::generateRay(glm::vec3 pos, glm::vec3 dir)
 {
-	testingLine->terminateLine();
+	//testingLine->teminateLine();
 	testingLine->addPoint(pos);
 	testingLine->addPoint(pos + dir * RAY_LENGTH);
 	testingLine->terminateLineWithBuiltIndexIncr();

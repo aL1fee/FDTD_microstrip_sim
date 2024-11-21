@@ -604,7 +604,6 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
                     if (fabs(lastScaleValue - value) > MAX_DISTANCE_RESIZE_JUMP) {
                         return;
                     }
-
                     _scene_main->getActiveObject()->setScaleL(value);
                 }
                 else if (_modifyingVectorsDirection == __z_norm_vec3)
@@ -651,7 +650,16 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
                     }
                     _scene_main->getActiveObject()->setScaleH(value);
                 }
-                _scene_main->getActiveObject()->generateModelMatrix();
+                // i don't understand why i have to do this
+                if (_scene_main->getActiveObject()->getObjectType() == CUBOID_ARRAY)
+                {
+                    _scene_main->getActiveObject()->setInstancePositionsChanged(true);
+                    _scene_main->getActiveObject()->setRebuiltExpected(true);
+                }
+                else
+                {
+                    _scene_main->getActiveObject()->generateModelMatrix();
+                }
                 _scene_main->getModifyingVectors()->setOrigin
                 (_scene_main->getActiveObject()->getCenterLocation());
                 _scene_main->getModifyingVectors()->setRebuiltExpected(true);

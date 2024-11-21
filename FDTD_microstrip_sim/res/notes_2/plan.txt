@@ -45,6 +45,8 @@ Plan:
 #fix incorrect mod vec rotations -> modifies translation & scaling vecs. fix inf position bugs. fix y-coord orientation.
 #create arrows and boundary conditions for rotations
 #add MVP mat to modifying vectors; add rotations; fix remaining issues
+#redesigned tuning pad array using MVP. added rotations about y axis. fixed bugs with scaling. 
+
 
 
 
@@ -54,7 +56,6 @@ Plan:
 add MVP vertex handling in all objects (except for wires for now?). specify the rotation angle with respect to x.
 address memory leaks in all objects
 redesign list:
-	tuning pad array
 	wire 
 	ribbon
 	System #1 (just check)

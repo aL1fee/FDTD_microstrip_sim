@@ -34,6 +34,7 @@ PhysicalObject::PhysicalObject()
 	modelMatrix = __initial_model_mat4;
 	inverseModelMatrix = __initial_inverse_model_mat4;
 	beingRendered = true;
+	instancePositionsChanged = false;
 }
 
 PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh)
@@ -68,6 +69,7 @@ PhysicalObject::PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3
 	modelMatrix = __initial_model_mat4;
 	inverseModelMatrix = __initial_inverse_model_mat4;
 	beingRendered = true;
+	instancePositionsChanged = false;
 }
 
 PhysicalObject::~PhysicalObject()

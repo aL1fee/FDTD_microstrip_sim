@@ -42,6 +42,8 @@ protected:
 	glm::mat4 modelMatrix;
 	glm::mat4 inverseModelMatrix;
 
+	bool instancePositionsChanged;
+
 	void addColorVertex(glm::vec3 v) { vertices->pushToExistingArray(v); }
 
 	virtual void buildVertices() = 0;
@@ -68,4 +70,5 @@ public:
 	float* getRotationAngle() { return &rotationAngle; }
 
 	glm::vec3* getColor() { return &color; }
+
 };

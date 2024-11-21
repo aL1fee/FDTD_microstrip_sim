@@ -34,7 +34,8 @@ enum PhysicalObjectType {
 	TRACE,
 	CYLINDER,
 	CURVE,
-	RIBBON
+	RIBBON,
+	CUBOID_ARRAY
 };
 
 class PhysicalObject : public GeometricalObject
@@ -87,6 +88,10 @@ public:
 	virtual void setScaleH(float h) { height = h; }
 	virtual void setScaleW(float w) { width = w; }
 
+	virtual void updateL() {}
+	virtual void updateW() {}
+	virtual void updateH() {}
+
 	void setInteractable(bool val) { isInteractable = val; }
 
 	bool operator==(const PhysicalObject& other) const {
@@ -103,5 +108,7 @@ public:
 	virtual void generateModelMatrix() {};
 
 	virtual glm::vec3 getLocalFromWorldPos(glm::vec3 v);
+
+	void setInstancePositionsChanged(bool b) { instancePositionsChanged = b; }
 
 };

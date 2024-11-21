@@ -12,6 +12,10 @@ protected:
 	float padSeparationX;
 	float padSeparationZ;
 
+	float initial_length;
+	float initial_width;
+	float initial_height;
+
 	unsigned int instanceVBO[2];
 
 	std::vector<glm::vec3>* instancePositions;
@@ -36,9 +40,13 @@ public:
 		length = numPadsX * sizeX + (numPadsX - 1) * padSeparationX;
 		width = numPadsZ * sizeZ + (numPadsZ - 1) * padSeparationZ;
 		instancePositions = new std::vector<glm::vec3>();
+		instancePositionsChanged = true;
 		instanceVBO[0] = 0;
 		instanceVBO[1] = 1;
-		//objectType = CUBOID;
+		objectType = CUBOID_ARRAY;
+		initial_length = length;
+		initial_width = width;
+		initial_height = height;
 	}
 
 	void build() override;
@@ -56,7 +64,12 @@ public:
 	float* getPadSeparationX() { return &padSeparationX; }
 	float* getPadSeparationZ() { return &padSeparationZ; }
 
-	glm::vec3 getCenterLocation() const override;
 	void setScaleL(float l) override;
 	void setScaleW(float w) override;
+
+	void generateModelMatrix() override;
+
+	virtual void updateL() override;
+	virtual void updateW() override;
+
 };

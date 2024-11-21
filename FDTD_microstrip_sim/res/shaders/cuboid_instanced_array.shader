@@ -20,7 +20,7 @@ void main()
     scaledPos.x *= sizeX;
     scaledPos.z *= sizeZ;
 
-    vec4 worldPosition = model * vec4(scaledPos, 1.0) + vec4(aOffset, 0.0);
+    vec4 worldPosition = model * (vec4(scaledPos, 1.0) + vec4(aOffset, 0.0));
     gl_Position = proj * view * worldPosition;
 
     vertexColor = aColor;

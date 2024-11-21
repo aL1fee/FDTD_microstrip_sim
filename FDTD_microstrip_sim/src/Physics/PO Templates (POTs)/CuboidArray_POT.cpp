@@ -19,23 +19,23 @@ void CuboidArray_POT::buildVertices()
     for (int i = 0; i < 5; i++) {
         z = (i == 1 || i == 2) ? 1 : 0;
         y = (i == 2 || i == 3) ? 1 : 0;
-        vertices->pushToExistingArray(glm::vec3(0, y, 1 * z));
+        vertices->pushToExistingArray(glm::vec3(0, y * height, 1 * z));
         addColorVertex(color);
-        vertices->pushToExistingArray(glm::vec3(1, y, 1 * z));
-        addColorVertex(color);
-    }
-    for (int i = 0; i < 2; i++) {
-        y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(glm::vec3(0, y, 0));
-        addColorVertex(color);
-        vertices->pushToExistingArray(glm::vec3(0, y, 1));
+        vertices->pushToExistingArray(glm::vec3(1, y * height, 1 * z));
         addColorVertex(color);
     }
     for (int i = 0; i < 2; i++) {
         y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(glm::vec3(1, y, 0));
+        vertices->pushToExistingArray(glm::vec3(0, y * height, 0));
         addColorVertex(color);
-        vertices->pushToExistingArray(glm::vec3(1, y, 1));
+        vertices->pushToExistingArray(glm::vec3(0, y * height, 1));
+        addColorVertex(color);
+    }
+    for (int i = 0; i < 2; i++) {
+        y = (i == 1) ? 1 : 0;
+        vertices->pushToExistingArray(glm::vec3(1, y * height, 0));
+        addColorVertex(color);
+        vertices->pushToExistingArray(glm::vec3(1, y * height, 1));
         addColorVertex(color);
     }
     if (edgesOn) {
@@ -92,37 +92,37 @@ void CuboidArray_POT::buildEdges()
     for (int i = 0; i < 4; i++) {
         z = (i == 1 || i == 2) ? 1 : 0;
         y = (i == 2 || i == 3) ? 1 : 0;
-        vertices->pushToExistingArray(glm::vec3(0, y, 1 * z));
+        vertices->pushToExistingArray(glm::vec3(0, y * height, 1 * z));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(glm::vec3(1, y, 1 * z));
+        vertices->pushToExistingArray(glm::vec3(1, y * height, 1 * z));
         addColorVertex(glm::vec3(.1f));
     }
     for (int i = 0; i < 2; i++) {
         y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(glm::vec3(0, y, 0));
+        vertices->pushToExistingArray(glm::vec3(0, y * height, 0));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(glm::vec3(0, y, 1));
+        vertices->pushToExistingArray(glm::vec3(0, y * height, 1));
         addColorVertex(glm::vec3(.1f));
     }
     for (int i = 0; i < 2; i++) {
         z = (i == 1) ? 1 : 0;
         vertices->pushToExistingArray(glm::vec3(0, 0, 1 * z));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(glm::vec3(0, 1, 1 * z));
+        vertices->pushToExistingArray(glm::vec3(0, height, 1 * z));
         addColorVertex(glm::vec3(.1f));
     }
     for (int i = 0; i < 2; i++) {
         y = (i == 1) ? 1 : 0;
-        vertices->pushToExistingArray(glm::vec3(1, y, 0));
+        vertices->pushToExistingArray(glm::vec3(1, y * height, 0));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(glm::vec3(1, y, 1));
+        vertices->pushToExistingArray(glm::vec3(1, y * height, 1));
         addColorVertex(glm::vec3(.1f));
     }
     for (int i = 0; i < 2; i++) {
         z = (i == 1) ? 1 : 0;
         vertices->pushToExistingArray(glm::vec3(1, 0, 1 * z));
         addColorVertex(glm::vec3(.1f));
-        vertices->pushToExistingArray(glm::vec3(1, 1, 1 * z));
+        vertices->pushToExistingArray(glm::vec3(1, height, 1 * z));
         addColorVertex(glm::vec3(.1f));
     }
 }
@@ -132,44 +132,58 @@ void CuboidArray_POT::build()
     VAOs->clear();
     buildVertices();
     buildVAOs();
-    rebuiltExpected = true;
+    generateModelMatrix();
+    //rebuiltExpected = true;
 }
 
 void CuboidArray_POT::rebuild()
 {
-    instancePositions->clear();
-    setInstancePositions();
+    generateModelMatrix();
+}
 
-    for (int i = 0; i < vertices->getSize(); i++)
+void CuboidArray_POT::generateModelMatrix()
+{
+    if (instancePositionsChanged)
     {
-        glBindVertexArray(VAOs->at(i));
-        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO[i]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, 
-            instancePositions->size() * sizeof(glm::vec3), 
-            instancePositions->data());
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        instancePositions->clear();
+        setInstancePositions();
+        for (int i = 0; i < vertices->getSize(); i++)
+        {
+            glBindVertexArray(VAOs->at(i));
+            glBindBuffer(GL_ARRAY_BUFFER, instanceVBO[i]);
+            glBufferSubData(GL_ARRAY_BUFFER, 0,
+                instancePositions->size() * sizeof(glm::vec3),
+                instancePositions->data());
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
+        instancePositionsChanged = false;
     }
 
     translationVector = origin;
-    scalingVector = glm::vec3(1.0f, height, 1.0f);
+    scalingVector = glm::vec3(1.0f, height / initial_height,
+       1.0f);
 
     modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, translationVector);
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
+    
+    inverseModelMatrix = glm::inverse(modelMatrix);
+    
     modelMatrix = glm::scale(modelMatrix, scalingVector);
 }
 
-
 void CuboidArray_POT::draw()
 {
-    shader->bind();
     if (rebuiltExpected) {
         rebuild();
         rebuiltExpected = false;
     }
 
-    glUniformMatrix4fv(shader->getUniformLocation("model"), 1, GL_FALSE, 
-        glm::value_ptr(modelMatrix));
+    shader->bind();
+
+    updateModelMatrix();
+
     shader->setUniform1f("sizeX", sizeX);
     shader->setUniform1f("sizeZ", sizeZ);
 
@@ -191,30 +205,25 @@ void CuboidArray_POT::draw()
 
 bool CuboidArray_POT::intersectionCheck(glm::vec3 v)
 {
+    v = inverseModelMatrix * glm::vec4(v, 1.0f);
     for (int countZ = 0; countZ < numPadsZ; countZ++)
     {
         for (int countX = 0; countX < numPadsX; countX++)
         {
-            if (origin.y > v.y || origin.y + height < v.y)
+            if (0.0f > v.y || height < v.y)
             {
                 return false;
             }
-            if ((origin. x + countX * sizeX + countX * padSeparationX < v.x &&
-                origin.x + countX * sizeX + countX * padSeparationX + sizeX > v.x) &&
-                (origin.z + countZ * sizeZ + countZ * padSeparationZ < v.z) &&
-                (origin.z + countZ * sizeZ + countZ * padSeparationZ + sizeZ > v.z))
+            if ((countX * sizeX + countX * padSeparationX < v.x) &&
+                (countX * sizeX + countX * padSeparationX + sizeX > v.x) &&
+                (countZ * sizeZ + countZ * padSeparationZ < v.z) &&
+                (countZ * sizeZ + countZ * padSeparationZ + sizeZ > v.z))
             {
                 return true;
             }
         }
     }
     return false;
-}
-
-glm::vec3 CuboidArray_POT::getCenterLocation() const
-{
-    return origin + glm::vec3((numPadsX * sizeX + (numPadsX - 1) * padSeparationX) / 2.0f,
-        height / 2.0f, (numPadsZ * sizeZ + (numPadsZ - 1) * padSeparationZ) / 2.0f);
 }
 
 void CuboidArray_POT::setScaleL(float l)
@@ -240,5 +249,16 @@ void CuboidArray_POT::setScaleW(float w)
     else if (padSeparationZ > MAX_PAD_SEPARATION_SIZE) {
         padSeparationZ = MAX_PAD_SEPARATION_SIZE;
     }
+    width = sizeZ * numPadsZ + padSeparationZ * (numPadsZ - 1);
+}
+
+
+void CuboidArray_POT::updateL()
+{
+    length = sizeX * numPadsX + padSeparationX * (numPadsX - 1);
+}
+
+void CuboidArray_POT::updateW()
+{
     width = sizeZ * numPadsZ + padSeparationZ * (numPadsZ - 1);
 }
