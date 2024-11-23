@@ -46,6 +46,7 @@ Plan:
 #create arrows and boundary conditions for rotations
 #add MVP mat to modifying vectors; add rotations; fix remaining issues
 #redesigned tuning pad array using MVP. added rotations about y axis. fixed bugs with scaling. 
+#fixed wire issues: 1. cant regenerate wire verts and vaos if i wire is not finished 2. always smoothly end feet
 
 
 
@@ -53,25 +54,21 @@ Plan:
 
 
 
-add MVP vertex handling in all objects (except for wires for now?). specify the rotation angle with respect to x.
-address memory leaks in all objects
-redesign list:
-	wire 
-	ribbon
-	System #1 (just check)
-	System #2 (just check)
 
 
 
 
+
+
+
+
+
+add Model matrices to ribbons + polish ribbons + solve bugs (fly away on startup) + address mem leaks
 
 add a feature to extend the gridlines
 
-polish ribbons + solve bugs (fly away on a startup)
 add triangular substrates & traces
 add carrier with cut angles
-
-
 
 
 
@@ -88,7 +85,8 @@ add carrier with cut angles
 
 
 
-11/11 - 11/21 **scene finish
+late november:
+	**scene finish
 
 	*fix property window bugs, add features and appearance. apply units
 
@@ -114,7 +112,7 @@ add carrier with cut angles
 
 
 
-start with/ FDTD (11/25 at the latest!)
+start with/ FDTD (12/1)
 pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 
@@ -166,6 +164,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 22. decrease num of VAOs of mod vectors
 23. center-based object manipulation (rather than left lower corner) feature
 24. implement a better and more efficienty way of generating rays and lines 
+25. wires may still contain bugs after 11/21 wire repolishing
 
 ------
 future:

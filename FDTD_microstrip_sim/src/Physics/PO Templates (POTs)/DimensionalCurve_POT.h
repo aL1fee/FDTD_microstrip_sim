@@ -77,7 +77,7 @@ public:
 		minY = std::numeric_limits<float>::max();
 		maxZ = std::numeric_limits<float>::min();
 		minZ = std::numeric_limits<float>::max();
-		objectType = CURVE;
+		objectType = DIMENSIONAL_CURVE;
 		indexProcessed = 0;
 		unprocessedVertex = glm::vec3(0.0f);
 		movementStarted = false;
@@ -128,4 +128,11 @@ public:
 	void lastPointEntered(bool b) { lastVertexEntered = b; }
 
 	glm::vec3 getCenterLocation() const override;
+
+	void setRotationAngle(float angle) override {}
+
+	glm::vec3 getLatestPoint();
+
+	void setEndingVerticesInYDirFrom(glm::vec3 v);
+
 };

@@ -26,6 +26,8 @@ extern bool _wireInputExpected;
 extern bool _wireInputPressed;
 extern bool _wireFirstXZPlanePoint;
 extern glm::vec3 _wireFirstPoint;
+extern bool _wireZYplane;
+extern bool _wireXYplane;
 
 extern bool _ribbonInputExpected;
 extern bool _ribbonInputPressed;
@@ -232,7 +234,17 @@ void Input::processInput()
         glm::vec3 rayOrigin = cam->getPos();
         glm::vec3 rayDir = glm::vec3(rayWorld);
 
-        glm::vec3 planeNormal = glm::vec3(1.0f, 0.0f, 0.0f);
+
+        glm::vec3 planeNormal = glm::normalize(glm::vec3(rayDir.x, 0.0f, rayDir.z));
+        if (_wireZYplane)
+        {
+            planeNormal = glm::vec3(1.0f, 0.0f, 0.0f);
+        }
+        if (_wireXYplane)
+        {
+            planeNormal = glm::vec3(0.0f, 0.0f, 1.0f);
+        }
+
         glm::vec3 planePoint = _wireFirstPoint;
 
         if (_wireFirstXZPlanePoint) 
@@ -259,7 +271,6 @@ void Input::processInput()
 
         if (higherPointObject == nullptr && !_scene_main->getActiveWire()->isTerminated())
         {
-            //std::cout << "ha" << std::endl;
             _scene_main->getActiveWire()->updateUnprocessedVertex(intersectionPoint);
         }
         else if (!_scene_main->getActiveWire()->isTerminated()) 
@@ -270,10 +281,9 @@ void Input::processInput()
                     *higherPointObject->getOriginY() + *higherPointObject->getHeight(),
                     intersectionPoint.z);
 
-                //std::cout << "curveTerminationPoint: " << glm::to_string(curveTerminationPoint) << std::endl; 
-
                 _scene_main->getActiveWire()->setLastVertex(curveTerminationPoint);
                 _scene_main->getActiveWire()->updateUnprocessedVertex(curveTerminationPoint);
+
                 _scene_main->getActiveWire()->lastPointEntered(true);
             }
         }
@@ -284,7 +294,11 @@ void Input::processInput()
         //_scene_main->getTestingLine()->terminateLine();
         _wireInputExpected = false;
         _wireInputPressed = false;
+        _wireZYplane = false;
+        _wireXYplane = false;
         _wireFirstXZPlanePoint = true;
+        _scene_main->terminateAllWires();
+
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && _testingLineExpected)
     {
@@ -712,7 +726,7 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
                     finalAngle = std::fmod(finalAngle, 360.0f);
                     finalAngle += 360.0f;
                 }
-                if(finalAngle > 360.0f) {
+                if (finalAngle > 360.0f) {
                     finalAngle = std::fmod(finalAngle, 360.0f);
                 }
 
@@ -720,7 +734,8 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
                 _scene_main->getActiveObject()->generateModelMatrix();
                 _scene_main->getModifyingVectors()->setOrigin(_scene_main->getActiveObject()
                     ->getCenterLocation());
-                _scene_main->getModifyingVectors()->setRotationAngle(finalAngle);
+                _scene_main->getModifyingVectors()->setRotationAngle(*_scene_main->
+                    getActiveObject()->getRotationAngle());
                 _scene_main->getModifyingVectors()->generateModelMatrix();
             }
         }

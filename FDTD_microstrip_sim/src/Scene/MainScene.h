@@ -31,6 +31,8 @@ class MainScene : public Scene
 private:
 	std::map<std::string, Shader*>* shaderMap;
 	std::map<unsigned int, PhysicalObject*>* physicalObjectBuffer;
+	std::map<unsigned int, DimensionalCurve_POT*>* wireObjectBuffer;
+
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
 	PropertyWindow* propertyWindow;
@@ -124,5 +126,7 @@ public:
 
 	void updateHighestClickedObjPoint(glm::vec3 pos, glm::vec3 dir);
 	PhysicalObject* higherPointObject(glm::vec3 v, glm::vec3 maxV);
+
+	void terminateAllWires();
 
 };

@@ -29,6 +29,7 @@ void DimensionalCurve_POT::buildVertices()
 
             if (unprocessedVertex.y <= lastVertex.y)
             {
+                setEndingVerticesInYDirFrom(lastVertex);
                 curveTerminated = true;
                 beingDrawn = false;
             }
@@ -36,6 +37,20 @@ void DimensionalCurve_POT::buildVertices()
             rebuildVertices();
         }
     }
+}
+
+void DimensionalCurve_POT::setEndingVerticesInYDirFrom(glm::vec3 v)
+{
+    glm::vec3 currentlastVertex = processedVertices.at(processedVertices.size() - 1);
+    glm::vec3 endVertex = v;
+    while (glm::length(currentlastVertex - endVertex) > DIMENSIONAL_CURVE_DELTA_LENGTH &&
+        currentlastVertex.y > endVertex.y)
+    {
+        processedVertices.push_back(glm::vec3(currentlastVertex.x,
+            currentlastVertex.y - DIMENSIONAL_CURVE_DELTA_LENGTH, currentlastVertex.z));
+        currentlastVertex = processedVertices.at(processedVertices.size() - 1);
+    }
+    lastVertex = endVertex;
 }
 
 void DimensionalCurve_POT::rebuildVertices()
@@ -56,9 +71,6 @@ void DimensionalCurve_POT::rebuildVertices()
 
     for (int j = 1; j < processedVertices.size(); j++)
     {
-        //cylindersVertices->allocateNewArray();
-        //crossSecVertices->allocateNewArray();
-
         glm::vec3 tangent = glm::normalize(processedVertices.at(j) -
             processedVertices.at(j - 1));
 
@@ -323,11 +335,6 @@ void DimensionalCurve_POT::draw()
     shader->bind();
     shader->setUniform3f("color", color.x, color.y, color.z);
 
-    //glBindVertexArray(VAOs->at(0));
-    //glDrawArrays(GL_LINE_STRIP, 0,
-    //    static_cast<GLsizei>(processedVertices.size()));
-    //glBindVertexArray(0);
-
     for (int i = 0; i < cylindersVAOs->getSize(); i++) {
         glBindVertexArray(cylindersVAOs->at(i));
         glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(cylindersVertices->at(i)->size()));
@@ -392,4 +399,9 @@ bool DimensionalCurve_POT::intersectionCheck(glm::vec3 v)
 glm::vec3 DimensionalCurve_POT::getCenterLocation() const
 {
     return glm::vec3(minX + (maxX - minX) / 2.0f, minY + (maxY - minY) / 2.0f, minZ + (maxZ - minZ) / 2.0f);
+}
+
+glm::vec3 DimensionalCurve_POT::getLatestPoint()
+{
+    return processedVertices.at(processedVertices.size() - 1);
 }

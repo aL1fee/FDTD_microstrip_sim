@@ -111,19 +111,32 @@ void GUI::buildMenuUpperPanel()
 		if (ImGui::BeginMenu("Add"))
 		{
 			std::string s = "";
-			if (ImGui::MenuItem("Wire (in z-y plane)"))
+			if (ImGui::BeginMenu("Wire"))
 			{
-				//extern bool _acceptingLeftClickBufferInput;
-				//extern bool _testingLineExpected;
-				//_testingLineExpected = true;
-				extern bool _wireInputExpected;
-				_wireInputExpected = true;
-
-				s = "> Adding a wire";
-				_scene_main->addWire(s, glm::vec3(0.0f), 0.0f, 0.0f, 0.0f,
-					glm::vec3(1.0f, .843f, 0.0f), 25, 560);
-
-
+				if (ImGui::MenuItem("Image plane"))
+				{
+					_wireInputExpected = true;
+					s = "> Adding an image plane wire";
+					_scene_main->addWire(s, glm::vec3(0.0f), 0.0f, 0.0f, 0.0f,
+						glm::vec3(1.0f, .843f, 0.0f), 25, 560);
+				}
+				if (ImGui::MenuItem("XY plane"))
+				{
+					_wireInputExpected = true;
+					s = "> Adding an XY plane wire";
+					_wireXYplane = true;
+					_scene_main->addWire(s, glm::vec3(0.0f), 0.0f, 0.0f, 0.0f,
+						glm::vec3(1.0f, .843f, 0.0f), 25, 560);
+				}
+				if (ImGui::MenuItem("ZY plane"))
+				{
+					_wireInputExpected = true;
+					s = "> Adding a ZY plane wire";
+					_wireZYplane = true;
+					_scene_main->addWire(s, glm::vec3(0.0f), 0.0f, 0.0f, 0.0f,
+						glm::vec3(1.0f, .843f, 0.0f), 25, 560);
+				}
+				ImGui::EndMenu();
 			}
 			if (ImGui::MenuItem("Ribbon (in x-z plane)"))
 			{

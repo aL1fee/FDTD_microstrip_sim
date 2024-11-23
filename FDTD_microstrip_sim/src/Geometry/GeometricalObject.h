@@ -42,6 +42,10 @@ protected:
 	glm::mat4 modelMatrix;
 	glm::mat4 inverseModelMatrix;
 
+	//bool rotatable;
+	//bool translatable;
+	//bool scalable;
+
 	bool instancePositionsChanged;
 
 	void addColorVertex(glm::vec3 v) { vertices->pushToExistingArray(v); }

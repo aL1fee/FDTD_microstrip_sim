@@ -34,6 +34,7 @@ enum PhysicalObjectType {
 	TRACE,
 	CYLINDER,
 	CURVE,
+	DIMENSIONAL_CURVE,
 	RIBBON,
 	CUBOID_ARRAY
 };
@@ -81,7 +82,7 @@ public:
 
 	void setRotationAxis(glm::vec3 v) { rotationAxis = v; }
 	void setOrigin(glm::vec3 v) { origin = v; }
-	void setRotationAngle(float angle) { rotationAngle = angle; }
+	virtual void setRotationAngle(float angle) { rotationAngle = angle; }
 
 	virtual void setScale(float l, float h, float w);
 	virtual void setScaleL(float l) { length = l; }

@@ -20,6 +20,7 @@ MainScene::MainScene(GLFWwindow* w)
 	activeWire = nullptr;
 	activeRibbon = nullptr;
 	highestClickedObjPoint = glm::vec3(0.0f);
+	wireObjectBuffer = new std::map<unsigned int, DimensionalCurve_POT*>();
 	init();
 }
 
@@ -263,8 +264,8 @@ void MainScene::addWire(std::string& s, glm::vec3 o, float l, float w,
 	Wire_PO* wire = new Wire_PO(o, l, w, h, col, perm, cond, shader);
 	wire->updatePropertyMap();
 	physicalObjectBuffer->insert(std::make_pair(wire->getId(), wire));
+	wireObjectBuffer->insert(std::make_pair(wire->getId(), wire));
 	postObjectInsertionSetup();
-
 	activeWire = wire;
 }
 
@@ -314,6 +315,10 @@ void MainScene::deleteActiveObject()
 		if (activeObject->interactable())
 		{
 			physicalObjectBuffer->erase(activeObject->getId());
+			if (activeObject->getObjectType() == DIMENSIONAL_CURVE)
+			{
+				wireObjectBuffer->erase(activeObject->getId());
+			}
 			eraseShaderMapOneInstance(activeObject->getShaderName());
 			delete activeObject;
 			activeObject = nullptr;
@@ -340,6 +345,7 @@ void MainScene::deleteAllObjects()
 			++it;
 		}
 	}
+	wireObjectBuffer->clear();
 	//modifyingVectors = nullptr;
 	activeObject = nullptr;
 	propertyWindow->nullify();
@@ -538,5 +544,14 @@ PhysicalObject* MainScene::higherPointObject(glm::vec3 v, glm::vec3 maxV)
 		}
 	}
 	return nullptr;
+}
+
+void MainScene::terminateAllWires()
+{
+	for (auto it = wireObjectBuffer->begin(); it != wireObjectBuffer->end(); it++)
+	{
+		DimensionalCurve_POT* obj = it->second;
+		obj->setBeingDrawn(false);
+	}
 }
 

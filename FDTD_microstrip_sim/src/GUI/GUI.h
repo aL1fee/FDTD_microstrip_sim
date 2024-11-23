@@ -20,6 +20,10 @@
 
 #include "../Scene/MainScene.h"
 
+extern bool _wireZYplane;
+extern bool _wireXYplane;
+extern bool _wireInputExpected;
+
 class GUI
 {
 private:

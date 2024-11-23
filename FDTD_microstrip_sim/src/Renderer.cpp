@@ -23,6 +23,9 @@ bool _wireInputExpected = false;
 bool _wireInputPressed = false;
 bool _wireFirstXZPlanePoint = true;
 glm::vec3 _wireFirstPoint = glm::vec3(0.0f);
+bool _wireXYplane = false;
+bool _wireZYplane = false;
+
 
 bool _ribbonInputExpected = false;
 bool _ribbonInputPressed = false;
@@ -324,7 +327,9 @@ void Renderer::render() const
 {
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
-
+	
+	/*glfwWindowHint(GLFW_SAMPLES, 20);*/
+		
 	glfwMakeContextCurrent(window);
 	while (!glfwWindowShouldClose(window)) {
 		if (threadSwitch.load()) {
