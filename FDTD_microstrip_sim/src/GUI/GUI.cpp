@@ -78,7 +78,16 @@ void GUI::buildMainMenuPanel()
 		if (ImGui::BeginMenu("Help"))
 		{
 			if (ImGui::MenuItem("Commands")) { /* Undo action */ }
-			if (ImGui::MenuItem("Theory of operation")) { /* Undo action */ }
+			if (ImGui::MenuItem("Theory of operation")) 
+			{
+				//ImGui::SetNextWindowPos(ImVec2(200, 200), ImGuiCond_Once); // Set initial position
+				//ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once); // Set initial size
+
+				//if (ImGui::Begin("My Pop-Out Window")) {
+				//	ImGui::Text("This is a floating window.");
+				//}
+				//ImGui::End();
+			}
 			if (ImGui::MenuItem("About")) {}
 			ImGui::EndMenu();
 		}
@@ -503,6 +512,11 @@ void GUI::buildLeftPanel()
 					float* propertyValue = it->second;
 					if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue)) {
 						// TODO only rebuild the object which property had been updated
+						if (it->first == "X position" || it->first == "Y position" ||
+							it->first == "Z position")
+						{
+							activeObj->setModelMatrixRegenExpected(true);
+						}					
 						if (it->first == "Length" || it->first == "Width" ||
 							it->first == "Height" || it->first == "Radius") {
 							if (*propertyValue < MIN_OBJECT_SIZE) {
@@ -511,6 +525,7 @@ void GUI::buildLeftPanel()
 							if (*propertyValue > MAX_OBJECT_SIZE) {
 								*propertyValue = MAX_OBJECT_SIZE;
 							}
+							activeObj->setModelMatrixRegenExpected(true);
 						}
 						if (it->first == "X pad separation" || it->first == "Z pad separation" ||
 							it->first == "X pad size" || it->first == "Z pad size") {
@@ -541,6 +556,44 @@ void GUI::buildLeftPanel()
 							if (*propertyValue > 360.0f) {
 								*propertyValue = std::fmod(*propertyValue, 360.0f);
 							}
+						}
+						if (it->first == "Curve length" || it->first == "Tail length" ||
+							it->first == "Curve height" || it->first == "Thickness")
+						{
+							activeObj->setModelVertsRegenExpected(true);
+
+							if (it->first == "Curve length")
+							{
+								activeObj->setScaleL(*propertyValue);
+							}
+							else if (it->first == "Curve height")
+							{
+								if (*propertyValue < RIBBON_MIN_CURVE_HEIGHT) {
+									*propertyValue = static_cast<float>(RIBBON_MIN_CURVE_HEIGHT);
+								}
+								if (*propertyValue > RIBBON_MAX_CURVE_HEIGHT) {
+									*propertyValue = static_cast<float>(RIBBON_MAX_CURVE_HEIGHT);
+								}
+							}
+							else if (it->first == "Tail length")
+							{
+								if (*propertyValue < RIBBON_MIN_CURVE_TAIL) {
+									*propertyValue = static_cast<float>(RIBBON_MIN_CURVE_TAIL);
+								}
+								if (*propertyValue > RIBBON_MAX_CURVE_TAIL) {
+									*propertyValue = static_cast<float>(RIBBON_MAX_CURVE_TAIL);
+								}
+							}
+							else if (it->first == "Thickness")
+							{
+								if (*propertyValue < RIBBON_MIN_CURVE_THICKNESS) {
+									*propertyValue = static_cast<float>(RIBBON_MIN_CURVE_THICKNESS);
+								}
+								if (*propertyValue > RIBBON_MAX_CURVE_THICKNESS) {
+									*propertyValue = static_cast<float>(RIBBON_MAX_CURVE_THICKNESS);
+								}
+							}
+							activeObj->doBeforeGUIPropertyChange();
 						}
 						activeObj->setRebuiltExpected(true);
 						ModifyingVectors_PO* modVecs = _scene_main->getModifyingVectors();

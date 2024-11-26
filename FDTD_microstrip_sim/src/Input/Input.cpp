@@ -195,6 +195,7 @@ void Input::processInput()
                 if (!_scene_main->getActiveRibbon()->firstPointSelected())
                 {
                     _scene_main->getActiveRibbon()->setFirstPoint(intersectionPoint);
+                    _scene_main->getActiveRibbon()->setOrigin(intersectionPoint);
                 }
                 else
                 {
@@ -657,6 +658,13 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
                     }
                     if (value > MAX_OBJECT_SIZE) {
                         value = MAX_OBJECT_SIZE;
+                    }
+                    if (_scene_main->getActiveObject()->getObjectType() == RIBBON)
+                    {
+                        if (value > RIBBON_MAX_CURVE_HEIGHT)
+                        {
+                            value = RIBBON_MAX_CURVE_HEIGHT;
+                        }
                     }
 
                     if (fabs(lastScaleValue - value) > MAX_DISTANCE_RESIZE_JUMP) {

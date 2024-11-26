@@ -328,7 +328,7 @@ void Renderer::render() const
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
 	
-	/*glfwWindowHint(GLFW_SAMPLES, 20);*/
+	//glfwWindowHint(GLFW_SAMPLES, 20);
 		
 	glfwMakeContextCurrent(window);
 	while (!glfwWindowShouldClose(window)) {
@@ -342,10 +342,12 @@ void Renderer::render() const
 
 			}
 			//testPerformanceStart();
-
 			updateDeltaTime();
 			updateFrameBackgroundColor();
 			clearDepthBuffer();
+
+			//glEnable(GL_MULTISAMPLE)
+
 
 			_scene_main->render();
 

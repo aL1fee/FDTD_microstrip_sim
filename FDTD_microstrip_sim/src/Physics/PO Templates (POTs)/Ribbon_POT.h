@@ -17,7 +17,7 @@ protected:
 	//length = abs length
 	//width = abs width
 	//height = height of ribbon
-	
+
 	float initialY;
 	float finalY;
 	float tail_size;
@@ -30,6 +30,8 @@ protected:
 
 	glm::vec3 firstPoint;
 	glm::vec3 secondPoint;
+
+	float thickness;
 
 	float maxX;
 	float minX;
@@ -61,6 +63,8 @@ protected:
 
 	void updateMaxXYZValues();
 
+	void updateFirstTwoPoints();
+
 public:
 	Ribbon_POT(glm::vec3 o, float l, float w, float h, glm::vec3 col,
 		float perm, float cond, Shader* sh) :
@@ -73,7 +77,11 @@ public:
 		tail_size = RIBBON_DEFAULT_TAIL_SIZE;
 		curve_height = RIBBON_DEFAULT_CURVE_HEIGHT;
 		width = RIBBON_INITIAL_WIDTH;
-		height = RIBBON_INITIAL_HEIGHT;
+		thickness = RIBBON_INITIAL_THICKNESS;
+		initial_width = width;
+		height = thickness + curve_height;
+		initial_height = height;
+		//initial_length = 
 		terminated = false;
 		firstPointSel = false;
 		secondPointSel = false;
@@ -120,5 +128,12 @@ public:
 	glm::vec3 getCenterLocation() const override;
 	void setScaleH(float h) override;
 	void setScaleW(float w) override;
+	void setScaleL(float l) override;
+
+	float* getThickness() { return &thickness; }
+
+	void generateModelMatrix() override;
+
+	void doBeforeGUIPropertyChange() override;
 
 };

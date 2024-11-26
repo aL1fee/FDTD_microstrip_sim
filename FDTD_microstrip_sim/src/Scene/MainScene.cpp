@@ -406,6 +406,7 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 				_propertyWindowOn = true;
 				if (modifyingVectors != nullptr)
 				{
+					modifyingVectors->setRotationAngle(*activeObject->getRotationAngle());
 					modifyingVectors->setOrigin(activeObject->getCenterLocation());
 					modifyingVectors->setRebuiltExpected(true);
 				}

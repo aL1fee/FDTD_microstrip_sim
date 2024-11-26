@@ -42,6 +42,10 @@ protected:
 	glm::mat4 modelMatrix;
 	glm::mat4 inverseModelMatrix;
 
+
+	bool modelVertsRegenExpected;
+	bool modelMatrixRegenExpected;
+
 	//bool rotatable;
 	//bool translatable;
 	//bool scalable;
@@ -63,9 +67,9 @@ public:
 	virtual void draw() = 0;
 	virtual bool intersectionCheck(glm::vec3 v) = 0;
 
-	float* getLength() { return &length; }
-	float* getWidth() { return &width; }
-	float* getHeight() { return &height; }
+	virtual float* getLength() { return &length; }
+	virtual float* getWidth() { return &width; }
+	virtual float* getHeight() { return &height; }
 
 	float* getOriginX() { return &origin.x; };
 	float* getOriginY() { return &origin.y; };
@@ -74,5 +78,8 @@ public:
 	float* getRotationAngle() { return &rotationAngle; }
 
 	glm::vec3* getColor() { return &color; }
+
+	void setModelVertsRegenExpected(bool b) { modelVertsRegenExpected = b; }
+	void setModelMatrixRegenExpected(bool b) { modelMatrixRegenExpected = b; }
 
 };

@@ -47,6 +47,20 @@ Plan:
 #add MVP mat to modifying vectors; add rotations; fix remaining issues
 #redesigned tuning pad array using MVP. added rotations about y axis. fixed bugs with scaling. 
 #fixed wire issues: 1. cant regenerate wire verts and vaos if i wire is not finished 2. always smoothly end feet
+#add regen verts VS regen model mtx design to ribbons + polish ribbons + solve bugs (fly away on startup) + address mem leaks
+
+
+
+
+
+fix ribbons boundary conditions
+
+start with/ FDTD (12/1)
+pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
+
+	Plan:
+		1. Define the size grid, time step, boundary conditions
+		2. Permittivity, permeability for dielectrics. Conductivity for conductors
 
 
 
@@ -60,32 +74,19 @@ Plan:
 
 
 
+	add a feature to extend the gridlines
+
+	*add string properties: name
+	*add bool properties: an option to turn on/off the edges
+	*add color properties
+	*add secondary lines to all objects
+	*test the program on another PC
 
 
-
-add Model matrices to ribbons + polish ribbons + solve bugs (fly away on startup) + address mem leaks
-
-add a feature to extend the gridlines
-
-add triangular substrates & traces
-add carrier with cut angles
+	*implement a hierarchy data structure to store elements & its properties of a scene
+	*hierarchy-level/multiple-object selection
 
 
-
-
-*add string properties: name
-*add bool properties: an option to turn on/off the edges
-*add color properties
-*add secondary lines to all objects
-*test the program on another PC
-
-
-*implement a hierarchy data structure to store elements & its properties of a scene
-*hierarchy-level/multiple-object selection
-
-
-
-late november:
 	**scene finish
 
 	*fix property window bugs, add features and appearance. apply units
@@ -107,13 +108,13 @@ late november:
 
 	*create more systems
 
+	*finish all menus
+
 	
 
 
 
 
-start with/ FDTD (12/1)
-pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 
 
@@ -122,6 +123,25 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 
 
 
+
+
+=====Priority improvements:
+1. add 8 edges to cylinders
+2. add a eature of dynamically creating new objects by specifing the size and direction with the mouse. the object must have only dashed outline while being created.
+	add angled substrates, traces, carriers dynamically with two points and 180 deg angles:
+	Specifications:
+		1.
+			1. first point that determines origin
+			2. second point that determines width, length
+			3. third point determines height
+			6. fourth point determines rotation of the object
+		2. 
+			1. first point that determines origin
+			2. second point that determines width, length
+			3. third point determines height
+			4. fourth point determines beginning angle
+			5. fifth point determines ending angle
+			6. sixth point determines rotation of the object\
 
 
 =====Major features TODO:

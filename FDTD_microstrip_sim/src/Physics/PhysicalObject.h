@@ -112,4 +112,5 @@ public:
 
 	void setInstancePositionsChanged(bool b) { instancePositionsChanged = b; }
 
+	virtual void doBeforeGUIPropertyChange() {};
 };
