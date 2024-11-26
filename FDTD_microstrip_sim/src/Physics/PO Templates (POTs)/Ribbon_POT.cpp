@@ -4,13 +4,8 @@
 void Ribbon_POT::buildVertices()
 {
     vertices->clear();
-    //vertices->pushToExistingArray(firstPoint);
     vertices->pushToExistingArray(glm::vec3(0.0f));
 
-    //if (secondPointSel)
-    //{
-    //    //vertices->pushToExistingArray(secondPoint);
-    //}
 
     if (secondPointSel)
     {
@@ -18,28 +13,8 @@ void Ribbon_POT::buildVertices()
         curveVertices->clear();
         edgeVertices->clear();
 
-        //glm::vec3 diff = secondPoint - firstPoint;
-        //float l = glm::length(diff);
-        //length = l - 2 * tail_size;
-        ////origin = firstPoint;
-        //translationVector = origin;
-
         glm::vec3 normalX = glm::vec3(1.0f, 0.0f, 0.0f);
         glm::vec3 normalV = glm::normalize(secondPoint - firstPoint);
-
-
-        //if (glm::abs(glm::dot(normalX, normalV) - 1.0f) < EPSILON) {
-        //    rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // Default axis for no rotation
-        //    rotationAngle = 0.0f; // No rotation needed
-        //}
-        //else if (glm::abs(glm::dot(normalX, normalV) + 1.0f) < EPSILON) {
-        //    rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // Choose any perpendicular axis
-        //    rotationAngle = 180.0f; // Rotate by 180 degrees
-        //}
-        //else {
-        //    rotationAngle = glm::degrees(acos(glm::dot(normalX, normalV)));
-        //    rotationAxis = glm::normalize(glm::cross(normalX, normalV));
-        //}
 
         glm::vec3 diff = secondPoint - firstPoint;
         float l = glm::length(diff);
@@ -60,9 +35,11 @@ void Ribbon_POT::buildVertices()
             rotationAngle = 0.0f; // No rotation for zero-length vector
         }
 
+        scalingVector = glm::vec3(1.0f, 1.0f, width / initial_width);
         modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, translationVector);
         modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
+        modelMatrix = glm::scale(modelMatrix, scalingVector);
 
         inverseModelMatrix = glm::inverse(modelMatrix);
         vertices->pushToExistingArray(glm::vec3(l, 0, 0));
@@ -201,34 +178,6 @@ void Ribbon_POT::updateMaxXYZValues()
 
 void Ribbon_POT::rebuildVertices()
 {
-    /*vertices->clear();
-    vertices->pushToExistingArray(glm::vec3(0.0f));
-
-    feetVertices->clear();
-    curveVertices->clear();
-    edgeVertices->clear();
-
-    float overall_length = length + 2 * tail_size;
-
-
-    translationVector = origin;
-    scalingVector = glm::vec3(1.0f, 1.0f, width / initial_width);
-
-    modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, translationVector);
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotationAngle), rotationAxis);
-    modelMatrix = glm::scale(modelMatrix, scalingVector);
-
-    inverseModelMatrix = glm::inverse(modelMatrix);
-
-    firstPoint = origin;
-    secondPoint = 
-
-
-    vertices->pushToExistingArray(glm::vec3(overall_length, 0, 0));
-
-    generateRibbonVertices();*/
-
 }
 
 void Ribbon_POT::setupModelMatrix()
@@ -421,15 +370,7 @@ void Ribbon_POT::rebuild()
 {
     //!
     //do it from data, not the first 2 init points, like build() does it
-    //glm::vec3 pointDiff = secondPoint - firstPoint;
-    //firstPoint = origin;
-    //secondPoint = origin + pointDiff;
-
     build();
-
-
-
-
 }
 
 void Ribbon_POT::build()
@@ -543,6 +484,10 @@ void Ribbon_POT::draw()
     shader->unbind();
 }
 
+// boundary conditions inaccurately computed.
+// the error increases as curve_height > .15f
+// in order to fix it, one has to redesign the way the ribbon is constructed
+// the thickness vector should be orthogonal to the segment direction vector
 bool Ribbon_POT::intersectionCheck(glm::vec3 v)
 {
     glm::vec4 vLocalFrame = inverseModelMatrix * glm::vec4(v, 1.0f);
@@ -562,15 +507,15 @@ bool Ribbon_POT::intersectionCheck(glm::vec3 v)
         }
 
         int numSegments = RIBBON_BOUNDARY_CHECK_FEET_NUM;
-        float length = glm::length(firstPoint - secondPoint) - tail_size * 2;
-        float delta = length / (numSegments - 1);
+        float l = glm::length(firstPoint - secondPoint) - tail_size * 2;
+        float delta = l / (numSegments - 1);
         glm::vec3 normDir = glm::vec3(1.0f, 0.0f, 0.0f);
         glm::vec3 pos = normDir * tail_size;
         for (int i = 0; i < numSegments; ++i) 
         {
             float t = static_cast<float>(i) / (numSegments - 1);
-            float distanceFromCenter = (t - 0.5f) * length;
-            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, length / 6.5f);
+            float distanceFromCenter = (t - 0.5f) * l;
+            float gaussianHeight = gaussian(distanceFromCenter, curve_height, 0.0f, l / 6.5f);
             glm::vec3 perpDir = glm::vec3(0.0f, 0.0f, 1.0f);
 
             if (vLocalFrame.x > pos.x + perpDir.x * initial_width &&
@@ -578,6 +523,7 @@ bool Ribbon_POT::intersectionCheck(glm::vec3 v)
                 vLocalFrame.y > gaussianHeight &&
                 vLocalFrame.y < gaussianHeight + thickness)
             {
+                std::cout << "WITHIN BOTH" << std::endl;
                 return true;
             }
             pos += normDir * delta;
@@ -620,12 +566,6 @@ void Ribbon_POT::setScaleW(float w)
 
 void Ribbon_POT::setScaleL(float l)
 {
-    //glm::vec3 diffV = glm::normalize(secondPoint - firstPoint);
-
-    //glm::mat4 mtx = glm::mat4(1.0f);
-    //mtx = glm::rotate(mtx, glm::radians(rotationAngle), rotationAxis);
-    //glm::vec3 normDir = mtx * glm::vec4(diffV, 1.0f);
-    //secondPoint = firstPoint + normDir * l;
     length = l;
     updateFirstTwoPoints();
     rebuiltExpected = true;

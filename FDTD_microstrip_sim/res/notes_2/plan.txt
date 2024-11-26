@@ -48,14 +48,13 @@ Plan:
 #redesigned tuning pad array using MVP. added rotations about y axis. fixed bugs with scaling. 
 #fixed wire issues: 1. cant regenerate wire verts and vaos if i wire is not finished 2. always smoothly end feet
 #add regen verts VS regen model mtx design to ribbons + polish ribbons + solve bugs (fly away on startup) + address mem leaks
+#fix ribbons boundary conditions
 
 
 
 
 
-fix ribbons boundary conditions
-
-start with/ FDTD (12/1)
+start with/ FDTD (11-26)
 pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 	Plan:
