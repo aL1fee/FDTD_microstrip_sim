@@ -153,6 +153,9 @@
     <ClInclude Include="src\Macros and variables\Global variables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Simulation\SimulationSpace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Physics\Physical Objects %28POs%29\CoordinateSystem_PO.cpp">
@@ -284,12 +287,16 @@
     <ClCompile Include="src\Macros and variables\Global variables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Simulation\SimulationSpace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\notes_2\concepts.txt" />
     <Text Include="res\notes_2\notes.txt" />
     <Text Include="res\notes_2\plan.txt" />
     <Text Include="res\notes_2\commands_and_directions.txt" />
+    <Text Include="res\notes_2\FDTD_physics_notes.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\coordinate_system.shader" />
@@ -305,6 +312,7 @@
     <None Include="res\shaders\cuboid_instanced_array.shader" />
     <None Include="res\shaders\generic_MVP.shader" />
     <None Include="res\shaders\generic_pos_col_MVP.shader" />
+    <None Include="res\shaders\simulation_cells.shader" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />

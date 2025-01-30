@@ -48,6 +48,7 @@ static bool loadGlad() {
 	return true;
 }
 
+//int WinMain(HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow) {
 int main() {
 
 	if (!glfwInitialize())

@@ -95,6 +95,31 @@ void MainScene::render()
 	}
 }
 
+bool MainScene::checkShader(std::string shaderName)
+{
+	if (shaderMap->find(shaderName) == shaderMap->end())
+	{
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+void MainScene::addShader(Shader* s)
+{
+	if (shaderMap->find(s->getName()) == shaderMap->end())
+	{
+		shaderMap->insert(std::make_pair(s->getName(), s));
+	}
+}
+
+// catch errors
+Shader* MainScene::getShader(std::string shaderName)
+{
+	return shaderMap->at(shaderName);
+}
+
 void MainScene::addCarrier(std::string& s, glm::vec3 o, float l, float w,
 	float h, glm::vec3 col, float perm, float cond)
 {
@@ -512,7 +537,7 @@ void MainScene::updateHighestClickedObjPoint(glm::vec3 pos, glm::vec3 dir)
 		for (auto& pair : *physicalObjectBuffer) {
 			PhysicalObject* obj = pair.second;
 			// make sure this check works
-			if (obj == modifyingVectors || obj->getObjectType() == CURVE) {
+			if (obj == modifyingVectors || obj->getObjectType() == DIMENSIONAL_CURVE) {
 				continue;
 			}
 			if (obj->intersectionCheck(rayPos)) {

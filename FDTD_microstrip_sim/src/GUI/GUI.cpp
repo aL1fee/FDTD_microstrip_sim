@@ -1,6 +1,7 @@
 #include "GUI.h"
 
 extern MainScene* _scene_main;
+extern SimulationSpace* _simulation_space;
 extern bool _propertyWindowOn;
 
 extern bool _windowS1On;
@@ -383,18 +384,59 @@ void GUI::buildMenuLowerPanel()
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu("1"))
+		ImGui::Text(" Simulation");
+		ImGui::Separator();
+
+		if (ImGui::BeginMenu("Settings"))
 		{
-			if (ImGui::MenuItem("Open", "Ctrl+O")) { /* Open action */ }
-			if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Save action */ }
+			if (ImGui::BeginMenu("Simulation dimensions"))
+			{
+				glm::vec3* currDims = _simulation_space->getDimensions();
+
+				float simulationDimensions[3] = { currDims->x, currDims->y, currDims->z };
+
+				if (ImGui::SliderFloat3("Dimensions (x, y, z)", simulationDimensions, 0.0f, 20.0f, "%.2f")) {
+					currDims->x = simulationDimensions[0];
+					currDims->y = simulationDimensions[1];
+					currDims->z = simulationDimensions[2];
+					_simulation_space->setCellUpdate(true);
+				}
+
+				ImGui::EndMenu();
+			}
+			if (ImGui::MenuItem("Cell Toggle ON/OFF"))
+			{
+				_simulation_space->setRenderingCell(!_simulation_space->
+					getRenderingCellOn());
+			}
+			if (ImGui::BeginMenu("Cell size"))
+			{
+				float* cellSize = _simulation_space->getCellSize();
+				if (ImGui::SliderFloat("Cell size", cellSize, 0.04f, .5f, "%.2f"))
+				{
+					_simulation_space->setCellUpdate(true);
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Cell color"))
+			{
+				glm::vec3* currColor = _simulation_space->getCellColor();
+
+				float simulationDimensions[3] = { currColor->x, currColor->y, currColor->z };
+
+				if (ImGui::SliderFloat3("Color RGB", simulationDimensions, 0.0f, 1.0f, "%.2f")) {
+					currColor->x = simulationDimensions[0];
+					currColor->y = simulationDimensions[1];
+					currColor->z = simulationDimensions[2];
+					_simulation_space->setCellColor(*currColor);
+				}
+
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("2"))
-		{
-			if (ImGui::MenuItem("Undo", "Ctrl+Z")) { /* Undo action */ }
-			if (ImGui::MenuItem("Redo", "Ctrl+Y")) { /* Redo action */ }
-			ImGui::EndMenu();
-		}
+
+
 		if (ImGui::BeginMenu("3"))
 		{
 			if (ImGui::MenuItem("Open", "Ctrl+O")) { /* Open action */ }
@@ -758,7 +800,7 @@ void GUI::init()
 	//io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 	//io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 
-	customFont = io.Fonts->AddFontFromFileTTF("res/fonts/Helvetica.ttf", 12.0f); // Adjust the size as needed
+	customFont = io.Fonts->AddFontFromFileTTF(__fontFile, 12.0f); // Adjust the size as needed
 	io.Fonts->Build();
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.

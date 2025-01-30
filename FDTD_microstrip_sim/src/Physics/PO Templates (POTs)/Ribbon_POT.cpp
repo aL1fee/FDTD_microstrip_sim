@@ -523,7 +523,6 @@ bool Ribbon_POT::intersectionCheck(glm::vec3 v)
                 vLocalFrame.y > gaussianHeight &&
                 vLocalFrame.y < gaussianHeight + thickness)
             {
-                std::cout << "WITHIN BOTH" << std::endl;
                 return true;
             }
             pos += normDir * delta;

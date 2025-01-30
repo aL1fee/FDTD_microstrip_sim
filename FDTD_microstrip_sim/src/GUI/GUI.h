@@ -19,6 +19,7 @@
 #include "PropertyWindow.h"
 
 #include "../Scene/MainScene.h"
+#include "../Simulation/SimulationSpace.h"
 
 extern bool _wireZYplane;
 extern bool _wireXYplane;

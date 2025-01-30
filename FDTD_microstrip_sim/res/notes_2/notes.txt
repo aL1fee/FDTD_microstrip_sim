@@ -2,7 +2,7 @@
 // int WinMain(HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nCmdShow)
 // Linker -> Linker, system, windows
 //
-//
+// Embed the Resources Directly in the Executable
 // === Physics sources for sims
 Caps & dielectrics: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/ba7ba4fb31a34a167dc98bf25904d38a_chap5capacitance.pdf
 the whole book: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/pages/readings/

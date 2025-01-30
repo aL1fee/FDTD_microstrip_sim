@@ -1,0 +1,15 @@
+Sources:
+https://eecs.wsu.edu/~schneidj/ufdtd/ufdtd.pdf
+https://uspas.fnal.gov/materials/10MIT/FDTD_Basics.pdf
+https://engineering.purdue.edu/wcchew/ece604s20/Lecture%20Notes/Lect37.pdf
+https://my.ece.utah.edu/~ece6340/LECTURES/lecture%2014/FDTD.pdf
+https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/2d2f227e6fd26ee25f366759e02f03dc_chapte13em_waves.pdf
+
+
+
+
+
+
+
+
+

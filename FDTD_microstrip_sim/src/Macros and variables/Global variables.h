@@ -4,6 +4,8 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
+#include <string>
+
 extern glm::vec3 __y_norm_vec3;
 extern glm::vec3 __color_main;
 extern glm::vec3 __color_secondary;
@@ -29,3 +31,5 @@ extern glm::mat4 __initial_inverse_model_mat4;
 
 extern float __initial_rotation_angle;
 extern float __initial_zero_value;
+
+extern const char* __fontFile;

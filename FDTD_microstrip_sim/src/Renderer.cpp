@@ -63,6 +63,8 @@ std::mutex mtx;
 
 //MainScene* _scene_main = nullptr;
 MainScene* _scene_main;
+SimulationSpace* _simulation_space;
+
 
 //std::vector<glm::vec3> activeInputBuffer 
 
@@ -250,6 +252,7 @@ void Renderer::run() const
 	//_scene_main = new MainScene(window, gui, input);
 	//_scene_main = new MainScene(window, input);
 	_scene_main = new MainScene(window);
+	_simulation_space = new SimulationSpace(window, _scene_main);
 
 	glfwMakeContextCurrent(nullptr); // Release context from main thread
 	std::thread renderThread(&Renderer::render, this);
@@ -350,6 +353,9 @@ void Renderer::render() const
 
 
 			_scene_main->render();
+
+			_simulation_space->update();
+			_simulation_space->render();
 
 			input->processInput();
 

@@ -26,4 +26,6 @@ glm::mat4 __initial_inverse_model_mat4(1.0f);
 float __initial_rotation_angle(0.0f);
 float __initial_zero_value(0.0f);
 
-extern bool __centerOrientedRotation = false;
+bool __centerOrientedRotation = false;
+
+const char* __fontFile = "res/fonts/Helvetica.ttf";

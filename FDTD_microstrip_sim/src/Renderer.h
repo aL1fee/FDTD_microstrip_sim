@@ -30,6 +30,8 @@
 #include "Scene/Camera.h"
 #include "Scene/MainScene.h"
 
+#include "Simulation/SimulationSpace.h"
+
 
 void window_size_callback(GLFWwindow* window, int width, int height);
 
@@ -71,6 +73,7 @@ public:
 	void run() const;
 
 	void render() const;
+	//void updateSimulation() const;
 
 
 

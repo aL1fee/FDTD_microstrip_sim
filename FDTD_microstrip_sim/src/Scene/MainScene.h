@@ -66,6 +66,10 @@ public:
 	void init() override;
 	void render() override;
 
+	bool checkShader(std::string shaderName);
+	void addShader(Shader* s);
+	Shader* getShader(std::string shaderName);
+
 	void addCarrier(std::string& s, glm::vec3 o, float l, float w, 
 		float h, glm::vec3 col, float perm, float cond);
 	void addSubstrate(std::string& s, glm::vec3 o, float l, float w,

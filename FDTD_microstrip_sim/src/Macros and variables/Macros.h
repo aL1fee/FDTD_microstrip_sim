@@ -91,3 +91,5 @@
 #define MIN_COORD_VALUE -10000.0
 
 #define EPSILON 1e-6f
+
+#define SIMULATION_INITIAL_CELL_SIZE .1f

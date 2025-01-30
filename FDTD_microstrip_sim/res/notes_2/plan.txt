@@ -49,12 +49,23 @@ Plan:
 #fixed wire issues: 1. cant regenerate wire verts and vaos if i wire is not finished 2. always smoothly end feet
 #add regen verts VS regen model mtx design to ribbons + polish ribbons + solve bugs (fly away on startup) + address mem leaks
 #fix ribbons boundary conditions
+#made the simulation space grid
 
 
 
+// create a complete third system
 
 
-start with/ FDTD (11-26)
+
+__hardcoded_sim_space 5.0f, .6f, 8.0f
+
+
+
+!
+
+add a feature to extend the gridlines and make the simulation space
+
+start with/ FDTD
 pay close attention to model matrix handling. consider Batch Processing, GPU Instancing
 
 	Plan:
@@ -71,8 +82,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 
 
 
-
-
+	add a feature to control the simulation space
 	add a feature to extend the gridlines
 
 	*add string properties: name
@@ -145,6 +155,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 
 =====Major features TODO:
 1. 2D top-view scene generation (another viewport)
+2. Third thread for physics optimizing performance without taking much time handling shared resorces
 
 
 ======Bugs TODO:
@@ -156,6 +167,7 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 1. delete heap elements in object destructors that are children of physicalObject
 2. Memory leaks from some objects
 3. RAM issues from some objects
+4. Simulation cell update replace rebuilding with GPU redrawing
 
 ======Not a priority improvements TODO:
 -1. GPU model matrix manipulation for CPU usage reduction
@@ -184,6 +196,10 @@ pay close attention to model matrix handling. consider Batch Processing, GPU Ins
 23. center-based object manipulation (rather than left lower corner) feature
 24. implement a better and more efficienty way of generating rays and lines 
 25. wires may still contain bugs after 11/21 wire repolishing
+
+
+Cross-display/platform:
+1. Need UI related on pixel display, not just 1920 x 1080
 
 ------
 future:
