@@ -31,6 +31,7 @@ protected:
 	//x, y, z
 	glm::vec3 simSpaceDimensions;
 	glm::vec3 cellColor;
+	float cellOpaqueness;
 	float cellSize;
 
 	Shader* cellShader;
@@ -55,6 +56,7 @@ public:
 	~SimulationSpace();
 
 	void setCellColor(glm::vec3 c);
+	void setCellOpaqueness(float f);
 
 	void update();
 	void render();
@@ -64,6 +66,8 @@ public:
 
 	void setCellSize(float f) { cellSize = f; }
 	float* getCellSize() { return &cellSize; }
+
+	float* getCellOpaqueness() { return &cellOpaqueness; }
 
 	void setCellUpdate(bool b) { needCellUpdate = b; }
 	void setRenderingCell(bool b) { renderingCellOn = b; }

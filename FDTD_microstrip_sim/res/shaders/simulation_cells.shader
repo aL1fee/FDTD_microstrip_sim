@@ -7,12 +7,12 @@ uniform mat4 view;
 uniform mat4 proj;
 
 uniform vec4 col;  
-out vec3 color;
+out vec4 color;
 
 void main()
 {
 	gl_Position = proj * view * vec4(pos.x, pos.y, pos.z, 1.0f);
-	color = vec3(col);
+	color = col;
 }
 
 #shader fragment
@@ -20,9 +20,9 @@ void main()
 
 
 out vec4 FragColor;
-in vec3 color;
+in vec4 color;
 
 void main()
 {
-	FragColor = vec4(color, 1.0f);
+	FragColor = color;
 }

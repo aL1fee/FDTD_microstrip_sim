@@ -412,7 +412,7 @@ void GUI::buildMenuLowerPanel()
 			if (ImGui::BeginMenu("Cell size"))
 			{
 				float* cellSize = _simulation_space->getCellSize();
-				if (ImGui::SliderFloat("Cell size", cellSize, 0.04f, .5f, "%.2f"))
+				if (ImGui::SliderFloat("Cell size", cellSize, 0.02f, .5f, "%.2f"))
 				{
 					_simulation_space->setCellUpdate(true);
 				}
@@ -429,6 +429,16 @@ void GUI::buildMenuLowerPanel()
 					currColor->y = simulationDimensions[1];
 					currColor->z = simulationDimensions[2];
 					_simulation_space->setCellColor(*currColor);
+				}
+
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Cell opaqueness"))
+			{
+				float* currCellOpaqueness = _simulation_space->getCellOpaqueness();
+
+				if (ImGui::SliderFloat("Cell opaqueness", currCellOpaqueness, 0.0f, 1.0f, "%.2f")) {
+					_simulation_space->setCellOpaqueness(*currCellOpaqueness);
 				}
 
 				ImGui::EndMenu();

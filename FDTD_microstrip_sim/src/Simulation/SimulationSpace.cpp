@@ -5,6 +5,7 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
 	window = w;
 	scene = s;
 	cellColor = glm::vec3(.79f, .79f, .83f);
+    cellOpaqueness = 1.0f;
 	simSpaceDimensions = glm::vec3(4.5f, 2.0f, 7.0f);
 	cellSize = .2f;
     cellShader = nullptr;
@@ -24,7 +25,17 @@ void SimulationSpace::setCellColor(glm::vec3 c)
 {
     unsigned int colLoc = cellShader->getUniformLocation("col");
     cellShader->bind();
-    glUniform4fv(colLoc, 1, glm::value_ptr(c));
+    glm::vec4 v = glm::vec4(c, cellOpaqueness);
+    glUniform4fv(colLoc, 1, glm::value_ptr(v));
+    cellShader->unbind();
+}
+
+void SimulationSpace::setCellOpaqueness(float f)
+{
+    unsigned int colLoc = cellShader->getUniformLocation("col");
+    cellShader->bind();
+    glm::vec4 v = glm::vec4(cellColor, f);
+    glUniform4fv(colLoc, 1, glm::value_ptr(v));
     cellShader->unbind();
 }
 
@@ -105,6 +116,8 @@ void SimulationSpace::init()
 
 void SimulationSpace::drawCells()
 {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     if (renderingCellOn)
     {
         cellShader->bind();
@@ -115,8 +128,7 @@ void SimulationSpace::drawCells()
         }
         cellShader->unbind();
     }
-
-
+    glDisable(GL_BLEND);
 }
 
 void SimulationSpace::deleteCells()
