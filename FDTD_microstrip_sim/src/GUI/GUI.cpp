@@ -15,6 +15,7 @@ GUI::GUI(GLFWwindow* w)
 	customFont = nullptr;
 }
 
+
 void GUI::buildMainMenuPanel()
 {
 	float windowWidth = ImGui::GetIO().DisplaySize.x;
@@ -81,6 +82,28 @@ void GUI::buildMainMenuPanel()
 			if (ImGui::MenuItem("Commands")) { /* Undo action */ }
 			if (ImGui::MenuItem("Theory of operation")) 
 			{
+				//std::cout << 14 << std::endl;
+				//showNewWindow = true; // Set the flag to show the new window
+
+
+				//// This is the new window that will pop up when the flag is true
+				//if (showNewWindow)
+				//{
+				//	ImGui::SetNextWindowPos(ImVec2(200, 200), ImGuiCond_Once);
+				//	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once);
+				//	ImGui::SetNextWindowFocus();
+				//	ImGui::Begin("New Window", &showNewWindow, ImGuiWindowFlags_AlwaysAutoResize);
+
+				//	ImGui::Text("This is a new window!");
+
+				//	// Close button inside the new window
+				//	if (ImGui::Button("Close"))
+				//	{
+				//		showNewWindow = false;  // Close the window when the button is pressed
+				//	}
+
+				//	ImGui::End();  // End the new window
+				//}
 				//ImGui::SetNextWindowPos(ImVec2(200, 200), ImGuiCond_Once); // Set initial position
 				//ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once); // Set initial size
 
@@ -366,7 +389,6 @@ void GUI::buildMenuUpperPanel()
 
 }
 
-
 void GUI::buildMenuLowerPanel()
 {
 	float windowWidth = ImGui::GetIO().DisplaySize.x;
@@ -384,7 +406,24 @@ void GUI::buildMenuLowerPanel()
 		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
 	{
-		ImGui::Text(" Simulation");
+		std::string simDimStr = std::to_string(
+			*_simulation_space->getSimulationDimension());
+		std::string simTitle = "Simulation " + simDimStr + "D";
+		if (ImGui::BeginMenu(simTitle.c_str()))
+		{
+			int* option = _simulation_space->getSimulationDimension();
+			if (ImGui::MenuItem("1D", nullptr, *option == 1))
+				*option = 1;
+
+			if (ImGui::MenuItem("2D", nullptr, *option == 2))
+				*option = 2;
+
+			if (ImGui::MenuItem("3D", nullptr, *option == 3))
+				*option = 3;
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::Separator();
 
 		if (ImGui::BeginMenu("Settings"))
@@ -401,7 +440,6 @@ void GUI::buildMenuLowerPanel()
 					currDims->z = simulationDimensions[2];
 					_simulation_space->setCellUpdate(true);
 				}
-
 				ImGui::EndMenu();
 			}
 			if (ImGui::MenuItem("Cell Toggle ON/OFF"))

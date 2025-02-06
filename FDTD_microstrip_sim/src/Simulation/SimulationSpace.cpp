@@ -8,6 +8,7 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     cellOpaqueness = 1.0f;
 	simSpaceDimensions = glm::vec3(4.5f, 2.0f, 7.0f);
 	cellSize = .2f;
+    simulationDimension = 3;
     cellShader = nullptr;
     needCellUpdate = false;
     renderingCellOn = false;
@@ -118,6 +119,7 @@ void SimulationSpace::drawCells()
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);  // Disable writing to depth buffer
     if (renderingCellOn)
     {
         cellShader->bind();
@@ -128,6 +130,7 @@ void SimulationSpace::drawCells()
         }
         cellShader->unbind();
     }
+    glDepthMask(GL_TRUE);  // Re-enable depth writing
     glDisable(GL_BLEND);
 }
 

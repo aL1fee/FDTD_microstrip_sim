@@ -38,6 +38,9 @@ protected:
 	VertexVectorDS* cellVerts;
 	VAOVectorDS* cellVAOs;
 
+	int simulationDimension;
+
+
 	void buildCellVertices();
 	void buildCellVAOs();
 	void generateCells();
@@ -76,6 +79,9 @@ public:
 
 	glm::vec3* getCellColor() { return &cellColor; }
 
+	int* getSimulationDimension() { return &simulationDimension; }
+
+	void setSimulationDimension(int i) { simulationDimension = i; }
 
 
 };
