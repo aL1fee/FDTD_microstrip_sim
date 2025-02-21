@@ -45,10 +45,12 @@ protected:
 	int timeMS;
 	int timeNS;
 
-	
+	//do enums instead
 	bool running1D;
 	bool running2D;
 	bool running3D;
+
+	bool drawing1D;
 
 	Shader* cellShader;
 	Shader* eFieldShader;
@@ -117,12 +119,10 @@ public:
 	void loadFieldShaders();
 
 	//do enums instead for 1d, 2d, 3d
-	void reset1D() {
-		running1D = false; 
-		initializeFields1D();
-		fields1DVAOs->clear();
-	}
-	void setRunning1D(bool b) { running1D = b; }
+	void reset1D();
 
+	void setRunning1D(bool b) { running1D = b; }
+	void setDrawing1D(bool b) { drawing1D = b; }
+	bool isDrawing1D() { return drawing1D; }
 
 };

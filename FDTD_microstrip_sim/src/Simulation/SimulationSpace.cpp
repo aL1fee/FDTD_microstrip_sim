@@ -7,7 +7,7 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
 	cellColor = glm::vec3(.79f, .79f, .83f);
     cellOpaqueness = 1.0f;
 	simSpaceDimensions = glm::vec3(4.5f, 2.0f, 7.0f);
-	cellSize = .2f;
+	cellSize = .02f;
     simulationDimension = 3;
     cellShader = nullptr;
     needCellUpdate = false;
@@ -22,6 +22,8 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     initialEFieldCol = glm::vec3(0.0f, 0.0f, 1.0f);
     initialHFieldCol = glm::vec3(1.0f, 0.0f, 0.0f);
     init();
+    drawing1D = true;
+
 }
 
 SimulationSpace::~SimulationSpace()
@@ -84,6 +86,15 @@ void SimulationSpace::loadFieldShaders()
         hFieldShader = scene->getShader(shaderHName);
     }
     setFieldColors();
+}
+
+void SimulationSpace::reset1D()
+{
+    running1D = false;
+    fields1DVAOs->clear();
+    initializeFields1D();
+    timeT = 0;
+    drawing1D = true;
 }
 
 void SimulationSpace::buildCellVertices()
@@ -218,8 +229,9 @@ void SimulationSpace::render()
 // do another shader
 void SimulationSpace::drawFields()
 {
-    if (running1D)
+    if (drawing1D)
     {
+
         // might be less expensive to use a signle shader for both field
         // and change the color through uniforms
         eFieldShader->bind();
@@ -276,6 +288,7 @@ void SimulationSpace::initializeFields1D()
         eX1D[i] = glm::vec3(cellSize1D * i, 0.0f, 0.0f);
         hY1D[i] = glm::vec3(cellSize1D * i, 0.0f, 0.0f);
     }
+    buildFields1DVAOs();
 }
 
 void SimulationSpace::updateFields1D()

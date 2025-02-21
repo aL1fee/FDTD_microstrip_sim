@@ -489,6 +489,16 @@ void GUI::buildMenuLowerPanel()
 		{
 			int* option = _simulation_space->getSimulationDimension();
 
+			if (ImGui::MenuItem("Toggle ON/OFF"))
+			{
+				if (*option == 1)
+				{
+					_simulation_space->setDrawing1D(
+						!_simulation_space->isDrawing1D());
+
+				}
+
+			}
 			if (ImGui::MenuItem("Reset"))
 			{
 				if (*option == 1)
@@ -512,6 +522,7 @@ void GUI::buildMenuLowerPanel()
 					_simulation_space->setRunning1D(false);
 				}
 			}
+
 
 			ImGui::EndMenu();
 		}
