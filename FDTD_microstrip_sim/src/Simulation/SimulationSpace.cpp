@@ -14,7 +14,14 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     renderingCellOn = false;
     cellVerts = new VertexVectorDS();
     cellVAOs = new VAOVectorDS();
-	init();
+    numCells1D = 200;
+    cellSize1D = .02f;
+    timeT = 0;
+    running1D = false;
+    fields1DVAOs = new VAOVectorDS();
+    initialEFieldCol = glm::vec3(0.0f, 0.0f, 1.0f);
+    initialHFieldCol = glm::vec3(1.0f, 0.0f, 0.0f);
+    init();
 }
 
 SimulationSpace::~SimulationSpace()
@@ -31,6 +38,20 @@ void SimulationSpace::setCellColor(glm::vec3 c)
     cellShader->unbind();
 }
 
+void SimulationSpace::setFieldColors()
+{
+    unsigned int colLoc = eFieldShader->getUniformLocation("col");
+    eFieldShader->bind();
+    glm::vec4 v = glm::vec4(initialEFieldCol, 1.0f);
+    glUniform4fv(colLoc, 1, glm::value_ptr(v));
+    eFieldShader->unbind();
+    unsigned int colLoc2 = hFieldShader->getUniformLocation("col");
+    hFieldShader->bind();
+    glm::vec4 v2 = glm::vec4(initialHFieldCol, 1.0f);
+    glUniform4fv(colLoc2, 1, glm::value_ptr(v2));
+    hFieldShader->unbind();
+}
+
 void SimulationSpace::setCellOpaqueness(float f)
 {
     unsigned int colLoc = cellShader->getUniformLocation("col");
@@ -38,6 +59,31 @@ void SimulationSpace::setCellOpaqueness(float f)
     glm::vec4 v = glm::vec4(cellColor, f);
     glUniform4fv(colLoc, 1, glm::value_ptr(v));
     cellShader->unbind();
+}
+
+void SimulationSpace::loadFieldShaders()
+{
+    std::string shaderEName = "e_field_shader";
+    if (!scene->checkShader(shaderEName))
+    {
+        eFieldShader = new Shader("res/shaders/field.shader", 1, shaderEName);
+        scene->addShader(eFieldShader);
+    }
+    else
+    {
+        eFieldShader = scene->getShader(shaderEName);
+    }
+    std::string shaderHName = "h_field_shader";
+    if (!scene->checkShader(shaderHName))
+    {
+        hFieldShader = new Shader("res/shaders/field.shader", 1, shaderHName);
+        scene->addShader(hFieldShader);
+    }
+    else
+    {
+        hFieldShader = scene->getShader(shaderHName);
+    }
+    setFieldColors();
 }
 
 void SimulationSpace::buildCellVertices()
@@ -113,6 +159,8 @@ void SimulationSpace::generateCells()
 void SimulationSpace::init()
 {
 	generateCells();
+    initializeFields1D();
+    loadFieldShaders();
 }
 
 void SimulationSpace::drawCells()
@@ -150,7 +198,11 @@ void SimulationSpace::update()
         generateCells();
         needCellUpdate = false;
     }
-
+    if (running1D)
+    {
+        updateFields1D();
+        buildFields1DVAOs();
+    }
 
 
 }
@@ -159,5 +211,93 @@ void SimulationSpace::render()
 {
     update();
     drawCells();
+    drawFields();
+}
+
+// do 1d first
+// do another shader
+void SimulationSpace::drawFields()
+{
+    if (running1D)
+    {
+        // might be less expensive to use a signle shader for both field
+        // and change the color through uniforms
+        eFieldShader->bind();
+        glBindVertexArray(fields1DVAOs->at(0));
+        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(numCells1D));
+        glBindVertexArray(0);
+        eFieldShader->unbind();
+        hFieldShader->bind();
+        glBindVertexArray(fields1DVAOs->at(1));
+        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(numCells1D));
+        glBindVertexArray(0);
+        hFieldShader->unbind();
+
+    }
+
+
+
+}
+
+void SimulationSpace::buildFields1DVAOs()
+{
+    fields1DVAOs->clear();
+
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * numCells1D, eX1D, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    fields1DVAOs->addVBO(VBO);
+    fields1DVAOs->push(VAO);
+
+    unsigned int hVAO;
+    glGenVertexArrays(1, &hVAO);
+    glBindVertexArray(hVAO);
+    unsigned int hVBO;
+    glGenBuffers(1, &hVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, hVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * numCells1D, hY1D, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    fields1DVAOs->addVBO(hVBO);
+    fields1DVAOs->push(hVAO);
+
+}
+
+void SimulationSpace::initializeFields1D()
+{
+    for (int i = 0; i < numCells1D; i++)
+    {
+        eX1D[i] = glm::vec3(cellSize1D * i, 0.0f, 0.0f);
+        hY1D[i] = glm::vec3(cellSize1D * i, 0.0f, 0.0f);
+    }
+}
+
+void SimulationSpace::updateFields1D()
+{
+    timeT++;
+    int slowDownFactor = 1;
+    if (timeT % slowDownFactor != 0)
+    {
+        return;
+    }
+
+    for (int i = 1; i < numCells1D; i++)
+    {
+        eX1D[i].y = eX1D[i].y + .5f * (hY1D[i - 1].z - hY1D[i].z);
+    }
+    float t0 = 40.0f;
+    float spread = 3.0f;
+    float pulse = (float) exp(-.5 * (pow((t0 - float (timeT / slowDownFactor)) / spread, 2.0)));
+    eX1D[numCells1D / 2].y = pulse;
+    for (int i = 1; i < numCells1D; i++)
+    {
+        hY1D[i].z = hY1D[i].z + .5f * (eX1D[i].y - eX1D[i + 1].y);
+    }
 }
 

@@ -50,6 +50,8 @@ Plan:
 #add regen verts VS regen model mtx design to ribbons + polish ribbons + solve bugs (fly away on startup) + address mem leaks
 #fix ribbons boundary conditions
 #made the simulation space grid
+#implemented simple 1d fdtd with no dielectrics, boundary conds
+
 
 
 

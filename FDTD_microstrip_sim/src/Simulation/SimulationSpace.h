@@ -34,9 +34,34 @@ protected:
 	float cellOpaqueness;
 	float cellSize;
 
+	//hardcodes for now
+	int numCells1D;
+	glm::vec3 eX1D[200];
+	glm::vec3 hY1D[200];
+	float cellSize1D;
+
+	int timeT; //arbitrary time
+	int timeS;
+	int timeMS;
+	int timeNS;
+
+	
+	bool running1D;
+	bool running2D;
+	bool running3D;
+
 	Shader* cellShader;
+	Shader* eFieldShader;
+	Shader* hFieldShader;
+
+	glm::vec3 initialEFieldCol;
+	glm::vec3 initialHFieldCol;
+
+
 	VertexVectorDS* cellVerts;
 	VAOVectorDS* cellVAOs;
+
+	VAOVectorDS* fields1DVAOs;
 
 	int simulationDimension;
 
@@ -48,7 +73,6 @@ protected:
 	void init();
 
 	void drawCells();
-
 	void deleteCells();
 
 	bool needCellUpdate;
@@ -59,10 +83,17 @@ public:
 	~SimulationSpace();
 
 	void setCellColor(glm::vec3 c);
+	void setFieldColors();
 	void setCellOpaqueness(float f);
 
 	void update();
 	void render();
+	void drawFields();
+
+	void buildFields1DVAOs();
+
+	void initializeFields1D();
+	void updateFields1D();
 
 	void setDimensions(glm::vec3 v) { simSpaceDimensions = v; }
 	glm::vec3* getDimensions() { return &simSpaceDimensions; }
@@ -82,6 +113,16 @@ public:
 	int* getSimulationDimension() { return &simulationDimension; }
 
 	void setSimulationDimension(int i) { simulationDimension = i; }
+
+	void loadFieldShaders();
+
+	//do enums instead for 1d, 2d, 3d
+	void reset1D() {
+		running1D = false; 
+		initializeFields1D();
+		fields1DVAOs->clear();
+	}
+	void setRunning1D(bool b) { running1D = b; }
 
 
 };

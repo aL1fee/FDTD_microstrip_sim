@@ -6,6 +6,8 @@
 // === Physics sources for sims
 Caps & dielectrics: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/ba7ba4fb31a34a167dc98bf25904d38a_chap5capacitance.pdf
 the whole book: https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2007/pages/readings/
+good fdtd source: https://lshoshia.science.tsu.ge/fdtd/Dennissullivan-fixed.pdf
+
 
 
 //

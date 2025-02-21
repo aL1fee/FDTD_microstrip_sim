@@ -313,6 +313,7 @@
     <None Include="res\shaders\generic_MVP.shader" />
     <None Include="res\shaders\generic_pos_col_MVP.shader" />
     <None Include="res\shaders\simulation_cells.shader" />
+    <None Include="res\shaders\field.shader" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />

@@ -484,6 +484,40 @@ void GUI::buildMenuLowerPanel()
 			ImGui::EndMenu();
 		}
 
+		// do enums or switches instead for 1,2,3d
+		if (ImGui::BeginMenu("Execute"))
+		{
+			int* option = _simulation_space->getSimulationDimension();
+
+			if (ImGui::MenuItem("Reset"))
+			{
+				if (*option == 1)
+				{
+					_simulation_space->reset1D();
+				}
+
+			}
+			if (ImGui::MenuItem("Run"))
+			{
+				if (*option == 1)
+				{
+					_simulation_space->setRunning1D(true);
+				}
+
+			}
+			if (ImGui::MenuItem("Stop"))
+			{
+				if (*option == 1)
+				{
+					_simulation_space->setRunning1D(false);
+				}
+			}
+
+			ImGui::EndMenu();
+		}
+
+
+
 
 		if (ImGui::BeginMenu("3"))
 		{
