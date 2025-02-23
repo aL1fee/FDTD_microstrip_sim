@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="src\Data Structures\VAOVectorDS.h" />
     <ClInclude Include="src\Data Structures\VertexVectorDS.h" />
+    <ClInclude Include="src\GUI\SimulationWindow.h" />
     <ClInclude Include="src\Macros and variables\Global variables.h" />
     <ClInclude Include="src\Physics\Physical Objects (POs)\Curve_PO.h" />
     <ClInclude Include="src\Physics\Physical Objects %28POs%29\Substrate_PO.h" />
@@ -186,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\OpenGL\glad\src\glad.c" />
+    <ClCompile Include="src\GUI\SimulationWindow.cpp" />
     <ClCompile Include="src\Macros and variables\Global variables.cpp" />
     <ClCompile Include="src\Data Structures\VAOVectorDS.cpp" />
     <ClCompile Include="src\Data Structures\VertexVectorDS.cpp" />

@@ -294,7 +294,7 @@ void SimulationSpace::initializeFields1D()
 void SimulationSpace::updateFields1D()
 {
     timeT++;
-    int slowDownFactor = 1;
+    int slowDownFactor = 3;
     if (timeT % slowDownFactor != 0)
     {
         return;
@@ -306,8 +306,13 @@ void SimulationSpace::updateFields1D()
     }
     float t0 = 40.0f;
     float spread = 3.0f;
+    //hard source
     float pulse = (float) exp(-.5 * (pow((t0 - float (timeT / slowDownFactor)) / spread, 2.0)));
     eX1D[numCells1D / 2].y = pulse;
+
+
+    //eX1D[80].y = pulse;
+    //eX1D[130].y = pulse;
     for (int i = 1; i < numCells1D; i++)
     {
         hY1D[i].z = hY1D[i].z + .5f * (eX1D[i].y - eX1D[i + 1].y);

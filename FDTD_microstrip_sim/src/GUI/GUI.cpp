@@ -12,6 +12,7 @@ GUI::GUI(GLFWwindow* w)
 	window = w;
 	statusWindow = new StatusWindow("...");
 	firstRightPanelMinimized = true;
+	propertyWindowMinimized = true;
 	customFont = nullptr;
 }
 
@@ -790,11 +791,29 @@ void GUI::buildLeftPanel()
 	ImGui::PopStyleColor(4);
 	ImGui::PopStyleVar(2);
 
+	propertyWindowMinimized = ImGui::IsWindowCollapsed();
 
+	//if (!propertyWindowMinimized)
+	//{
+	//	ImGui::SetNextWindowCollapsed(true, ImGuiCond_Once);
 
+	//	ImGui::SetNextWindowPos(ImVec2(4, 112 + 5 + (windowHeight - 85 - 12) / 2));
+	//	ImGui::SetNextWindowSize(ImVec2(248, (windowHeight - 85 - 12 - 46) / 2));
+	//	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4)); // Adjust the second value to reduce height
+	//	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 4));  // Adjust the second value to reduce spacing
+	//	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+	//	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
+	//	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
+	//	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 
+	//	ImGui::Begin("Simulation window", nullptr, ImGuiWindowFlags_NoResize |
+	//		ImGuiWindowFlags_NoMove);
+	//	// removed ImGuiWindowFlags_NoTitleBar
 
-
+	//	ImGui::End();
+	//	ImGui::PopStyleColor(4);
+	//	ImGui::PopStyleVar(2);
+	//}
 
 
 
@@ -812,11 +831,240 @@ void GUI::buildLowerPanel() {
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.976f, 0.976f, 0.976f, 1.0f));
 
 	ImGui::Begin("LowerPanel", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+	ImGui::SetNextWindowPos(ImVec2(259, windowHeight - 156));
+	ImGui::SetNextWindowSize(ImVec2(windowWidth - 259 - 3, 153));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4)); 
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 4)); 
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
+
+	ImGui::Begin("Simulation window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove);
+
+	ImGui::Text("Simulation window");
+
+	// simulation window starts here
 
 
-	ImGui::Text("Status window:");
-	ImGui::Text(statusWindow->getMessage().c_str());
+
+
+	const char* options[] = { "1D", "2D", "3D" };
+	static int selectedOption = 0;
+
+	ImGui::SetCursorPos(ImVec2(20, 30));
+	ImGui::Text("Dimension:");
+	ImGui::PushItemWidth(50);
+	ImGui::SetCursorPos(ImVec2(120, 26));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.90f, 0.90f, 0.90f, 1.0f)); // Set button color to gray
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Set hovered button color to light gray
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.7f, 0.7f, 1.0f)); // Set active button color to darker gray
+
+	if (ImGui::BeginCombo("##combo", options[selectedOption])) {
+		for (int i = 0; i < IM_ARRAYSIZE(options); i++) {
+			bool isSelected = (selectedOption == i);
+			if (ImGui::Selectable(options[i], isSelected)) {
+				selectedOption = i;
+			}
+			if (isSelected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	ImGui::PopStyleColor(3);
+
+	ImGui::PopStyleColor();
+	ImGui::PopItemWidth();
+
+	static float number = 0;
+
+	ImGui::SetCursorPos(ImVec2(20, 54));
+	ImGui::Text("Frequency (GHz):");
+
+	ImGui::SetCursorPos(ImVec2(120, 50));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(50);
+	//ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+
+
+	ImGui::InputFloat("##number", &number);
+
+
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor(); 
+
+
+	static float cellSizeEx = .02f;
+
+	ImGui::SetCursorPos(ImVec2(20, 78));
+	ImGui::Text("Cell size ex:");
+
+	ImGui::SetCursorPos(ImVec2(120, 74));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(50);
+
+	ImGui::InputFloat("##cell_size_ex", &cellSizeEx);
+
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor();
+
+	static float anotherProperty = 0;
+
+	ImGui::SetCursorPos(ImVec2(20, 102));
+	ImGui::Text("Anoth prop:");
+
+	ImGui::SetCursorPos(ImVec2(120, 98));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(50);
+
+	ImGui::InputFloat("##anoth_prop", &anotherProperty);
+
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor();
+
+	static float anotherProperty2 = 0;
+
+	ImGui::SetCursorPos(ImVec2(20, 126));
+	ImGui::Text("Last col 1 prop:");
+
+	ImGui::SetCursorPos(ImVec2(120, 122));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(50);
+
+	ImGui::InputFloat("##last_col1_prop", &anotherProperty2);
+
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor();
+
+
+	////////// 2nd column of properties
+
+
+
+	ImGui::SetCursorPos(ImVec2(190, 30));
+	ImGui::Text("Slowdown factor:");
+
+	int sliderValue = 5;
+
+	ImGui::SetCursorPos(ImVec2(290, 26));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(100);
+
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+
+	//ImGuiCol_FrameBg,  // Background of checkbox, radio button, plot, slider, text input
+	//ImGuiCol_FrameBgHovered,
+	//ImGuiCol_FrameBgActive,
+	ImGui::SliderInt("##Slider Label", &sliderValue, 1, 100);
+
+	ImGui::PopStyleColor(4);
+
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor();
+
+
+	////////// 3rd column of properties
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(.55f, .55f, .55f, 1.0f));
+
+	static bool permitState = true;
+	bool permeabState = true;
+	bool bcondsState = true;
+	bool reflState = true;
+	bool disperState = true;
+
+	ImGui::SetCursorPos(ImVec2(412, 30));
+	ImGui::Text("Permittivity:");
+	ImGui::SetCursorPos(ImVec2(536, 26));
+	if (ImGui::Checkbox("##Enable Feature", &permitState)) {
+		if (permitState) {
+			permitState = !permitState;
+		}
+		else {
+			
+		}
+	}
+
+	ImGui::SetCursorPos(ImVec2(412, 54));
+	ImGui::Text("Permiability:");
+	ImGui::SetCursorPos(ImVec2(536, 50));
+	if (ImGui::Checkbox("##Enable Feature", &permeabState)) {
+		if (permeabState) {
+		}
+		else {
+		}
+	}
+
+	ImGui::SetCursorPos(ImVec2(412, 78));
+	ImGui::Text("Boundary conditions:");
+	ImGui::SetCursorPos(ImVec2(536, 74));
+	if (ImGui::Checkbox("##Enable Feature", &bcondsState)) {
+		if (bcondsState) {
+		}
+		else {
+		}
+	}
+
+	ImGui::SetCursorPos(ImVec2(412, 102));
+	ImGui::Text("Reflection:");
+	ImGui::SetCursorPos(ImVec2(536, 98));
+	if (ImGui::Checkbox("##Enable Feature", &reflState)) {
+		if (reflState) {
+		}
+		else {
+		}
+	}
+
+	ImGui::SetCursorPos(ImVec2(412, 126));
+	ImGui::Text("Dispersion:");
+	ImGui::SetCursorPos(ImVec2(536, 122));
+	if (ImGui::Checkbox("##Enable Feature", &disperState)) {
+		if (disperState) {
+		}
+		else {
+		}
+	}
+
+
+
+
+
+	ImGui::PopStyleColor(4);
+
+	////////// 4th column of properties
+
+
+
+
+
+
+
+	ImGui::End();
+	ImGui::PopStyleColor(4);
+	ImGui::PopStyleVar(2);
+
+
+
+
+
+
+
+
+
+	//ImGui::Text("Status window:");
+	//ImGui::Text(statusWindow->getMessage().c_str());
 
 	//ImGui::Text("> Loading..");
 	//ImGui::Text("> Loading..");
@@ -917,6 +1165,8 @@ void GUI::terminate()
 
 void GUI::newFrame()
 {
+	ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, ImVec4(0.81f, 0.81f, 0.81f, 1.0f)); // Background color of selected text
+
 	ImGui_ImplGlfw_NewFrame();
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui::NewFrame();
@@ -926,4 +1176,6 @@ void GUI::newFrame()
 	buildLeftPanel();
 	buildLowerPanel();
 	buildRightPanels();
+
+	ImGui::PopStyleColor();
 }

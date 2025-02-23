@@ -32,6 +32,7 @@ private:
 	StatusWindow* statusWindow;
 	
 	float firstRightPanelMinimized;
+	float propertyWindowMinimized;
 
 	void buildMainMenuPanel();
 	void buildMenuUpperPanel();
