@@ -36,8 +36,8 @@ protected:
 
 	//hardcodes for now
 	int numCells1D;
-	glm::vec3 eX1D[200];
-	glm::vec3 hY1D[200];
+	std::vector<glm::vec3>* eX1D;
+	std::vector<glm::vec3>* hY1D;
 	float cellSize1D;
 
 	int timeT; //arbitrary time
@@ -63,16 +63,25 @@ protected:
 
 	int slowdownFactor;
 
-	VertexVectorDS* cellVerts;
-	VAOVectorDS* cellVAOs;
+	VertexVectorDS* cellVerts1D;
+	VAOVectorDS* cellVAOs1D;
+	VertexVectorDS* cellVerts3D;
+	VAOVectorDS* cellVAOs3D;
 
 	VAOVectorDS* fields1DVAOs;
 
 	int simulationDimension;
+	bool oldSimulationRunning;
 
+	void buildCellVertices1D();
+	void buildCellVAOs1D();
 
-	void buildCellVertices();
-	void buildCellVAOs();
+	void buildCellVertices3D();
+	void buildCellVAOs3D();
+
+	void generateCells1D();
+	void generateCells3D();
+
 	void generateCells();
 
 	void init();
@@ -82,6 +91,9 @@ protected:
 
 	bool needCellUpdate;
 	bool renderingCellOn;
+
+	bool simStopped;
+
 
 public:
 	SimulationSpace(GLFWwindow* w, MainScene* s);
@@ -100,10 +112,20 @@ public:
 	void initializeFields1D();
 	void updateFields1D();
 
-	void setDimensions(glm::vec3 v) { simSpaceDimensions = v; }
+	void initilizeFields()
+	{
+		initializeFields1D();
+	}
+
+	void setDimensions(glm::vec3 v) 
+	{	simSpaceDimensions = v; 
+		//initilizeFields();
+		//updateFieldArraySizes();
+	}
+
 	glm::vec3* getDimensions() { return &simSpaceDimensions; }
 
-	void setCellSize(float f) { cellSize = f; }
+	void setCellSize(float f) { cellSize = f; updateFieldArraySizes(); }
 	float* getCellSize() { return &cellSize; }
 
 	float* getCellOpaqueness() { return &cellOpaqueness; }
@@ -124,7 +146,7 @@ public:
 	//do enums instead for 1d, 2d, 3d
 	void reset1D();
 
-	void setRunning1D(bool b) { running1D = b; }
+	void setRunning1D(bool b);
 	void setDrawing1D(bool b) { drawing1D = b; }
 	bool isDrawing1D() { return drawing1D; }
 
@@ -133,5 +155,15 @@ public:
 
 	int* getSlowdownFactor() { return &slowdownFactor; }
 	void setSlowdownFactor(int i) { slowdownFactor = i; }
+
+	//void reinitializeFields() { initializeFields1D(); }
+
+	void updateFieldArraySizes();
+
+	bool simulationRunning() { return running1D || running2D || running3D; }
+	bool isOldSimulationRunning() { return oldSimulationRunning; }
+
+	bool isSimStopped() { return simStopped; }
+	void setSimStopped(bool b) { simStopped = b; }
 
 };

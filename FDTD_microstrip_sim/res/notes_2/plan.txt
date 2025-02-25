@@ -55,7 +55,13 @@ Plan:
 
 
 
+!Have to write a data structure for sim space arrays!!!
+
+
+
 // create a complete third system
+
+
 
 
 

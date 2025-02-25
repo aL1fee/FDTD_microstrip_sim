@@ -410,6 +410,8 @@ void GUI::buildMenuLowerPanel()
 		std::string simDimStr = std::to_string(
 			*_simulation_space->getSimulationDimension());
 		std::string simTitle = "Simulation " + simDimStr + "D";
+		bool oldSimulationRunning = _simulation_space->isOldSimulationRunning();
+		ImGui::BeginDisabled(oldSimulationRunning);
 		if (ImGui::BeginMenu(simTitle.c_str()))
 		{
 			int* option = _simulation_space->getSimulationDimension();
@@ -424,6 +426,7 @@ void GUI::buildMenuLowerPanel()
 
 			ImGui::EndMenu();
 		}
+		ImGui::EndDisabled();
 
 		ImGui::Separator();
 
@@ -520,6 +523,7 @@ void GUI::buildMenuLowerPanel()
 			{
 				if (*option == 1)
 				{
+					_simulation_space->setSimStopped(true);
 					_simulation_space->setRunning1D(false);
 				}
 			}
@@ -849,6 +853,8 @@ void GUI::buildLowerPanel() {
 
 	// simulation window starts here
 
+	bool oldSimulationRunning = _simulation_space->isOldSimulationRunning();
+
 	int currentDim = *_simulation_space->getSimulationDimension();
 
 	const char* options[] = { "1D", "2D", "3D" };
@@ -863,7 +869,8 @@ void GUI::buildLowerPanel() {
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.90f, 0.90f, 0.90f, 1.0f)); // Set button color to gray
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.8f, 0.8f, 1.0f)); // Set hovered button color to light gray
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.7f, 0.7f, 1.0f)); // Set active button color to darker gray
-
+	
+	ImGui::BeginDisabled(oldSimulationRunning);
 	if (ImGui::BeginCombo("##combo", options[selectedOption])) {
 		for (int i = 0; i < IM_ARRAYSIZE(options); i++) {
 			bool isSelected = (selectedOption == i);
@@ -877,6 +884,7 @@ void GUI::buildLowerPanel() {
 		}
 		ImGui::EndCombo();
 	}
+	ImGui::EndDisabled();
 
 	ImGui::PopStyleColor(3);
 
@@ -884,6 +892,7 @@ void GUI::buildLowerPanel() {
 	ImGui::PopItemWidth();
 
 	float* cellSize = _simulation_space->getCellSize();
+	glm::vec3* currentSimSpace = _simulation_space->getDimensions();
 
 	ImGui::SetCursorPos(ImVec2(20, 54));
 	ImGui::Text("Cell size (mm):");
@@ -893,16 +902,44 @@ void GUI::buildLowerPanel() {
 	ImGui::PushItemWidth(50);
 	//ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 
-
+	ImGui::BeginDisabled(oldSimulationRunning);
 	if (ImGui::InputFloat("##number", cellSize, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
+		float minCellSize1D = currentSimSpace->x;
+		float minCellSize2D = std::min({ currentSimSpace->x, currentSimSpace->z });
+		float minCellSize3D = std::min({ currentSimSpace->x, currentSimSpace->y, currentSimSpace->z });
+		switch (currentDim)
+		{
+		case 1:
+			if (*cellSize >= minCellSize1D)
+			{
+				*cellSize = minCellSize1D;
+			}
+			break;
+		case 2:
+			if (*cellSize >= minCellSize2D)
+			{
+				*cellSize = minCellSize2D;
+			}
+			break;
+		case 3:
+			if (*cellSize >= minCellSize3D)
+			{
+				*cellSize = minCellSize3D;
+			}
+			break;
+		}
+		if (*cellSize <= 0.0f)
+		{
+			*cellSize = .01f;
+		}
 		_simulation_space->setCellUpdate(true);
 	}
+	ImGui::EndDisabled();
 
 	ImGui::PopItemWidth();
 	ImGui::PopStyleColor(); 
 
-	glm::vec3* currentSimSpace = _simulation_space->getDimensions();
 	float currentSimSpaceX = currentSimSpace->x;
 	float finalSimSpaceX = currentSimSpaceX;
 
@@ -913,13 +950,24 @@ void GUI::buildLowerPanel() {
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushItemWidth(50);
 
+	ImGui::BeginDisabled(oldSimulationRunning);
 	if (ImGui::InputFloat("##simSpaceX", &finalSimSpaceX, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
+		if (finalSimSpaceX <= 0.0f)
+		{
+			finalSimSpaceX = .04f;
+		}
 		_simulation_space->setDimensions(glm::vec3(finalSimSpaceX,
 			currentSimSpace->y, currentSimSpace->z));
+		float minCellSize = std::min({ currentSimSpace->x, currentSimSpace->y, currentSimSpace->z });
+		if (*cellSize >= minCellSize)
+		{
+			*cellSize = minCellSize;
+		}
 		_simulation_space->setCellUpdate(true);
+		_simulation_space->initilizeFields();
 	}
-
+	ImGui::EndDisabled();
 
 	ImGui::PopItemWidth();
 	ImGui::PopStyleColor();
@@ -940,12 +988,24 @@ void GUI::buildLowerPanel() {
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 		ImGui::PushItemWidth(50);
 
+		ImGui::BeginDisabled(oldSimulationRunning);
 		if (ImGui::InputFloat("##simSpaceZ", &finalSimSpaceZ, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
+			if (finalSimSpaceZ <= 0.0f)
+			{
+				finalSimSpaceZ = .04f;
+			}
 			_simulation_space->setDimensions(glm::vec3(currentSimSpaceX,
 				currentSimSpace->y, finalSimSpaceZ));
+			float minCellSize = std::min({ currentSimSpace->x, currentSimSpace->y, currentSimSpace->z });
+			if (*cellSize >= minCellSize)
+			{
+				*cellSize = minCellSize;
+			}
 			_simulation_space->setCellUpdate(true);
+			_simulation_space->initilizeFields();
 		}
+		ImGui::EndDisabled();
 
 		ImGui::PopItemWidth();
 		ImGui::PopStyleColor();
@@ -963,12 +1023,24 @@ void GUI::buildLowerPanel() {
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 		ImGui::PushItemWidth(50);
 
+		ImGui::BeginDisabled(oldSimulationRunning);
 		if (ImGui::InputFloat("##simSpaceY", &finalSimSpaceY, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
+			if (finalSimSpaceY <= 0.0f)
+			{
+				finalSimSpaceY = .04f;
+			}
 			_simulation_space->setDimensions(glm::vec3(currentSimSpaceX,
 				finalSimSpaceY, currentSimSpace->z));
+			float minCellSize = std::min({ currentSimSpace->x, currentSimSpace->y, currentSimSpace->z });
+			if (*cellSize >= minCellSize)
+			{
+				*cellSize = minCellSize;
+			}
 			_simulation_space->setCellUpdate(true);
+			_simulation_space->initilizeFields();
 		}
+		ImGui::EndDisabled();
 
 		ImGui::PopItemWidth();
 		ImGui::PopStyleColor();
@@ -1046,7 +1118,7 @@ void GUI::buildLowerPanel() {
 	ImGui::SetCursorPos(ImVec2(424, 30));
 	ImGui::Text("Cell toggle ON/OFF:");
 	ImGui::SetCursorPos(ImVec2(542, 26));
-	if (ImGui::Checkbox("##Enable Feature", &cellOn)) {
+	if (ImGui::Checkbox("##Cell toggle", &cellOn)) {
 		if (cellOn) {
 			_simulation_space->setRenderingCell(true);
 		}
@@ -1086,7 +1158,7 @@ void GUI::buildLowerPanel() {
 	}
 
 	ImGui::SetCursorPos(ImVec2(578, 54));
-	ImGui::Text("Permiability:");
+	ImGui::Text("Permeability:");
 	ImGui::SetCursorPos(ImVec2(700, 50));
 	if (ImGui::Checkbox("##Enable Feature", &permeabState)) {
 		if (permeabState) {
