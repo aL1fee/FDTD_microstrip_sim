@@ -849,16 +849,15 @@ void GUI::buildLowerPanel() {
 
 	// simulation window starts here
 
-
-
+	int currentDim = *_simulation_space->getSimulationDimension();
 
 	const char* options[] = { "1D", "2D", "3D" };
-	static int selectedOption = 0;
+	int selectedOption = currentDim - 1;
 
 	ImGui::SetCursorPos(ImVec2(20, 30));
 	ImGui::Text("Dimension:");
 	ImGui::PushItemWidth(50);
-	ImGui::SetCursorPos(ImVec2(120, 26));
+	ImGui::SetCursorPos(ImVec2(126, 26));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.90f, 0.90f, 0.90f, 1.0f)); // Set button color to gray
@@ -870,6 +869,7 @@ void GUI::buildLowerPanel() {
 			bool isSelected = (selectedOption == i);
 			if (ImGui::Selectable(options[i], isSelected)) {
 				selectedOption = i;
+				_simulation_space->setSimulationDimension(i + 1);
 			}
 			if (isSelected) {
 				ImGui::SetItemDefaultFocus();
@@ -883,77 +883,108 @@ void GUI::buildLowerPanel() {
 	ImGui::PopStyleColor();
 	ImGui::PopItemWidth();
 
-	static float number = 0;
+	float* cellSize = _simulation_space->getCellSize();
 
 	ImGui::SetCursorPos(ImVec2(20, 54));
-	ImGui::Text("Frequency (GHz):");
+	ImGui::Text("Cell size (mm):");
 
-	ImGui::SetCursorPos(ImVec2(120, 50));
+	ImGui::SetCursorPos(ImVec2(126, 50));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushItemWidth(50);
 	//ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 
 
-	ImGui::InputFloat("##number", &number);
-
+	if (ImGui::InputFloat("##number", cellSize, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		_simulation_space->setCellUpdate(true);
+	}
 
 	ImGui::PopItemWidth();
 	ImGui::PopStyleColor(); 
 
-
-	static float cellSizeEx = .02f;
+	glm::vec3* currentSimSpace = _simulation_space->getDimensions();
+	float currentSimSpaceX = currentSimSpace->x;
+	float finalSimSpaceX = currentSimSpaceX;
 
 	ImGui::SetCursorPos(ImVec2(20, 78));
-	ImGui::Text("Cell size ex:");
+	ImGui::Text("Sim space X (mm):");
 
-	ImGui::SetCursorPos(ImVec2(120, 74));
+	ImGui::SetCursorPos(ImVec2(126, 74));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushItemWidth(50);
 
-	ImGui::InputFloat("##cell_size_ex", &cellSizeEx);
+	if (ImGui::InputFloat("##simSpaceX", &finalSimSpaceX, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		_simulation_space->setDimensions(glm::vec3(finalSimSpaceX,
+			currentSimSpace->y, currentSimSpace->z));
+		_simulation_space->setCellUpdate(true);
+	}
+
 
 	ImGui::PopItemWidth();
 	ImGui::PopStyleColor();
 
-	static float anotherProperty = 0;
+	if (currentDim == 1)
+	{
+		
+	}
+	else if (currentDim == 2 || currentDim == 3)
+	{
+		float currentSimSpaceZ = currentSimSpace->z;
+		float finalSimSpaceZ = currentSimSpaceZ;
 
-	ImGui::SetCursorPos(ImVec2(20, 102));
-	ImGui::Text("Anoth prop:");
+		ImGui::SetCursorPos(ImVec2(20, 102));
+		ImGui::Text("Sim space Z (mm):");
 
-	ImGui::SetCursorPos(ImVec2(120, 98));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
-	ImGui::PushItemWidth(50);
+		ImGui::SetCursorPos(ImVec2(126, 98));
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+		ImGui::PushItemWidth(50);
 
-	ImGui::InputFloat("##anoth_prop", &anotherProperty);
+		if (ImGui::InputFloat("##simSpaceZ", &finalSimSpaceZ, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			_simulation_space->setDimensions(glm::vec3(currentSimSpaceX,
+				currentSimSpace->y, finalSimSpaceZ));
+			_simulation_space->setCellUpdate(true);
+		}
 
-	ImGui::PopItemWidth();
-	ImGui::PopStyleColor();
+		ImGui::PopItemWidth();
+		ImGui::PopStyleColor();
 
-	static float anotherProperty2 = 0;
+	}
+	if (currentDim == 3)
+	{
+		float currentSimSpaceY = currentSimSpace->y;
+		float finalSimSpaceY = currentSimSpaceY;
 
-	ImGui::SetCursorPos(ImVec2(20, 126));
-	ImGui::Text("Last col 1 prop:");
+		ImGui::SetCursorPos(ImVec2(20, 126));
+		ImGui::Text("Sim space Y (mm):");
 
-	ImGui::SetCursorPos(ImVec2(120, 122));
-	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
-	ImGui::PushItemWidth(50);
+		ImGui::SetCursorPos(ImVec2(126, 122));
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+		ImGui::PushItemWidth(50);
 
-	ImGui::InputFloat("##last_col1_prop", &anotherProperty2);
+		if (ImGui::InputFloat("##simSpaceY", &finalSimSpaceY, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			_simulation_space->setDimensions(glm::vec3(currentSimSpaceX,
+				finalSimSpaceY, currentSimSpace->z));
+			_simulation_space->setCellUpdate(true);
+		}
 
-	ImGui::PopItemWidth();
-	ImGui::PopStyleColor();
+		ImGui::PopItemWidth();
+		ImGui::PopStyleColor();
+	}
 
 
 	////////// 2nd column of properties
 
 
-
 	ImGui::SetCursorPos(ImVec2(190, 30));
-	ImGui::Text("Slowdown factor:");
+	ImGui::Text("CW frequency (GHz):");
 
-	int sliderValue = 5;
+	float* freq = _simulation_space->getCWFrequency();
 
-	ImGui::SetCursorPos(ImVec2(290, 26));
+
+	ImGui::SetCursorPos(ImVec2(310, 26));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushItemWidth(100);
 
@@ -962,18 +993,75 @@ void GUI::buildLowerPanel() {
 	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 
-	//ImGuiCol_FrameBg,  // Background of checkbox, radio button, plot, slider, text input
-	//ImGuiCol_FrameBgHovered,
-	//ImGuiCol_FrameBgActive,
-	ImGui::SliderInt("##Slider Label", &sliderValue, 1, 100);
+	ImGui::SliderFloat("##freq slider", freq, .25, 40);
+
+	ImGui::PopStyleColor(4);
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor();
+
+	////-
+	//ImGui::SetCursorPos(ImVec2(190, 54));
+	//ImGui::Text("CW frequency (GHz):");
+
+	//ImGui::SetCursorPos(ImVec2(310, 50));
+	//ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	//ImGui::PushItemWidth(50);
+
+	//ImGui::InputFloat("##freq_exact", freq);
+
+	//ImGui::PopItemWidth();
+	//ImGui::PopStyleColor();
+	////-
+
+	ImGui::SetCursorPos(ImVec2(190, 54));
+	ImGui::Text("Slowdown factor:");
+
+	int* slowdownFactor = _simulation_space->getSlowdownFactor();
+
+	ImGui::SetCursorPos(ImVec2(310, 50));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(100);
+
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+
+	ImGui::SliderInt("##slowdown factor slider", slowdownFactor, 1, 20);
 
 	ImGui::PopStyleColor(4);
 
 	ImGui::PopItemWidth();
 	ImGui::PopStyleColor();
-
+	//
 
 	////////// 3rd column of properties
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(.55f, .55f, .55f, 1.0f));
+
+	bool cellOn = _simulation_space->getRenderingCellOn();
+
+	ImGui::SetCursorPos(ImVec2(424, 30));
+	ImGui::Text("Cell toggle ON/OFF:");
+	ImGui::SetCursorPos(ImVec2(542, 26));
+	if (ImGui::Checkbox("##Enable Feature", &cellOn)) {
+		if (cellOn) {
+			_simulation_space->setRenderingCell(true);
+		}
+		else {
+			_simulation_space->setRenderingCell(false);
+		}
+	}
+
+
+
+
+
+	ImGui::PopStyleColor(4);
+
+	////////// 4rd column of properties
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
@@ -985,9 +1073,9 @@ void GUI::buildLowerPanel() {
 	bool reflState = true;
 	bool disperState = true;
 
-	ImGui::SetCursorPos(ImVec2(412, 30));
+	ImGui::SetCursorPos(ImVec2(578, 30));
 	ImGui::Text("Permittivity:");
-	ImGui::SetCursorPos(ImVec2(536, 26));
+	ImGui::SetCursorPos(ImVec2(700, 26));
 	if (ImGui::Checkbox("##Enable Feature", &permitState)) {
 		if (permitState) {
 			permitState = !permitState;
@@ -997,9 +1085,9 @@ void GUI::buildLowerPanel() {
 		}
 	}
 
-	ImGui::SetCursorPos(ImVec2(412, 54));
+	ImGui::SetCursorPos(ImVec2(578, 54));
 	ImGui::Text("Permiability:");
-	ImGui::SetCursorPos(ImVec2(536, 50));
+	ImGui::SetCursorPos(ImVec2(700, 50));
 	if (ImGui::Checkbox("##Enable Feature", &permeabState)) {
 		if (permeabState) {
 		}
@@ -1007,9 +1095,9 @@ void GUI::buildLowerPanel() {
 		}
 	}
 
-	ImGui::SetCursorPos(ImVec2(412, 78));
+	ImGui::SetCursorPos(ImVec2(578, 78));
 	ImGui::Text("Boundary conditions:");
-	ImGui::SetCursorPos(ImVec2(536, 74));
+	ImGui::SetCursorPos(ImVec2(700, 74));
 	if (ImGui::Checkbox("##Enable Feature", &bcondsState)) {
 		if (bcondsState) {
 		}
@@ -1017,9 +1105,9 @@ void GUI::buildLowerPanel() {
 		}
 	}
 
-	ImGui::SetCursorPos(ImVec2(412, 102));
+	ImGui::SetCursorPos(ImVec2(578, 102));
 	ImGui::Text("Reflection:");
-	ImGui::SetCursorPos(ImVec2(536, 98));
+	ImGui::SetCursorPos(ImVec2(700, 98));
 	if (ImGui::Checkbox("##Enable Feature", &reflState)) {
 		if (reflState) {
 		}
@@ -1027,9 +1115,9 @@ void GUI::buildLowerPanel() {
 		}
 	}
 
-	ImGui::SetCursorPos(ImVec2(412, 126));
+	ImGui::SetCursorPos(ImVec2(578, 126));
 	ImGui::Text("Dispersion:");
-	ImGui::SetCursorPos(ImVec2(536, 122));
+	ImGui::SetCursorPos(ImVec2(700, 122));
 	if (ImGui::Checkbox("##Enable Feature", &disperState)) {
 		if (disperState) {
 		}
@@ -1043,7 +1131,7 @@ void GUI::buildLowerPanel() {
 
 	ImGui::PopStyleColor(4);
 
-	////////// 4th column of properties
+	////////// 5th column of properties
 
 
 

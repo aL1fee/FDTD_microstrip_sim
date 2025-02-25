@@ -5,11 +5,12 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
 	window = w;
 	scene = s;
 	cellColor = glm::vec3(.79f, .79f, .83f);
-    cellOpaqueness = 1.0f;
+    cellOpaqueness = .25f;
 	simSpaceDimensions = glm::vec3(4.5f, 2.0f, 7.0f);
-	cellSize = .02f;
-    simulationDimension = 3;
+	cellSize = .08f;
+    simulationDimension = 1;
     cellShader = nullptr;
+    CWFrequency = 2.0f;
     needCellUpdate = false;
     renderingCellOn = false;
     cellVerts = new VertexVectorDS();
@@ -22,8 +23,8 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     initialEFieldCol = glm::vec3(0.0f, 0.0f, 1.0f);
     initialHFieldCol = glm::vec3(1.0f, 0.0f, 0.0f);
     init();
+    slowdownFactor = 3;
     drawing1D = true;
-
 }
 
 SimulationSpace::~SimulationSpace()
@@ -294,8 +295,7 @@ void SimulationSpace::initializeFields1D()
 void SimulationSpace::updateFields1D()
 {
     timeT++;
-    int slowDownFactor = 3;
-    if (timeT % slowDownFactor != 0)
+    if (timeT % slowdownFactor != 0)
     {
         return;
     }
@@ -307,7 +307,7 @@ void SimulationSpace::updateFields1D()
     float t0 = 40.0f;
     float spread = 3.0f;
     //hard source
-    float pulse = (float) exp(-.5 * (pow((t0 - float (timeT / slowDownFactor)) / spread, 2.0)));
+    float pulse = (float) exp(-.5 * (pow((t0 - float (timeT / slowdownFactor)) / spread, 2.0)));
     eX1D[numCells1D / 2].y = pulse;
 
 
@@ -317,5 +317,11 @@ void SimulationSpace::updateFields1D()
     {
         hY1D[i].z = hY1D[i].z + .5f * (eX1D[i].y - eX1D[i + 1].y);
     }
+
+    //// PEC
+    //eX1D[0] = glm::vec3(0.0f);
+    //// PMC
+    //hY1D[numCells1D - 1] = glm::vec3(0.0f);
+
 }
 

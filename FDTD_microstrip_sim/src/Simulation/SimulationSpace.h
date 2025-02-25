@@ -52,6 +52,8 @@ protected:
 
 	bool drawing1D;
 
+	float CWFrequency;
+
 	Shader* cellShader;
 	Shader* eFieldShader;
 	Shader* hFieldShader;
@@ -59,6 +61,7 @@ protected:
 	glm::vec3 initialEFieldCol;
 	glm::vec3 initialHFieldCol;
 
+	int slowdownFactor;
 
 	VertexVectorDS* cellVerts;
 	VAOVectorDS* cellVAOs;
@@ -124,5 +127,11 @@ public:
 	void setRunning1D(bool b) { running1D = b; }
 	void setDrawing1D(bool b) { drawing1D = b; }
 	bool isDrawing1D() { return drawing1D; }
+
+	float* getCWFrequency() { return &CWFrequency; }
+	void setCWFrequency(float f) { CWFrequency = f; }
+
+	int* getSlowdownFactor() { return &slowdownFactor; }
+	void setSlowdownFactor(int i) { slowdownFactor = i; }
 
 };
