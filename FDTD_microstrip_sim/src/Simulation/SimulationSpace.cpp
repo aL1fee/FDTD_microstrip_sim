@@ -6,6 +6,8 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
 	scene = s;
     eX1D = new std::vector<glm::vec3>();
     hY1D = new std::vector<glm::vec3>();
+    eX1DHelperLines1D = new std::vector<glm::vec3>();
+    hY1DHelperLines1D = new std::vector<glm::vec3>();
 	cellColor = glm::vec3(.79f, .79f, .83f);
     oldSimulationRunning = false;
     cellOpaqueness = .25f;
@@ -31,6 +33,7 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     init();
     slowdownFactor = 3;
     drawing1D = true;
+    helperFieldLines1DOn = false;
 }
 
 SimulationSpace::~SimulationSpace()
@@ -97,6 +100,7 @@ void SimulationSpace::loadFieldShaders()
 
 void SimulationSpace::reset1D()
 {
+    simStopped = false;
     running1D = false;
     fields1DVAOs->clear();
     initializeFields1D();
@@ -338,6 +342,10 @@ void SimulationSpace::render()
 // do another shader
 void SimulationSpace::drawFields()
 {
+    if (!oldSimulationRunning)
+    {
+        return;
+    }
     if (drawing1D)
     {
 
@@ -347,11 +355,27 @@ void SimulationSpace::drawFields()
         glBindVertexArray(fields1DVAOs->at(0));
         glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(static_cast<int>(simSpaceDimensions.x / cellSize)));
         glBindVertexArray(0);
+
+        if (helperFieldLines1DOn)
+        {
+            glBindVertexArray(fields1DVAOs->at(1));
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(2 * static_cast<int>(simSpaceDimensions.x / cellSize)));
+            glBindVertexArray(0);
+        }
+
         eFieldShader->unbind();
         hFieldShader->bind();
-        glBindVertexArray(fields1DVAOs->at(1));
+        glBindVertexArray(fields1DVAOs->at(2));
         glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(static_cast<int>(simSpaceDimensions.x / cellSize)));
         glBindVertexArray(0);
+
+        if (helperFieldLines1DOn)
+        {
+            glBindVertexArray(fields1DVAOs->at(3));
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(2 * static_cast<int>(simSpaceDimensions.x / cellSize)));
+            glBindVertexArray(0);
+        }
+
         hFieldShader->unbind();
 
     }
@@ -376,6 +400,18 @@ void SimulationSpace::buildFields1DVAOs()
     fields1DVAOs->addVBO(VBO);
     fields1DVAOs->push(VAO);
 
+    unsigned int VAOHelperLines1D;
+    glGenVertexArrays(1, &VAOHelperLines1D);
+    glBindVertexArray(VAOHelperLines1D);
+    unsigned int VBOHelperLines1D;
+    glGenBuffers(1, &VBOHelperLines1D);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOHelperLines1D);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * eX1DHelperLines1D->size(), eX1DHelperLines1D->data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    fields1DVAOs->addVBO(VBOHelperLines1D);
+    fields1DVAOs->push(VAOHelperLines1D);
+
 
     unsigned int hVAO;
     glGenVertexArrays(1, &hVAO);
@@ -389,6 +425,18 @@ void SimulationSpace::buildFields1DVAOs()
     fields1DVAOs->addVBO(hVBO);
     fields1DVAOs->push(hVAO);
 
+    unsigned int hVAOHelperLines1D;
+    glGenVertexArrays(1, &hVAOHelperLines1D);
+    glBindVertexArray(hVAOHelperLines1D);
+    unsigned int hVBOHelperLines1D;
+    glGenBuffers(1, &hVBOHelperLines1D);
+    glBindBuffer(GL_ARRAY_BUFFER, hVBOHelperLines1D);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * hY1DHelperLines1D->size(), hY1DHelperLines1D->data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    fields1DVAOs->addVBO(hVBOHelperLines1D);
+    fields1DVAOs->push(hVAOHelperLines1D);
+
 
 }
 
@@ -398,11 +446,17 @@ void SimulationSpace::initializeFields1D()
     //std::cout << static_cast<int>(simSpaceDimensions.x / cellSize) << std::endl;
     eX1D->clear();
     hY1D->clear();
+    eX1DHelperLines1D->clear();
+    hY1DHelperLines1D->clear();
 
     for (int i = 0; i < static_cast<int>(simSpaceDimensions.x / cellSize); i++)
     {
         eX1D->push_back(glm::vec3(cellSize * i, 0.0f, 0.0f));
         hY1D->push_back(glm::vec3(cellSize * i, 0.0f, 0.0f));
+        eX1DHelperLines1D->push_back(glm::vec3(cellSize * i, 0.0f, 0.0f));
+        eX1DHelperLines1D->push_back(glm::vec3(cellSize * i, 0.0f, 0.0f));
+        hY1DHelperLines1D->push_back(glm::vec3(cellSize * i, 0.0f, 0.0f));
+        hY1DHelperLines1D->push_back(glm::vec3(cellSize * i, 0.0f, 0.0f));
        /* eX1D->at(i) = glm::vec3(cellSize * i, 0.0f, 0.0f);
         hY1D->at(i) = glm::vec3(cellSize * i, 0.0f, 0.0f);*/
     }
@@ -421,23 +475,28 @@ void SimulationSpace::updateFields1D()
         return;
     }
 
-
     for (int i = 1; i < static_cast<int>(simSpaceDimensions.x / cellSize); i++)
     {
         eX1D->at(i).y = eX1D->at(i).y + .5f * (hY1D->at(i - 1).z - hY1D->at(i).z);
+        eX1DHelperLines1D->at(i * 2).y = eX1D->at(i).y;
     }
     float t0 = 40.0f;
     float spread = 3.0f;
     //hard source
     float pulse = (float) exp(-.5 * (pow((t0 - float (timeT / slowdownFactor)) / spread, 2.0)));
-    eX1D->at(static_cast<int>(simSpaceDimensions.x / cellSize) / 2).y = pulse;
-
+    
+    // condition of source duration
+    if (timeT < 500)
+    {
+        eX1D->at(static_cast<int>(simSpaceDimensions.x / cellSize) / 2).y = pulse;
+    }
 
     //eX1D[80].y = pulse;
     //eX1D[130].y = pulse;
     for (int i = 0; i < static_cast<int>(simSpaceDimensions.x / cellSize) - 1; i++)
     {
         hY1D->at(i).z = hY1D->at(i).z + .5f * (eX1D->at(i).y - eX1D->at(i + 1).y);
+        hY1DHelperLines1D->at(i * 2).z = hY1D->at(i).z;
     }
 
     //// PEC

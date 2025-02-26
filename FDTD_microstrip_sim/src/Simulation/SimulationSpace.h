@@ -38,6 +38,12 @@ protected:
 	int numCells1D;
 	std::vector<glm::vec3>* eX1D;
 	std::vector<glm::vec3>* hY1D;
+
+	std::vector<glm::vec3>* eX1DHelperLines1D;
+	std::vector<glm::vec3>* hY1DHelperLines1D;
+
+	bool helperFieldLines1DOn;
+
 	float cellSize1D;
 
 	int timeT; //arbitrary time
@@ -117,8 +123,9 @@ public:
 		initializeFields1D();
 	}
 
-	void setDimensions(glm::vec3 v) 
-	{	simSpaceDimensions = v; 
+	void setDimensions(glm::vec3 v)
+	{
+		simSpaceDimensions = v;
 		//initilizeFields();
 		//updateFieldArraySizes();
 	}
@@ -165,5 +172,8 @@ public:
 
 	bool isSimStopped() { return simStopped; }
 	void setSimStopped(bool b) { simStopped = b; }
+
+	bool isHelperFieldLines1DOn() { return helperFieldLines1DOn; }
+	void setHelperFieldLines1D(bool b) { helperFieldLines1DOn = b; }
 
 };

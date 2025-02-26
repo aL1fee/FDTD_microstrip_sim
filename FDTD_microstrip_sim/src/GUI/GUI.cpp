@@ -432,6 +432,7 @@ void GUI::buildMenuLowerPanel()
 
 		if (ImGui::BeginMenu("Settings"))
 		{
+			ImGui::BeginDisabled(oldSimulationRunning);
 			if (ImGui::BeginMenu("Simulation dimensions"))
 			{
 				glm::vec3* currDims = _simulation_space->getDimensions();
@@ -446,11 +447,13 @@ void GUI::buildMenuLowerPanel()
 				}
 				ImGui::EndMenu();
 			}
+			ImGui::EndDisabled();
 			if (ImGui::MenuItem("Cell Toggle ON/OFF"))
 			{
 				_simulation_space->setRenderingCell(!_simulation_space->
 					getRenderingCellOn());
 			}
+			ImGui::BeginDisabled(oldSimulationRunning);
 			if (ImGui::BeginMenu("Cell size"))
 			{
 				float* cellSize = _simulation_space->getCellSize();
@@ -460,6 +463,7 @@ void GUI::buildMenuLowerPanel()
 				}
 				ImGui::EndMenu();
 			}
+			ImGui::EndDisabled();
 			if (ImGui::BeginMenu("Cell color"))
 			{
 				glm::vec3* currColor = _simulation_space->getCellColor();
@@ -1126,6 +1130,28 @@ void GUI::buildLowerPanel() {
 			_simulation_space->setRenderingCell(false);
 		}
 	}
+
+	if (currentDim == 1)
+	{
+		bool helperFieldLines1DOn = _simulation_space->isHelperFieldLines1DOn();
+		ImGui::SetCursorPos(ImVec2(424, 54));
+		ImGui::Text("Field helper lines:");
+		ImGui::SetCursorPos(ImVec2(542, 50));
+		if (ImGui::Checkbox("##helperFieldLines1D", &helperFieldLines1DOn)) {
+			if (helperFieldLines1DOn) {
+				_simulation_space->setHelperFieldLines1D(true);
+			}
+			else {
+				_simulation_space->setHelperFieldLines1D(false);
+			}
+		}
+	}
+
+
+
+
+
+
 
 
 
