@@ -322,6 +322,27 @@ void MainScene::addRibbon(std::string& s, glm::vec3 o, float l, float w, float h
 
 }
 
+std::vector<PowerSource_PO*>* MainScene::getPowerSources()
+{
+	std::vector<PowerSource_PO*>* powerSources =
+		new std::vector<PowerSource_PO*>();
+	for (auto it = physicalObjectBuffer->begin();
+		it != physicalObjectBuffer->end();) {
+		
+		PowerSource_PO* obj = dynamic_cast<PowerSource_PO*>(it->second);
+
+		if (obj != nullptr)
+		{
+			if (obj->getShaderName() == "Power source")
+			{
+				powerSources->push_back(obj);
+			}
+		}
+		++it;
+	}
+	return powerSources;
+}
+
 void MainScene::eraseShaderMapOneInstance(std::string name)
 {
 	std::cout << "objs served: " << shaderMap->at(name)->getNumObjectsServed() << std::endl;

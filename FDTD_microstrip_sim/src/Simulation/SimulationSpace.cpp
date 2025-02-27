@@ -1,5 +1,7 @@
 #include "SimulationSpace.h"
 
+extern MainScene* _scene_main;
+
 SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
 {
 	window = w;
@@ -10,7 +12,7 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     hY1DHelperLines1D = new std::vector<glm::vec3>();
 	cellColor = glm::vec3(.79f, .79f, .83f);
     oldSimulationRunning = false;
-    cellOpaqueness = .25f;
+    cellOpaqueness = .35f;
 	simSpaceDimensions = glm::vec3(4.5f, 2.0f, 7.0f);
 	cellSize = .02f;
     simulationDimension = 1;
@@ -33,6 +35,7 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     init();
     slowdownFactor = 3;
     drawing1D = true;
+    powerSources = new std::vector<PowerSource_PO*>();
     helperFieldLines1DOn = false;
 }
 
@@ -281,11 +284,13 @@ void SimulationSpace::drawCells()
         cellShader->bind();
         if (simulationDimension == 1)
         {
+            //glDepthMask(GL_TRUE);
             for (int i = 0; i < 2; i++) {
                 glBindVertexArray(cellVAOs1D->at(i));
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(cellVerts1D->at(i)->size()));
                 glBindVertexArray(0);
             }
+            //glDepthMask(GL_FALSE);
             glBindVertexArray(cellVAOs1D->at(2));
             glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(cellVerts1D->at(2)->size()));
             glBindVertexArray(0);
@@ -442,6 +447,9 @@ void SimulationSpace::buildFields1DVAOs()
 
 void SimulationSpace::initializeFields1D()
 {
+    delete powerSources;
+    powerSources = _scene_main->getPowerSources();
+
 
     //std::cout << static_cast<int>(simSpaceDimensions.x / cellSize) << std::endl;
     eX1D->clear();
@@ -482,14 +490,61 @@ void SimulationSpace::updateFields1D()
     }
     float t0 = 40.0f;
     float spread = 3.0f;
-    //hard source
     float pulse = (float) exp(-.5 * (pow((t0 - float (timeT / slowdownFactor)) / spread, 2.0)));
-    
-    // condition of source duration
-    if (timeT < 500)
+    pulse = sin(2 * 3.141592f * 1000000000 * timeT * .00000000001f);
+
+    int psPosIndex = 0;
+
+    for (PowerSource_PO* ps : *powerSources)
     {
-        eX1D->at(static_cast<int>(simSpaceDimensions.x / cellSize) / 2).y = pulse;
+        for (int i = 1; i < static_cast<int>(simSpaceDimensions.x / cellSize); i++)
+        {
+            if (ps->intersectionCheck(eX1D->at(i)))
+            {
+                if (*ps->getRotationAngle() > 90.0f &&
+                    *ps->getRotationAngle() < 270.0f)
+                {
+                    float psPos = ps->getOrigin()->x;
+                    psPosIndex = static_cast<int>(psPos / cellSize);
+
+                    if (psPosIndex < static_cast<int>(simSpaceDimensions.x / cellSize))
+                    {
+                        pulse = sin(2 * (float) M_PI * *ps->getFrequency() * GHZ_TO_HZ *timeT * .00000000001f);
+                        eX1D->at(psPosIndex).y += pulse;
+                        break;
+                    }
+
+
+                }
+                else {
+                    float psPos = *ps->getLength() + ps->getOrigin()->x;
+                    psPosIndex = static_cast<int>(psPos / cellSize);
+                    if (psPosIndex < static_cast<int>(simSpaceDimensions.x / cellSize))
+                    {
+                        eX1D->at(psPosIndex).y += pulse;
+                        break;
+                    }
+
+
+                    //pulse = sin(2 * (float) M_PI * *ps->getFrequency() * GHZ_TO_HZ * timeT * .0000000001f);
+                    //eX1D->at(i).y += pulse;
+
+                    //float epsilon_eff = 2.2; 
+                    //float waveSpeed = SPEED_OF_LIGHT / sqrt(epsilon_eff);
+
+                    //float k = 2 * M_PI * *ps->getFrequency() * GHZ_TO_HZ / waveSpeed; // Wave number
+                    // pulse = sin(2 * (float)M_PI * .5f * GHZ_TO_HZ * timeT * 1e-11f);                        pulse = sin(2 * (float)M_PI * *ps->getFrequency() * GHZ_TO_HZ * timeT * 1e-11f - k * float(i) * cellSize);
+                    //pulse = sin(2 * 3.141592f * 100000000 * timeT * .00000000001f);
+
+                    //eX1D->at(i).y += pulse;
+                    //break;
+
+                }
+            }
+        }
     }
+
+
 
     //eX1D[80].y = pulse;
     //eX1D[130].y = pulse;
@@ -498,6 +553,10 @@ void SimulationSpace::updateFields1D()
         hY1D->at(i).z = hY1D->at(i).z + .5f * (eX1D->at(i).y - eX1D->at(i + 1).y);
         hY1DHelperLines1D->at(i * 2).z = hY1D->at(i).z;
     }
+
+    //hY1D->at(psPosIndex).z += pulse;
+
+    //hY1D->at(100).z -= pulse;
 
     //// PEC
     //eX1D[0] = glm::vec3(0.0f);

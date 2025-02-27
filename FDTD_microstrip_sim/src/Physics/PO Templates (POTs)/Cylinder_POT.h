@@ -26,6 +26,8 @@ protected:
 
 	void rebuild() override;
 
+	bool powerSourceOutDesignator;
+
 
 public:
 	Cylinder_POT(glm::vec3 o, glm::vec3 dir, float r, float l,
@@ -43,6 +45,7 @@ public:
 		height = radius;
 		initial_width = radius;
 		initial_height = radius;
+		powerSourceOutDesignator = false;
 	}
 
 	void build() override;

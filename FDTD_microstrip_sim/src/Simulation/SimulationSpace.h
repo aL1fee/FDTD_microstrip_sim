@@ -67,6 +67,8 @@ protected:
 	glm::vec3 initialEFieldCol;
 	glm::vec3 initialHFieldCol;
 
+	std::vector<PowerSource_PO*>* powerSources;
+
 	int slowdownFactor;
 
 	VertexVectorDS* cellVerts1D;

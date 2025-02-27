@@ -67,6 +67,31 @@ void Cylinder_POT::buildEdges()
             addColorVertex(glm::vec3(.1f));
         }
     }
+    // powerSourceOutDesignator
+    vertices->allocateNewArray();
+    for (float i = 0.0f; i < 360.0f + CYLINDER_DRAWING_ANGLE_INTERVAL;
+        i += CYLINDER_DRAWING_ANGLE_INTERVAL)
+    {
+        float z = -cos(glm::radians(i)) * radius * .1f;
+        float y = sin(glm::radians(i)) * radius * .1f;
+        vertices->pushToExistingArray(glm::vec3(length,
+            y, z));
+        addColorVertex(glm::vec3(.1f));
+    }
+    // arrow tail
+    vertices->allocateNewArray();
+    vertices->pushToExistingArray(glm::vec3(0.0f,
+        -radius, 0.0f));
+    addColorVertex(glm::vec3(.1f));
+    vertices->pushToExistingArray(glm::vec3(0.0f,
+        radius, 0.0f));
+    addColorVertex(glm::vec3(.1f));
+    vertices->pushToExistingArray(glm::vec3(0.0f,
+        0.0, -radius));
+    addColorVertex(glm::vec3(.1f));
+    vertices->pushToExistingArray(glm::vec3(0.0f,
+        0.0, radius));
+    addColorVertex(glm::vec3(.1f));
 }
 
 void Cylinder_POT::build()
@@ -121,6 +146,15 @@ void Cylinder_POT::draw()
         for (int i = 3; i < 5; i++) {
             glBindVertexArray(VAOs->at(i));
             glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(vertices->at(i)->size() / 2));
+            glBindVertexArray(0);
+        }
+        if (powerSourceOutDesignator)
+        {
+            glBindVertexArray(VAOs->at(5));
+            glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(vertices->at(5)->size() / 2));
+            glBindVertexArray(0);
+            glBindVertexArray(VAOs->at(6));
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(vertices->at(6)->size() / 2));
             glBindVertexArray(0);
         }
     }

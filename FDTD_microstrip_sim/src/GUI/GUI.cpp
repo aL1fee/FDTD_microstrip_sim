@@ -650,6 +650,7 @@ void GUI::buildLeftPanel()
 				for (auto it = properties->begin(); it != properties->end(); ++it) {
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
+					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
 					ImGui::Text("%s", it->first.c_str());
 					ImGui::TableSetColumnIndex(1);
 					ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
@@ -933,10 +934,12 @@ void GUI::buildLowerPanel() {
 			}
 			break;
 		}
-		if (*cellSize <= 0.0f)
+		if (*cellSize <= 0.01f)
 		{
 			*cellSize = .01f;
 		}
+
+		std::cout << "Cell: " << *_simulation_space->getCellSize() << std::endl;
 		_simulation_space->setCellUpdate(true);
 	}
 	ImGui::EndDisabled();
@@ -1089,12 +1092,57 @@ void GUI::buildLowerPanel() {
 	//ImGui::PopStyleColor();
 	////-
 
+	float wavelength = (float) SPEED_OF_LIGHT / (*freq * GHZ_TO_HZ) * 1000;
+
 	ImGui::SetCursorPos(ImVec2(190, 54));
+	ImGui::Text("Wavelength (mm):");
+
+	ImGui::SetCursorPos(ImVec2(310, 50));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(100);
+
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+
+	ImGui::SliderFloat("##wavelength slider", &wavelength, 5.0, 600.0);
+
+	ImGui::PopStyleColor(4);
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor();
+
+
+	float inputPower = -40;
+
+	ImGui::SetCursorPos(ImVec2(190, 78));
+	ImGui::Text("Source power (dBm):");
+
+	ImGui::SetCursorPos(ImVec2(310, 74));
+	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushItemWidth(100);
+
+	ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.85f, 0.85f, 0.85f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
+
+	ImGui::SliderFloat("##powerIn slider", &inputPower, -110.0f, 50.0f);
+
+	ImGui::PopStyleColor(4);
+	ImGui::PopItemWidth();
+	ImGui::PopStyleColor();
+
+	//
+
+
+
+	ImGui::SetCursorPos(ImVec2(190, 102));
 	ImGui::Text("Slowdown factor:");
 
 	int* slowdownFactor = _simulation_space->getSlowdownFactor();
 
-	ImGui::SetCursorPos(ImVec2(310, 50));
+	ImGui::SetCursorPos(ImVec2(310, 98));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushItemWidth(100);
 
