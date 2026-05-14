@@ -55,6 +55,12 @@ Plan:
 
 
 
+
+
+!deleting power sources individually or by all objects creates error in simSpace sourcesArray
+
+
+
 !Have to write a data structure for sim space arrays!!!
 
 

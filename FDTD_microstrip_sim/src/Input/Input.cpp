@@ -1,4 +1,5 @@
 #include "Input.h"
+#include <mutex>
 
 extern Camera* cam;
 extern MainScene* _scene_main;
@@ -43,6 +44,9 @@ extern glm::vec3 _modifyingVectorsDirection;
 
 extern bool _cameraVerticalRotationAboutPointOn;
 
+// use renderer's global mutex to synchronize camera access
+extern std::mutex mtx;
+
 bool _modyfingVectorsMovementStart = false;
 glm::vec3 _modyfingVectorsMovementStartOrigin = glm::vec3(0.0f);
 bool _modyfingVectorsScalingStart = false;
@@ -74,6 +78,7 @@ void Input::processInput()
 
     inputBuffer->processKeyStates();
 
+    // process keyboard movement (runs in render thread)
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cam->moveForward(_deltaTime);
     }
@@ -126,20 +131,16 @@ void Input::processInput()
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS
         && glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         _cameraVerticalRotationAboutPointOn = true;
+
     } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE)
         == GLFW_PRESS) 
     {
+        
         _cameraRotationAboutPointOn = true;
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_RELEASE) {
         _middleMouseReleaseExpected = false;
     }
-
-
-
-
-
-
 
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
@@ -414,6 +415,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     float offsetY = _lastY - posYF; // reversed since y-coordinates go from bottom to top
     _lastX = posXF;
     _lastY = posYF;
+
+    // synchronize camera access with render thread
+    std::lock_guard<std::mutex> lock(mtx);
+
     if (_cameraTranslationalMotionOn) {
         cam->processMouseTranslation(offsetX, offsetY, _deltaTime);
     } else if (_mouseRightButtonPressed) {
@@ -761,6 +766,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     }
 
     extern float _deltaTime;
+    // synchronize camera access when scrolling
+    std::lock_guard<std::mutex> lock(mtx);
     cam->processMouseScroll(static_cast<float>(yoffset), _deltaTime);
 }
 

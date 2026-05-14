@@ -236,9 +236,6 @@ void Renderer::run() const
 	enableDepthTest();
 	enablePolygonOffset();
 
-
-
-
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -264,17 +261,9 @@ void Renderer::run() const
 			_resizing = false;
 			threadSwitch.store(true);
 		}
-		//
-		////if (!threadSwitch) {
-		////}
-		////threadSwitch = true;
-		////std::lock_guard<std::mutex> lock(mtx);
-		////glfwPollEvents();
-		////std::lock_guard<std::mutex> unlock(mtx);
 
 	}
 	renderThread.join();
-
 }
 
 void Renderer::centeredViewportResize() const {
@@ -330,27 +319,16 @@ void Renderer::render() const
 {
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
-	
-	//glfwWindowHint(GLFW_SAMPLES, 20);
 		
 	glfwMakeContextCurrent(window);
 	while (!glfwWindowShouldClose(window)) {
 		if (threadSwitch.load()) {
 			if (_resizing) {
-				//centeredViewportResize();
-				//_projMatrixChanged = true;
-				//std::cout << "currentWidth: " << _currentWindowWidth << std::endl;
-				//std::cout << "currentHeight: " << _currentWindowHeight << std::endl;
-				//glViewport(0, 0, _currentWindowWidth, _currentWindowHeight);
-
 			}
 			//testPerformanceStart();
 			updateDeltaTime();
 			updateFrameBackgroundColor();
 			clearDepthBuffer();
-
-			//glEnable(GL_MULTISAMPLE)
-
 
 			_scene_main->render();
 
@@ -376,6 +354,5 @@ void Renderer::render() const
 			threadSwitch.store(false);
 		}
 	}
-
 	glfwMakeContextCurrent(nullptr);
 }

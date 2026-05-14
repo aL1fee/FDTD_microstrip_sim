@@ -1215,7 +1215,7 @@ void GUI::buildLowerPanel() {
 
 	static bool permitState = true;
 	bool permeabState = true;
-	bool bcondsState = true;
+	bool bcondsState = _simulation_space->getBoundaryCondition1DTest();
 	bool reflState = true;
 	bool disperState = true;
 
@@ -1244,10 +1244,12 @@ void GUI::buildLowerPanel() {
 	ImGui::SetCursorPos(ImVec2(578, 78));
 	ImGui::Text("Boundary conditions:");
 	ImGui::SetCursorPos(ImVec2(700, 74));
-	if (ImGui::Checkbox("##Enable Feature", &bcondsState)) {
+	if (ImGui::Checkbox("##Bcond Feature", &bcondsState)) {
 		if (bcondsState) {
+			_simulation_space->setBoundaryCondition1DTest(true);
 		}
 		else {
+			_simulation_space->setBoundaryCondition1DTest(false);
 		}
 	}
 

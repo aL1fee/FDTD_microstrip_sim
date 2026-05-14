@@ -386,11 +386,13 @@ void MainScene::deleteAllObjects()
 			eraseShaderMapOneInstance(obj->getShaderName());
 			delete obj;
 			it = physicalObjectBuffer->erase(it); // Erase returns the next iterator
+		
 		}
 		else {
 			++it;
 		}
 	}
+	
 	wireObjectBuffer->clear();
 	//modifyingVectors = nullptr;
 	activeObject = nullptr;

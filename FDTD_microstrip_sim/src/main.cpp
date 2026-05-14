@@ -14,26 +14,26 @@ Renderer* renderer;
 
 static bool glfwInitialize() 
 {
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	if (!glfwInit()) {
 		return false;
 	}
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	return true;
 }
 
 static GLFWwindow* createWindow() 
 {
-	GLFWwindow* window;
-	window = glfwCreateWindow(INITIAL_GLFW_WINDOW_WIDTH, INITIAL_GLFW_WINDOW_HEIGHT, "FDTD Microstrip simulation", NULL, NULL);
-	glfwSetWindowPos(window, INITIAL_GLFW_WINDOW_POSITION_X, INITIAL_GLFW_WINDOW_POSITION_Y);
-	glfwMaximizeWindow(window);
+	GLFWwindow* window = glfwCreateWindow(INITIAL_GLFW_WINDOW_WIDTH, 
+		INITIAL_GLFW_WINDOW_HEIGHT, "FDTD Microstrip simulation", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		return nullptr;
 	}
+
+	glfwSetWindowPos(window, INITIAL_GLFW_WINDOW_POSITION_X, INITIAL_GLFW_WINDOW_POSITION_Y);
+	glfwMaximizeWindow(window);
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 	return window;
@@ -56,7 +56,12 @@ int main() {
 		return -1;
 	}
 	GLFWwindow* window = createWindow();
+	if (!window) {
+		return -1;
+	}
 	if (!loadGlad()) {
+		glfwDestroyWindow(window);
+		glfwTerminate();
 		return -1;
 	}
 
@@ -73,24 +78,15 @@ int main() {
 	extern float _aspectRatio;
 
 	_aspectRatio = (float) _initialWindowWidth / _initialWindowHeight;
-	//std::cout << "AR: " << _aspectRatio << std::endl;
-	//std::cout << "width: " << _initialWindowWidth << std::endl;
-	//std::cout << "height: " << _initialWindowHeight << std::endl;
-
-
-	//glViewport(0, 0, FULL_SCREEN_SIZE_X, FULL_SCREEN_SIZE_Y);
-	 
-	
-	//glView port(INITIAL_OPENGL_CONTEXT_POSITION_X, INITIAL_OPENGL_CONTEXT_POSITION_Y,
-	//	INITIAL_OPENGL_CONTEXT_SCREEN_WIDTH, INITIAL_OPENGL_CONTEXT_SCREEN_HEIGHT);
-
 
 	GUI* gui = new GUI(window);
 	renderer = new Renderer(window, gui);
-
 	renderer->run();
 
-
+	delete gui;
+	gui = nullptr;
+	delete renderer;
+	renderer = nullptr;
 
 
 	glfwDestroyWindow(window);

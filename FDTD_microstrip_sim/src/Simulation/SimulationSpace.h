@@ -102,6 +102,7 @@ protected:
 
 	bool simStopped;
 
+	bool boundaryCondition1DTest;
 
 public:
 	SimulationSpace(GLFWwindow* w, MainScene* s);
@@ -177,5 +178,11 @@ public:
 
 	bool isHelperFieldLines1DOn() { return helperFieldLines1DOn; }
 	void setHelperFieldLines1D(bool b) { helperFieldLines1DOn = b; }
+
+	void deletePowerSources();
+
+	bool getBoundaryCondition1DTest() { return boundaryCondition1DTest; }
+
+	void setBoundaryCondition1DTest(bool b) { boundaryCondition1DTest = b; }
 
 };
