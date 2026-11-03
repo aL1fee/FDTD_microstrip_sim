@@ -68,7 +68,7 @@ public:
 
 	void processMouseRotation(float offsetX, float offsetY);
 	void processMouseTranslation(float offsetX, float offsetY, float dt);
-	void processMouseScroll(float offsetY, float dt);
+	void processMouseScroll(float offsetY, float dt, float scrollSpeed);
 	void processMouseRotationAboutPoint(float offsetX,
 		float offsetY, float dt, glm::vec3 point,
 		Direction dir);

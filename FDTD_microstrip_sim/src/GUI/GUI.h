@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+#include "../Simulation/CavityController.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -35,6 +37,19 @@ private:
 	float propertyWindowMinimized;
 
 	void buildMainMenuPanel();
+	void buildTheoryWindow();
+	void buildCavityWindow();
+
+	int cavityMaterialMode = 0;
+	float cavityPermittivity = 4.0f;
+	CavityController cavity;
+	bool cavityOpen = false;
+	int cavitySlice = 8;
+	double cavityLastFrame = 0;
+
+	bool theoryOpen = false;
+	int theoryTopic = -1;
+	std::string theoryText;
 	void buildMenuUpperPanel();
 	void buildMenuLowerPanel();
 	void buildLeftPanel();

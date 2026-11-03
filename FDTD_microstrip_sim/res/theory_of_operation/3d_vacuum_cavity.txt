@@ -1,0 +1,49 @@
+3D vacuum cavity validation
+
+* Cavity - A closed conducting box that supports standing electromagnetic waves.
+* Resonant mode - A spatial field pattern that oscillates at a characteristic frequency.
+* Numerical dispersion - A frequency or propagation-speed shift caused by discretizing space and time.
+* Grid convergence - Checking that a measured result approaches the analytical result as the grid is refined.
+
+Open the example
+
+Select 3D, then Execute > Open 3D vacuum cavity. The example has its own Run, Stop, Step Once, and Reset controls. It uses a fixed 12 x 10 x 8 mm vacuum box with perfectly conducting walls and 0.5 mm cubic cells. It advances at 80 steps per screen second. The displayed physical time advances by dt = 0.5 * dx / c0 per step, about 0.834 ps here.
+
+The preset initializes a standing electric field along Z, with zero magnetic field. It is a controlled validation case for the solver. The editable scene geometry does not define this box.
+
+Expected frequency
+
+The initialized pattern is proportional to sin(pi*x/Lx) * sin(pi*y/Ly). It has one half-wave along X, one along Y, and no variation along Z. Its ideal vacuum resonance is
+
+    f = (c0 / 2) * sqrt(1/Lx^2 + 1/Ly^2)
+    c0 = 299792458 m/s
+    Lx = 0.012 m
+    Ly = 0.010 m
+    f = 19.512116 GHz
+
+This is the frequency of the selected pattern. Other cavity modes have other frequencies. The Z dimension does not enter this particular mode's frequency because its field has no variation along Z.
+
+Measured frequency and error
+
+The viewer samples Ez at a fixed central grid location. It interpolates the times at which the probe crosses zero in the positive direction. After two such crossings, it estimates frequency as the number of complete periods divided by their total duration. More crossings improve the averaging.
+
+    1.0 mm cells    19.475719 GHz    0.1865% relative error
+    0.5 mm cells    19.503052 GHz    0.0465% relative error
+
+The analytical result describes continuous Maxwell equations. The solver uses finite differences in space and time. Numerical dispersion shifts the measured frequency slightly. Halving the cell size reduced this error by about four, consistent with second-order convergence for this smooth vacuum mode. The displayed frequency is measured from the evolving field.
+
+Reading the slice
+
+The colored XY slice shows normalized Ez. Red and blue represent opposite field directions, and white represents zero. Color intensity shows magnitude on a fixed scale from -1 to +1.
+
+The Z slider selects an Ez sample plane at z = (slice + 0.5) * dx. Every Z slice looks the same for this preset because the selected mode is uniform along Z. The field still evolves in time. A mode with variation along Z would give different slice patterns.
+
+Purpose and scope
+
+This example checks the vacuum Yee update, conducting-wall treatment, physical timestep, and probe measurement against an analytical solution. Tests also excite X- and Y-polarized patterns. Microstrip simulation additionally requires material mapping, excitation and measurement ports, and appropriate external boundaries.
+
+Implementation references
+
+    src/Simulation/Yee3D.h
+    tests/yee3d_cavity.cpp
+    src/GUI/GUI.cpp

@@ -124,7 +124,7 @@ void Camera::processMouseTranslation(float offsetX, float offsetY, float dt)
     //}
 }
 
-void Camera::processMouseScroll(float offsetY, float dt)
+void Camera::processMouseScroll(float offsetY, float dt, float scrollSpeed)
 {
     _viewMatrixChanged = true;
     //zoom -= (float) offsetY;
@@ -135,10 +135,10 @@ void Camera::processMouseScroll(float offsetY, float dt)
     //    zoom = 45.0f;
     //}
     if (offsetY > 0) {
-        cameraPos += cameraFront * cameraSpeed * dt * CAMERA_SCROLL_SENSITIVITY;
+        cameraPos += cameraFront * scrollSpeed * dt * CAMERA_SCROLL_SENSITIVITY;
     } 
     else if (offsetY < 0) {
-        cameraPos -= cameraFront * cameraSpeed * dt * CAMERA_SCROLL_SENSITIVITY;
+        cameraPos -= cameraFront * scrollSpeed * dt * CAMERA_SCROLL_SENSITIVITY;
     }
 }
 

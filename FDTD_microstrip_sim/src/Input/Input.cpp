@@ -1,3 +1,4 @@
+#include "../vendor/imgui/imgui.h"
 #include "Input.h"
 #include <mutex>
 
@@ -77,6 +78,9 @@ void Input::processInput()
     _cameraTranslationalMotionOn = false;
 
     inputBuffer->processKeyStates();
+    const ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+        return;
 
     // process keyboard movement (runs in render thread)
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -390,6 +394,11 @@ float previousAngle = 0.0f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        _firstMouseMovement = true;
+        return;
+    }
     extern float _deltaTime;
     extern bool _mouseRightButtonPressed;
     extern bool _cameraTranslationalMotionOn;
@@ -757,6 +766,9 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+    if (ImGui::GetIO().WantCaptureMouse)
+        return;
+
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
     glfwGetWindowSize(window, &screenWidth, &screenHeight);
@@ -768,13 +780,18 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     extern float _deltaTime;
     // synchronize camera access when scrolling
     std::lock_guard<std::mutex> lock(mtx);
-    cam->processMouseScroll(static_cast<float>(yoffset), _deltaTime);
+    const bool fastZoom = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
+        glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS ||
+        glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS;
+    cam->processMouseScroll(static_cast<float>(yoffset), _deltaTime,
+        fastZoom ? CAMERA_MAX_SPEED : CAMERA_SPEED);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     extern bool _mouseRightButtonPressed;
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    if (!ImGui::GetIO().WantCaptureMouse &&
+        glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         _mouseRightButtonPressed = true;
     } else {
         _mouseRightButtonPressed = false;

@@ -1,0 +1,12 @@
+Sources, probes, and display
+
+* Power source - Inject a waveform into an electric sample.
+* Field helper lines - Show field amplitude relative to the axis.
+
+A Power source injects into one electric sample when its geometry intersects the field. The source rotation selects the waveform. Angles strictly between 90 and 270 degrees use the sinusoid at the origin's X index. The other branch uses the origin plus length to place a Gaussian. Keep the cylinder near the X axis and the injection point in bounds.
+
+Edit CW frequency on the source object. The simulation panel's CW slider calculates a wavelength for display. Source power in dBm does not calibrate the normalized amplitude. Power detectors are editable scene geometry.
+
+The field curves use different transverse directions to separate E and H visually. The curves share the same displayed X sample positions. Field helper lines show the amplitude relative to the axis. Cell Toggle controls the grid overlay. Use Execute > Toggle ON/OFF to show or hide the field curves.
+
+If Run displays a flat field, check that the selected mode is 1D, field drawing is enabled, and a power source intersects the grid. A Gaussian can take several steps to become visible. Try Step Once and watch the counter to confirm that the solver is advancing.

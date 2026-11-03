@@ -90,7 +90,9 @@ public:
 	void addRibbon(std::string& s, glm::vec3 o, float l, float w, float h,
 		glm::vec3 col, float perm, float cond);
 
-	std::vector<PowerSource_PO*>* getPowerSources();
+	std::vector<PowerSource_PO*> getPowerSources();
+	std::vector<Substrate_PO*> getSubstrates() const;
+	std::vector<Cuboid_POT*> getConductors() const;
 
 
 

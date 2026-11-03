@@ -1,6 +1,6 @@
 #include "SimulationSpace.h"
 
-extern MainScene* _scene_main;
+#include <cmath>
 
 SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
 {
@@ -26,16 +26,14 @@ SimulationSpace::SimulationSpace(GLFWwindow* w, MainScene* s)
     cellVAOs1D = new VAOVectorDS();
     numCells1D = 200;
     cellSize1D = .02f;
-    timeT = 0;
+    acceptedSteps = 0;
     simStopped = false;
     running1D = false;
     fields1DVAOs = new VAOVectorDS();
     initialEFieldCol = glm::vec3(0.0f, 0.0f, 1.0f);
     initialHFieldCol = glm::vec3(1.0f, 0.0f, 0.0f);
     init();
-    slowdownFactor = 3;
     drawing1D = true;
-    powerSources = new std::vector<PowerSource_PO*>();
     helperFieldLines1DOn = false;
     boundaryCondition1DTest = false;
 }
@@ -108,7 +106,7 @@ void SimulationSpace::reset1D()
     running1D = false;
     fields1DVAOs->clear();
     initializeFields1D();
-    timeT = 0;
+    acceptedSteps = 0;
     drawing1D = true;
     oldSimulationRunning = false;
 }
@@ -118,6 +116,8 @@ void SimulationSpace::setRunning1D(bool b)
     if (!oldSimulationRunning || simStopped)
     {
         running1D = b;
+        lastPlaybackTime = glfwGetTime();
+        playbackSteps = 0.0;
         oldSimulationRunning = true;
         if (b && !simStopped)
         {
@@ -133,22 +133,18 @@ void SimulationSpace::setRunning1D(bool b)
     }
 }
 
-void SimulationSpace::deletePowerSources()
+bool SimulationSpace::hasValidGrid() const
 {
-    // MEMORY LEAK
-    powerSources->clear();
-}
+    // Bound the eager grid preview, whose line count grows quadratically.
+    constexpr float maxCellsPerAxis = 1000.0f;
+    if (!std::isfinite(cellSize) || cellSize <= 0.0f)
+        return false;
 
-//void SimulationSpace::updateFieldArraySizes()
-//{
-//    for (int i = 0; i < eX1D->size() - 
-//        static_cast<int>(simSpaceDimensions.x / cellSize); i++)
-//    {
-//        eX1D->push_back(glm::vec3(0.0f));
-//        hY1D->push_back(glm::vec3(0.0f));
-//    }
-//    buildFields1DVAOs();
-//}
+    const glm::vec3 cells = simSpaceDimensions / cellSize;
+    return cells.x >= 2.0f && cells.y > 0.0f && cells.z > 0.0f &&
+           cells.x <= maxCellsPerAxis && cells.y <= maxCellsPerAxis &&
+           cells.z <= maxCellsPerAxis;
+}
 
 void SimulationSpace::buildCellVertices1D()
 {
@@ -270,6 +266,9 @@ void SimulationSpace::generateCells3D()
 
 void SimulationSpace::generateCells()
 {
+    if (!hasValidGrid())
+        return;
+
     generateCells3D(); //shader created here
     generateCells1D();
 }
@@ -286,7 +285,7 @@ void SimulationSpace::drawCells()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_FALSE);  // Disable writing to depth buffer
-    if (renderingCellOn)
+    if (renderingCellOn && hasValidGrid())
     {
         cellShader->bind();
         if (simulationDimension == 1)
@@ -326,6 +325,22 @@ void SimulationSpace::deleteCells()
     //delete cellVAOs;
 }
 
+void SimulationSpace::stepOnce1D()
+{
+    if (simulationDimension != 1 || !hasValidGrid())
+        return;
+
+    if (!oldSimulationRunning)
+        initializeFields1D();
+
+    oldSimulationRunning = true;
+    running1D = false;
+    simStopped = true;
+    drawing1D = true;
+    updateFields1D();
+    buildFields1DVAOs();
+}
+
 void SimulationSpace::update()
 {
     if (needCellUpdate)
@@ -336,11 +351,21 @@ void SimulationSpace::update()
     }
     if (running1D)
     {
-        updateFields1D();
-        buildFields1DVAOs();
+        const double now = glfwGetTime();
+        // Bound catch-up work after a stalled frame or debugger pause.
+        // The distance between the first and last E samples is (N - 1) cells.
+        const double crossingSteps = (solver.e().size() > 1)
+            ? (solver.e().size() - 1) / static_cast<double>(Yee1D::courant)
+            : 0.0;
+        playbackSteps += std::min(now - lastPlaybackTime, 0.25) * crossingSteps / crossingSeconds;
+        lastPlaybackTime = now;
+        const int due = static_cast<int>(playbackSteps);
+        playbackSteps -= due;
+        for (int step = 0; step < due; ++step)
+            updateFields1D();
+        if (due > 0)
+            buildFields1DVAOs();
     }
-
-
 }
 
 void SimulationSpace::render()
@@ -354,7 +379,7 @@ void SimulationSpace::render()
 // do another shader
 void SimulationSpace::drawFields()
 {
-    if (!oldSimulationRunning)
+    if (!oldSimulationRunning || !hasValidGrid() || eX1D->empty())
     {
         return;
     }
@@ -365,26 +390,26 @@ void SimulationSpace::drawFields()
         // and change the color through uniforms
         eFieldShader->bind();
         glBindVertexArray(fields1DVAOs->at(0));
-        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(static_cast<int>(simSpaceDimensions.x / cellSize)));
+        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(eX1D->size()));
         glBindVertexArray(0);
 
         if (helperFieldLines1DOn)
         {
             glBindVertexArray(fields1DVAOs->at(1));
-            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(2 * static_cast<int>(simSpaceDimensions.x / cellSize)));
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(2 * eX1D->size()));
             glBindVertexArray(0);
         }
 
         eFieldShader->unbind();
         hFieldShader->bind();
         glBindVertexArray(fields1DVAOs->at(2));
-        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(static_cast<int>(simSpaceDimensions.x / cellSize)));
+        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(eX1D->size()));
         glBindVertexArray(0);
 
         if (helperFieldLines1DOn)
         {
             glBindVertexArray(fields1DVAOs->at(3));
-            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(2 * static_cast<int>(simSpaceDimensions.x / cellSize)));
+            glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(2 * eX1D->size()));
             glBindVertexArray(0);
         }
 
@@ -454,14 +479,18 @@ void SimulationSpace::buildFields1DVAOs()
 
 void SimulationSpace::initializeFields1D()
 {
-    delete powerSources;
-    powerSources = _scene_main->getPowerSources();
-
     //std::cout << static_cast<int>(simSpaceDimensions.x / cellSize) << std::endl;
     eX1D->clear();
     hY1D->clear();
     eX1DHelperLines1D->clear();
     hY1DHelperLines1D->clear();
+    solver.resetFields(hasValidGrid() ? static_cast<size_t>(simSpaceDimensions.x / cellSize) : 0);
+
+    if (!hasValidGrid())
+    {
+        fields1DVAOs->clear();
+        return;
+    }
 
     for (int i = 0; i < static_cast<int>(simSpaceDimensions.x / cellSize); i++)
     {
@@ -478,64 +507,64 @@ void SimulationSpace::initializeFields1D()
     buildFields1DVAOs();
 }
 
-float ex_high_m2 = 0.0f, ex_high_m1 = 0.0f;
 void SimulationSpace::updateFields1D()
 {
-    timeT++;
-    if (timeT % slowdownFactor != 0)
-    {
+    if (!hasValidGrid() || eX1D->size() != static_cast<size_t>(simSpaceDimensions.x / cellSize))
         return;
-    }
-    for (int i = 1; i < static_cast<int>(simSpaceDimensions.x / cellSize); i++)
+
+    ++acceptedSteps;
+    solver.step([&](Yee1D& fields)
     {
-        eX1D->at(i).y = eX1D->at(i).y + .5f * (hY1D->at(i - 1).z - hY1D->at(i).z);
-        eX1DHelperLines1D->at(i * 2).y = eX1D->at(i).y;
-    }
-    float t0 = 40.0f;
-    float spread = 8.0f;
-    float pulse = (float)exp(-.5 * (pow((t0 - float(timeT / slowdownFactor)) / spread, 2.0)));
-    //pulse = .5 * sin(2 * 3.141592f * 300000000 * timeT * .00000000001f);
-    int psPosIndex = 0;
-    for (PowerSource_PO* ps : *powerSources)
-    {
-        for (int i = 1; i < static_cast<int>(simSpaceDimensions.x / cellSize); i++)
+        for (size_t i = 1; i < fields.e().size(); ++i)
+            eX1DHelperLines1D->at(i * 2).y = fields.e()[i];
+
+        // Keep the original Gaussian width and center at the reference grid spacing.
+        constexpr double referenceDt = Yee1D::timestep(0.02e-3);
+        constexpr double pulseCenter = 40.0 * referenceDt;
+        constexpr double pulseWidth = 8.0 * referenceDt;
+        const double time = getSimulatedTime();
+        const double offset = (time - pulseCenter) / pulseWidth;
+        float pulse = static_cast<float>(std::exp(-0.5 * offset * offset));
+        for (PowerSource_PO* ps : scene->getPowerSources())
         {
-            if (ps->intersectionCheck(eX1D->at(i)))
+            for (int i = 1; i < static_cast<int>(simSpaceDimensions.x / cellSize); i++)
             {
-                if (*ps->getRotationAngle() > 90.0f &&
-                    *ps->getRotationAngle() < 270.0f)
+                glm::vec3 sample = eX1D->at(i);
+                sample.y = fields.e()[i];
+                if (ps->intersectionCheck(sample))
                 {
-                    float psPos = ps->getOrigin()->x;
-                    psPosIndex = static_cast<int>(psPos / cellSize);
-                    if (psPosIndex < static_cast<int>(simSpaceDimensions.x / cellSize))
+                    if (*ps->getRotationAngle() > 90.0f &&
+                        *ps->getRotationAngle() < 270.0f)
                     {
-                        pulse = sin(2 * (float)M_PI * *ps->getFrequency() * GHZ_TO_HZ * timeT * .00000000001f);
-                        eX1D->at(psPosIndex).y += pulse;
-                        break;
-                    }
-                }
-                else {
-                    float psPos = *ps->getLength() + ps->getOrigin()->x;
-                    psPosIndex = static_cast<int>(psPos / cellSize);
-                    if (psPosIndex < static_cast<int>(simSpaceDimensions.x / cellSize))
-                    {
-                        eX1D->at(psPosIndex).y += pulse;
-                        if (boundaryCondition1DTest)
+                        float psPos = ps->getOrigin()->x;
+                        const float cell = psPos / cellSize;
+                        if (cell >= 0.0f && cell < static_cast<float>(eX1D->size()))
                         {
-                            eX1D->at(eX1D->size() - 1).y = ex_high_m2;
-                            ex_high_m2 = ex_high_m1;
-                            ex_high_m1 = eX1D->at(eX1D->size() - 2).y;
+                            pulse = static_cast<float>(std::sin(2.0 * M_PI * *ps->getFrequency() * GHZ_TO_HZ * time));
+                            fields.inject(static_cast<size_t>(cell), pulse);
+                            break;
                         }
-                        break; 
+                    }
+                    else {
+                        float psPos = *ps->getLength() + ps->getOrigin()->x;
+                        const float cell = psPos / cellSize;
+                        if (cell >= 0.0f && cell < static_cast<float>(eX1D->size()))
+                        {
+                            fields.inject(static_cast<size_t>(cell), pulse);
+                            if (boundaryCondition1DTest)
+                                fields.applyLegacyRightBoundary();
+                            break;
+                        }
                     }
                 }
             }
         }
-    }
-    for (int i = 0; i < static_cast<int>(simSpaceDimensions.x / cellSize) - 1; i++)
+    });
+
+    for (size_t i = 0; i < solver.e().size(); ++i)
     {
-        hY1D->at(i).z = hY1D->at(i).z + .5f * (eX1D->at(i).y - eX1D->at(i + 1).y);
-        hY1DHelperLines1D->at(i * 2).z = hY1D->at(i).z;
+        eX1D->at(i).y = solver.e()[i];
+        hY1D->at(i).z = solver.h()[i];
+        hY1DHelperLines1D->at(i * 2).z = solver.h()[i];
     }
 }
-

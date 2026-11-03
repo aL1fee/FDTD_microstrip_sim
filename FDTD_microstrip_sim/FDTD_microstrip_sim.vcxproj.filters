@@ -153,6 +153,12 @@
     <ClInclude Include="src\Macros and variables\Global variables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Simulation\CavityController.h" />
+    <ClInclude Include="src\Simulation\SceneCavitySetup.h" />
+    <ClInclude Include="src\Simulation\Yee3D.h" />
+    <ClInclude Include="src\Simulation\Yee1D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\Simulation\SimulationSpace.h">
       <Filter>Header Files</Filter>
     </ClInclude>

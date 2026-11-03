@@ -61,7 +61,7 @@ protected:
 public:
 	PhysicalObject();
 	PhysicalObject(glm::vec3 o, float l, float w, float h, glm::vec3 col, float perm, float cond, Shader* sh);
-	~PhysicalObject();
+	virtual ~PhysicalObject();
 
 	virtual void updatePropertyMap() {};
 	std::vector<std::pair<std::string, float*>>* getPropertyMap() { return propertyMap; }

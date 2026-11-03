@@ -332,7 +332,6 @@ void Renderer::render() const
 
 			_scene_main->render();
 
-			_simulation_space->update();
 			_simulation_space->render();
 
 			input->processInput();

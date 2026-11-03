@@ -1,0 +1,13 @@
+Simulation controls
+
+* Run - Start or resume solver updates.
+* Stop - Pause at the current step.
+* Reset - Reinitialize the fields and step counter.
+
+Choose 1D for field evolution. The dimension selector also exposes 2D and 3D display modes. The 3D lattice is a geometry preview. In 3D mode, Execute > Open 3D vacuum cavity opens a separate, fixed validation example with its own controls. See 3D cavity validation for its physics and limitations.
+
+Set cell spacing and domain dimensions in millimeters. The 1D sample count is the X extent divided by cell size and truncated to a whole number. A valid grid has at least two X samples and at most 1,000 cells per axis. Reset before changing the grid after a run.
+
+Run starts or resumes the solver. Stop preserves its field state. Step Once pauses and advances one update. Reset clears the step counter and initializes the fields. Execute > Toggle ON/OFF controls field visibility.
+
+Vacuum crossing (s) controls playback pacing. The displayed time in picoseconds is simulation time. See 1D vacuum timing and playback for the conversion and measured accuracy.

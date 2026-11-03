@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Yee1D.h"
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <iostream>
@@ -46,15 +48,17 @@ protected:
 
 	float cellSize1D;
 
-	int timeT; //arbitrary time
+	double lastPlaybackTime = 0.0;
+	double playbackSteps = 0.0;
+	int acceptedSteps = 0;
 	int timeS;
 	int timeMS;
 	int timeNS;
 
 	//do enums instead
 	bool running1D;
-	bool running2D;
-	bool running3D;
+	bool running2D = false;
+	bool running3D = false;
 
 	bool drawing1D;
 
@@ -67,9 +71,10 @@ protected:
 	glm::vec3 initialEFieldCol;
 	glm::vec3 initialHFieldCol;
 
-	std::vector<PowerSource_PO*>* powerSources;
+	Yee1D solver;
+	bool hasValidGrid() const;
 
-	int slowdownFactor;
+	float crossingSeconds = 2.0f;
 
 	VertexVectorDS* cellVerts1D;
 	VAOVectorDS* cellVAOs1D;
@@ -163,8 +168,10 @@ public:
 	float* getCWFrequency() { return &CWFrequency; }
 	void setCWFrequency(float f) { CWFrequency = f; }
 
-	int* getSlowdownFactor() { return &slowdownFactor; }
-	void setSlowdownFactor(int i) { slowdownFactor = i; }
+	float* getCrossingSeconds() { return &crossingSeconds; }
+	double getSimulatedTime() const { return acceptedSteps * Yee1D::timestep(cellSize * 1e-3); }
+	void stepOnce1D();
+	int getAcceptedSteps() const { return acceptedSteps; }
 
 	//void reinitializeFields() { initializeFields1D(); }
 
@@ -179,7 +186,6 @@ public:
 	bool isHelperFieldLines1DOn() { return helperFieldLines1DOn; }
 	void setHelperFieldLines1D(bool b) { helperFieldLines1DOn = b; }
 
-	void deletePowerSources();
 
 	bool getBoundaryCondition1DTest() { return boundaryCondition1DTest; }
 

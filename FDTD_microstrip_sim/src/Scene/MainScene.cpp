@@ -322,10 +322,9 @@ void MainScene::addRibbon(std::string& s, glm::vec3 o, float l, float w, float h
 
 }
 
-std::vector<PowerSource_PO*>* MainScene::getPowerSources()
+std::vector<PowerSource_PO*> MainScene::getPowerSources()
 {
-	std::vector<PowerSource_PO*>* powerSources =
-		new std::vector<PowerSource_PO*>();
+	std::vector<PowerSource_PO*> powerSources;
 	for (auto it = physicalObjectBuffer->begin();
 		it != physicalObjectBuffer->end();) {
 		
@@ -335,7 +334,7 @@ std::vector<PowerSource_PO*>* MainScene::getPowerSources()
 		{
 			if (obj->getShaderName() == "Power source")
 			{
-				powerSources->push_back(obj);
+				powerSources.push_back(obj);
 			}
 		}
 		++it;
@@ -604,3 +603,25 @@ void MainScene::terminateAllWires()
 	}
 }
 
+
+std::vector<Substrate_PO*> MainScene::getSubstrates() const
+{
+	std::vector<Substrate_PO*> substrates;
+	for (const auto& entry : *physicalObjectBuffer)
+		if (auto* substrate = dynamic_cast<Substrate_PO*>(entry.second))
+			substrates.push_back(substrate);
+	return substrates;
+}
+
+std::vector<Cuboid_POT*> MainScene::getConductors() const
+{
+    std::vector<Cuboid_POT*> result;
+    for (const auto& entry : *physicalObjectBuffer)
+    {
+        if (auto* trace = dynamic_cast<Trace_PO*>(entry.second))
+            result.push_back(trace);
+        else if (auto* carrier = dynamic_cast<Carrier_PO*>(entry.second))
+            result.push_back(carrier);
+    }
+    return result;
+}

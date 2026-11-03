@@ -1,0 +1,12 @@
+Scene editor
+
+* Property panel - Inspect and edit the selected object.
+* Clipping planes - Set the near and far limits of the camera view.
+
+The insertion menu offers carriers, substrates, traces, housings, tuning pad arrays, wires, ribbons, power sources, and power detectors. System presets insert example geometry. The object list and viewport let you select objects. Use the property panel to inspect and edit the selected object's dimensions, position, and other exposed parameters.
+
+Use R to rotate, T to translate, and Y to scale. The editing menus also expose these tools. Delete removes the selected object. Delete all objects clears editable geometry, while Delete all lines clears helper lines.
+
+Use W, A, S, and D to move the camera and the mouse wheel to zoom. The View menu exposes the near and far clipping planes. Wire tools offer image, XY, and ZY planes. Ribbon drawing uses the XZ plane.
+
+Scene geometry can depict a microstrip assembly. The current field solver models homogeneous vacuum along X. Material properties, conductor geometry, and detector sensitivity are scene data awaiting a solver that can use them. File and Edit menu entries such as Save and Undo are placeholders.

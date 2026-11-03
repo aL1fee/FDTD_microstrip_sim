@@ -1,0 +1,15 @@
+Yee fields and boundaries
+
+* Yee staggering - Offset the electric and magnetic samples in space and time.
+* Reflective boundary - An endpoint that returns part of the incident wave.
+
+The 1D solver stores electric and magnetic samples in separate arrays. The magnetic sample H[i] represents the half cell between E[i] and E[i+1]. Each step updates E from neighboring H samples, applies sources and the selected experimental boundary, then updates H from neighboring E samples. The two fields are staggered by half a timestep.
+
+With S = 0.5, the normalized update is:
+
+    E[i] += S * (H[i-1] - H[i])
+    H[i] += S * (E[i] - E[i+1])
+
+The ordinary endpoint treatment reflects waves. The experimental boundary option applies a delayed neighboring E sample at the right edge when the Gaussian branch injects. Its behavior depends on the excitation and boundary history. It is an experimental treatment for the 1D demo.
+
+Field amplitudes are normalized. The simulator currently demonstrates propagation and reflection in vacuum.

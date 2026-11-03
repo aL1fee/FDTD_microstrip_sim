@@ -1,4 +1,9 @@
 #include "GUI.h"
+#include "../Simulation/SceneCavitySetup.h"
+
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 
 extern MainScene* _scene_main;
 extern SimulationSpace* _simulation_space;
@@ -81,37 +86,10 @@ void GUI::buildMainMenuPanel()
 		if (ImGui::BeginMenu("Help"))
 		{
 			if (ImGui::MenuItem("Commands")) { /* Undo action */ }
-			if (ImGui::MenuItem("Theory of operation")) 
+			if (ImGui::MenuItem("Theory of operation"))
 			{
-				//std::cout << 14 << std::endl;
-				//showNewWindow = true; // Set the flag to show the new window
-
-
-				//// This is the new window that will pop up when the flag is true
-				//if (showNewWindow)
-				//{
-				//	ImGui::SetNextWindowPos(ImVec2(200, 200), ImGuiCond_Once);
-				//	ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once);
-				//	ImGui::SetNextWindowFocus();
-				//	ImGui::Begin("New Window", &showNewWindow, ImGuiWindowFlags_AlwaysAutoResize);
-
-				//	ImGui::Text("This is a new window!");
-
-				//	// Close button inside the new window
-				//	if (ImGui::Button("Close"))
-				//	{
-				//		showNewWindow = false;  // Close the window when the button is pressed
-				//	}
-
-				//	ImGui::End();  // End the new window
-				//}
-				//ImGui::SetNextWindowPos(ImVec2(200, 200), ImGuiCond_Once); // Set initial position
-				//ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once); // Set initial size
-
-				//if (ImGui::Begin("My Pop-Out Window")) {
-				//	ImGui::Text("This is a floating window.");
-				//}
-				//ImGui::End();
+				theoryOpen = true;
+				ImGui::SetWindowFocus("Theory of Operation");
 			}
 			if (ImGui::MenuItem("About")) {}
 			ImGui::EndMenu();
@@ -496,6 +474,9 @@ void GUI::buildMenuLowerPanel()
 		if (ImGui::BeginMenu("Execute"))
 		{
 			int* option = _simulation_space->getSimulationDimension();
+
+		if (*option == 3 && ImGui::MenuItem("Open 3D vacuum cavity"))
+			cavityOpen = true;
 
 			if (ImGui::MenuItem("Toggle ON/OFF"))
 			{
@@ -1138,9 +1119,9 @@ void GUI::buildLowerPanel() {
 
 
 	ImGui::SetCursorPos(ImVec2(190, 102));
-	ImGui::Text("Slowdown factor:");
+	ImGui::Text("Vacuum crossing (s):");
 
-	int* slowdownFactor = _simulation_space->getSlowdownFactor();
+	float* crossingSeconds = _simulation_space->getCrossingSeconds();
 
 	ImGui::SetCursorPos(ImVec2(310, 98));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
@@ -1151,7 +1132,16 @@ void GUI::buildLowerPanel() {
 	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 
-	ImGui::SliderInt("##slowdown factor slider", slowdownFactor, 1, 20);
+	ImGui::SliderFloat("##vacuum crossing", crossingSeconds, 0.5f, 10.0f, "%.1f");
+
+	ImGui::BeginDisabled(currentDim != 1);
+	ImGui::SetCursorPos(ImVec2(190, 124));
+	if (ImGui::Button("Step Once"))
+		_simulation_space->stepOnce1D();
+	ImGui::EndDisabled();
+	ImGui::SameLine();
+	ImGui::Text("Step %d | %.2f ps", _simulation_space->getAcceptedSteps(),
+		_simulation_space->getSimulatedTime() * 1e12);
 
 	ImGui::PopStyleColor(4);
 
@@ -1367,6 +1357,182 @@ void GUI::buildRightPanels()
 
 
 
+void GUI::buildCavityWindow()
+{
+	if (!cavityOpen)
+		return;
+	const auto cavityCells = CavityController::cells();
+	const double cavitySpacing = CavityController::spacing();
+	auto reset = [&] {
+		resetSceneCavity(cavity, *_scene_main,
+			{static_cast<CavityController::Material>(cavityMaterialMode), cavityPermittivity});
+	};
+	if (!cavity.ready())
+		reset();
+	const double now = glfwGetTime();
+	cavity.update(now - cavityLastFrame);
+	cavityLastFrame = now;
+
+	ImGui::SetNextWindowSize(ImVec2(540, 470), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("3D vacuum cavity", &cavityOpen))
+	{
+		ImGui::TextWrapped("Solver validation example. A standing wave oscillates inside a closed metal box. "
+			"We compare its measured frequency with the calculated value to check the 3D solver.");
+		ImGui::TextWrapped("Red and blue show opposite electric-field directions. White is zero. "
+			"The initial mode is uniform along Z. Spatially varying materials can change its pattern.");
+		if (cavityMaterialMode < 2)
+			ImGui::Text("Analytical resonance %.3f GHz", cavity.analyticalFrequency() * 1e-9);
+		else
+			ImGui::TextWrapped("Scene substrates are sampled in mm inside the fixed box from (0,0,0). "
+				"Reset applies geometry edits. Traces and carriers become perfect conductors. Conductivity losses are excluded.");
+		ImGui::BeginDisabled(cavity.isRunning());
+		if (ImGui::Combo("Material", &cavityMaterialMode, "Vacuum\0Uniform dielectric\0Scene materials\0"))
+			reset();
+		if (cavityMaterialMode == 1 &&
+			ImGui::SliderFloat("Relative permittivity", &cavityPermittivity, 1.0f, 16.0f))
+			reset();
+		ImGui::EndDisabled();
+		if (!cavity.error().empty())
+			ImGui::TextWrapped("%s", cavity.error().c_str());
+		ImGui::TextUnformatted("12 x 10 x 8 mm | Conducting walls | 0.5 mm cells");
+        if (cavityMaterialMode == 2)
+            ImGui::Text("PEC electric samples: %zu (thin features may miss this grid)", cavity.conductorSamples());
+		ImGui::BeginDisabled(!cavity.error().empty());
+		if (ImGui::Button(cavity.isRunning() ? "Stop" : "Run"))
+		{
+			cavity.setRunning(!cavity.isRunning());
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Step Once"))
+		{
+			cavity.stepOnce();
+		}
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		if (ImGui::Button("Reset"))
+			reset();
+
+		ImGui::SliderInt("Z slice", &cavitySlice, 0, static_cast<int>(cavityCells[2]) - 1);
+		ImGui::Text("Step %d | %.2f ps | Z = %.2f mm", cavity.stepCount(),
+			cavity.time() * 1e12, (cavitySlice + 0.5) * cavitySpacing * 1e3);
+		if (cavity.measuredFrequency() > 0)
+			ImGui::Text("Probe crossing estimate %.3f GHz", cavity.measuredFrequency() * 1e-9);
+		else
+			ImGui::TextUnformatted("Probe resonance appears after two rising zero crossings.");
+		ImGui::TextUnformatted("XY slice of normalized Ez | Blue negative | White zero | Red positive");
+
+		const ImVec2 available = ImGui::GetContentRegionAvail();
+		const float pitch = std::min(available.x / (cavityCells[0] + 1),
+			available.y / (cavityCells[1] + 1));
+		if (pitch > 0)
+		{
+			const ImVec2 origin = ImGui::GetCursorScreenPos();
+			auto* draw = ImGui::GetWindowDrawList();
+			for (std::size_t y = 0; y <= cavityCells[1]; ++y)
+				for (std::size_t x = 0; x <= cavityCells[0]; ++x)
+				{
+					const float sample = cavity.sample(
+						{x, y, static_cast<std::size_t>(cavitySlice)});
+					const float value = std::max(-1.0f, std::min(sample, 1.0f));
+					const float fade = 1.0f - std::abs(value);
+					const ImU32 color = ImGui::GetColorU32(ImVec4(
+						value < 0 ? fade : 1.0f, fade, value > 0 ? fade : 1.0f, 1.0f));
+					const ImVec2 top(origin.x + pitch * x, origin.y + pitch * (cavityCells[1] - y));
+					draw->AddRectFilled(top, ImVec2(top.x + pitch, top.y + pitch), color);
+				}
+			ImGui::Dummy(ImVec2(pitch * (cavityCells[0] + 1), pitch * (cavityCells[1] + 1)));
+		}
+	}
+	ImGui::End();
+	if (!cavityOpen)
+		cavity.setRunning(false);
+}
+
+void GUI::buildTheoryWindow()
+{
+	if (!theoryOpen)
+		return;
+
+	struct Topic
+	{
+		const char* title;
+		const char* file;
+	};
+	static constexpr Topic topics[] = {
+		{"Start a 1D run", "getting_started.txt"},
+		{"Scene editor", "scene_editor.txt"},
+		{"Simulation controls", "simulation_controls.txt"},
+		{"Yee fields and boundaries", "yee_fields.txt"},
+		{"3D cavity validation", "3d_vacuum_cavity.txt"},
+		{"3D dielectric materials", "3d_dielectrics.txt"},
+		{"Sources, probes, and display", "sources_and_display.txt"},
+		{"1D vacuum timing and playback", "1d_vacuum_timing.txt"},
+	};
+
+	ImGui::SetNextWindowSize(ImVec2(820, 500), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Theory of Operation", &theoryOpen))
+	{
+		int selected = theoryTopic < 0 ? 0 : theoryTopic;
+		ImGui::BeginChild("Topics", ImVec2(220, 0), ImGuiChildFlags_Border);
+		ImGui::SeparatorText("Topics");
+		for (int i = 0; i < IM_ARRAYSIZE(topics); ++i)
+		{
+			if (ImGui::Selectable(topics[i].title, selected == i))
+				selected = i;
+		}
+		ImGui::EndChild();
+		ImGui::SameLine();
+
+		const bool changed = selected != theoryTopic;
+		if (changed)
+		{
+			theoryTopic = selected;
+			const std::string path = std::string("res/theory_of_operation/") + topics[selected].file;
+			std::ifstream file(path);
+			if (file)
+			{
+				std::ostringstream content;
+				content << file.rdbuf();
+				theoryText = content.str();
+			}
+			else
+			{
+				theoryText = "Could not open " + path +
+					". Launch the app from the directory containing res.";
+			}
+			ImGui::SetNextWindowScroll(ImVec2(0, 0));
+		}
+		ImGui::BeginChild("Article");
+		ImGui::PushTextWrapPos(0.0f);
+		for (std::size_t start = 0; start < theoryText.size();)
+		{
+			const std::size_t newline = theoryText.find('\n', start);
+			const std::size_t end = newline == std::string::npos ? theoryText.size() : newline;
+			const char* line = theoryText.data() + start;
+			if (end == start)
+				ImGui::Spacing();
+			else if (end - start >= 2 && line[0] == '*' && line[1] == ' ')
+			{
+				ImGui::Bullet();
+				ImGui::SameLine();
+				const ImVec2 pos = ImGui::GetCursorScreenPos();
+				const float width = ImGui::GetContentRegionAvail().x;
+				ImGui::TextUnformatted(line + 2, theoryText.data() + end);
+				// Add a second stroke using the same font to emphasize definitions.
+				ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize(),
+					ImVec2(pos.x + 0.6f, pos.y), ImGui::GetColorU32(ImGuiCol_Text),
+					line + 2, theoryText.data() + end, width);
+			}
+			else
+				ImGui::TextUnformatted(line, theoryText.data() + end);
+			start = end + 1;
+		}
+		ImGui::PopTextWrapPos();
+		ImGui::EndChild();
+	}
+	ImGui::End();
+}
+
 void GUI::init()
 {
 	ImGui::CreateContext();
@@ -1378,12 +1544,32 @@ void GUI::init()
 	//io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 
 	customFont = io.Fonts->AddFontFromFileTTF(__fontFile, 12.0f); // Adjust the size as needed
+	io.FontDefault = customFont;
 	io.Fonts->Build();
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
 	ImGui_ImplOpenGL3_Init();
 
 	ImGui::StyleColorsLight();
+
+	// Shared defaults for every window, including future tools and help panels.
+	auto& colors = ImGui::GetStyle().Colors;
+	colors[ImGuiCol_WindowBg] = ImVec4(1, 1, 1, 1);
+	colors[ImGuiCol_ChildBg] = ImVec4(0.976f, 0.976f, 0.976f, 1);
+	colors[ImGuiCol_PopupBg] = ImVec4(1, 1, 1, 1);
+	colors[ImGuiCol_TitleBg] = colors[ImGuiCol_TitleBgActive] =
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.93f, 0.93f, 0.93f, 1);
+	colors[ImGuiCol_FrameBg] = colors[ImGuiCol_FrameBgHovered] =
+		colors[ImGuiCol_FrameBgActive] = ImVec4(0.96f, 0.96f, 0.96f, 1);
+	colors[ImGuiCol_Button] = ImVec4(0.96f, 0.96f, 0.96f, 1);
+	colors[ImGuiCol_ButtonHovered] = colors[ImGuiCol_ButtonActive] =
+		ImVec4(0.93f, 0.93f, 0.93f, 1);
+	colors[ImGuiCol_Header] = ImVec4(0.91f, 0.91f, 0.91f, 1);
+	colors[ImGuiCol_HeaderHovered] = ImVec4(0.96f, 0.96f, 0.96f, 1);
+	colors[ImGuiCol_HeaderActive] = ImVec4(0.89f, 0.89f, 0.89f, 1);
+	colors[ImGuiCol_SliderGrab] = colors[ImGuiCol_SliderGrabActive] =
+		ImVec4(0.85f, 0.85f, 0.85f, 1);
+	colors[ImGuiCol_CheckMark] = ImVec4(0.55f, 0.55f, 0.55f, 1);
 }
 
 void GUI::render()
@@ -1412,6 +1598,8 @@ void GUI::newFrame()
 	buildLeftPanel();
 	buildLowerPanel();
 	buildRightPanels();
+	buildTheoryWindow();
+	buildCavityWindow();
 
 	ImGui::PopStyleColor();
 }
