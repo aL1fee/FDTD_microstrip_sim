@@ -11,6 +11,8 @@ private:
 	float power;
 	float frequency;
 	float wavelength;
+    float driveAmplitude3D = 1.0f;
+    int polarization3D = 1; // global Y, across a typical trace/ground gap
 
 public:
 	PowerSource_PO(glm::vec3 o, glm::vec3 dir, float p, float r, float l,
@@ -26,7 +28,9 @@ public:
 
 	void updatePropertyMap() override;
 
-	float* getFrequency() { return &frequency; }
+	float* getDriveAmplitude3D() { return &driveAmplitude3D; }
+    int* getPolarization3D() { return &polarization3D; }
+    float* getFrequency() { return &frequency; }
 	float* getPower() { return &power; }
 	float* getWavelength() { return &wavelength; }
 

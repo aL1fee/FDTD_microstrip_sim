@@ -13,7 +13,9 @@ void PowerSource_PO::updatePropertyMap()
 
 
 
-	propertyMap->push_back(std::make_pair("Power Level (dBm)", &power));
+	propertyMap->push_back(std::make_pair("Legacy power (dBm)", &power));
+	propertyMap->push_back(std::make_pair("3D drive amplitude (normalized)", &driveAmplitude3D));
+    propertyMapInt->push_back(std::make_pair("3D polarization", &polarization3D));
 	propertyMap->push_back(std::make_pair("CW Freq. (GHz)", &frequency));
 	propertyMap->push_back(std::make_pair("Wavelength (mm)", &wavelength));
 

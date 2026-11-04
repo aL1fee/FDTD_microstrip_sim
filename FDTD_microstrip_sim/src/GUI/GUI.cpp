@@ -1,9 +1,25 @@
 #include "GUI.h"
+#include "LengthUnits.h"
+#include "FieldSliceView.h"
 #include "../Simulation/SceneCavitySetup.h"
 
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+
+namespace
+{
+    LengthUnits::Unit lengthUnit = LengthUnits::Unit::Micrometer;
+    bool inputSceneLength(const char* label, float* sceneValue, const char* format = "%.2f")
+    {
+        float displayed = static_cast<float>(LengthUnits::fromScene(*sceneValue, lengthUnit));
+        if (!ImGui::InputFloat(label, &displayed, 0, 0, format, ImGuiInputTextFlags_EnterReturnsTrue))
+            return false;
+        if (!std::isfinite(displayed)) return false;
+        *sceneValue = static_cast<float>(LengthUnits::toScene(displayed, lengthUnit));
+        return true;
+    }
+}
 
 extern MainScene* _scene_main;
 extern SimulationSpace* _simulation_space;
@@ -80,7 +96,13 @@ void GUI::buildMainMenuPanel()
 		}
 		if (ImGui::BeginMenu("Tools"))
 		{
-			if (ImGui::MenuItem("Propetry menu")) { /* Undo action */ }
+			if (ImGui::BeginMenu("Length units"))
+            {
+                for (auto unit : {LengthUnits::Unit::Mil, LengthUnits::Unit::Millimeter, LengthUnits::Unit::Micrometer})
+                    if (ImGui::MenuItem(LengthUnits::symbol(unit), nullptr, lengthUnit == unit))
+                        lengthUnit = unit;
+                ImGui::EndMenu();
+            }
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Help"))
@@ -415,12 +437,14 @@ void GUI::buildMenuLowerPanel()
 			{
 				glm::vec3* currDims = _simulation_space->getDimensions();
 
-				float simulationDimensions[3] = { currDims->x, currDims->y, currDims->z };
+				float simulationDimensions[3] = { static_cast<float>(LengthUnits::fromScene(currDims->x, lengthUnit)),
+                    static_cast<float>(LengthUnits::fromScene(currDims->y, lengthUnit)),
+                    static_cast<float>(LengthUnits::fromScene(currDims->z, lengthUnit)) };
 
-				if (ImGui::SliderFloat3("Dimensions (x, y, z)", simulationDimensions, 0.0f, 20.0f, "%.2f")) {
-					currDims->x = simulationDimensions[0];
-					currDims->y = simulationDimensions[1];
-					currDims->z = simulationDimensions[2];
+				if (ImGui::SliderFloat3((std::string("Dimensions (") + LengthUnits::symbol(lengthUnit) + ")").c_str(), simulationDimensions, 0.0f, static_cast<float>(LengthUnits::fromScene(20, lengthUnit)), "%.2f")) {
+					currDims->x = static_cast<float>(LengthUnits::toScene(simulationDimensions[0], lengthUnit));
+					currDims->y = static_cast<float>(LengthUnits::toScene(simulationDimensions[1], lengthUnit));
+					currDims->z = static_cast<float>(LengthUnits::toScene(simulationDimensions[2], lengthUnit));
 					_simulation_space->setCellUpdate(true);
 				}
 				ImGui::EndMenu();
@@ -435,8 +459,11 @@ void GUI::buildMenuLowerPanel()
 			if (ImGui::BeginMenu("Cell size"))
 			{
 				float* cellSize = _simulation_space->getCellSize();
-				if (ImGui::SliderFloat("Cell size", cellSize, 0.02f, .5f, "%.2f"))
+				float displayedSize = static_cast<float>(LengthUnits::fromScene(*cellSize, lengthUnit));
+                if (ImGui::SliderFloat((std::string("Cell size (") + LengthUnits::symbol(lengthUnit) + ")").c_str(), &displayedSize,
+                    static_cast<float>(LengthUnits::fromScene(.02, lengthUnit)), static_cast<float>(LengthUnits::fromScene(.5, lengthUnit)), "%.2f"))
 				{
+                    *cellSize = static_cast<float>(LengthUnits::toScene(displayedSize, lengthUnit));
 					_simulation_space->setCellUpdate(true);
 				}
 				ImGui::EndMenu();
@@ -467,6 +494,18 @@ void GUI::buildMenuLowerPanel()
 
 				ImGui::EndMenu();
 			}
+            if (ImGui::BeginMenu("Observation plane"))
+            {
+                ImGui::Checkbox("Show in scene", &observationPlaneVisible);
+                ImGui::Checkbox("Show active solver boundary", &solverBoundaryVisible);
+                ImGui::SliderFloat("Opacity", &observationPlaneOpacity, 0.0f, 1.0f, "%.2f");
+                ImGui::TextUnformatted("0 = transparent, 1 = opaque");
+                ImGui::TextWrapped("Follows the active 3D field slice. It does not affect the simulation.");
+                if (!cavity.ready()) ImGui::TextUnformatted("Open slice controls and Apply / Reset to initialize a slice.");
+                if (ImGui::MenuItem("Open slice controls")) cavityOpen = true;
+                ImGui::EndMenu();
+            }
+
 			ImGui::EndMenu();
 		}
 
@@ -632,19 +671,23 @@ void GUI::buildLeftPanel()
 					ImGui::TableNextRow();
 					ImGui::TableSetColumnIndex(0);
 					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-					ImGui::Text("%s", it->first.c_str());
+					ImGui::Text("%s", LengthUnits::displayName(it->first, lengthUnit).c_str());
 					ImGui::TableSetColumnIndex(1);
 					ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
 					float* propertyValue = it->second;
-					if (ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0.0f, 0.0f, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue)) {
+					const std::string propertyName = LengthUnits::propertyName(it->first);
+                    const bool edited = LengthUnits::isSceneLength(it->first)
+                        ? inputSceneLength(("##value" + it->first).c_str(), propertyValue)
+                        : ImGui::InputFloat(("##value" + it->first).c_str(), propertyValue, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
+                    if (edited) {
 						// TODO only rebuild the object which property had been updated
-						if (it->first == "X position" || it->first == "Y position" ||
-							it->first == "Z position")
+						if (propertyName == "X position" || propertyName == "Y position" ||
+							propertyName == "Z position")
 						{
 							activeObj->setModelMatrixRegenExpected(true);
 						}					
-						if (it->first == "Length" || it->first == "Width" ||
-							it->first == "Height" || it->first == "Radius") {
+						if (propertyName == "Length" || propertyName == "Width" ||
+							propertyName == "Height" || propertyName == "Radius") {
 							if (*propertyValue < MIN_OBJECT_SIZE) {
 								*propertyValue = MIN_OBJECT_SIZE;
 							}
@@ -653,8 +696,8 @@ void GUI::buildLeftPanel()
 							}
 							activeObj->setModelMatrixRegenExpected(true);
 						}
-						if (it->first == "X pad separation" || it->first == "Z pad separation" ||
-							it->first == "X pad size" || it->first == "Z pad size") {
+						if (propertyName == "X pad separ." || propertyName == "Z pad separ." ||
+							propertyName == "X pad size" || propertyName == "Z pad size") {
 							if (*propertyValue < MIN_PAD_SEPARATION_SIZE) {
 								*propertyValue = MIN_PAD_SEPARATION_SIZE;
 							}
@@ -665,7 +708,7 @@ void GUI::buildLeftPanel()
 							activeObj->updateL();
 							activeObj->updateW();
 						}
-						if (it->first == "Diameter") {
+						if (propertyName == "Diameter") {
 							if (*propertyValue < WIRE_MIN_DIAMETER) {
 								*propertyValue = static_cast<float>(WIRE_MIN_DIAMETER);
 							}
@@ -673,7 +716,7 @@ void GUI::buildLeftPanel()
 								*propertyValue = static_cast<float>(WIRE_MAX_DIAMETER);
 							}
 						}
-						if (it->first == "Rotation angle")
+						if (propertyName == "Rotation angle")
 						{
 							if (*propertyValue < 0.0f) {
 								*propertyValue = std::fmod(*propertyValue, 360.0f);
@@ -683,16 +726,16 @@ void GUI::buildLeftPanel()
 								*propertyValue = std::fmod(*propertyValue, 360.0f);
 							}
 						}
-						if (it->first == "Curve length" || it->first == "Tail length" ||
-							it->first == "Curve height" || it->first == "Thickness")
+						if (propertyName == "Curve length" || propertyName == "Tail length" ||
+							propertyName == "Curve height" || propertyName == "Thickness")
 						{
 							activeObj->setModelVertsRegenExpected(true);
 
-							if (it->first == "Curve length")
+							if (propertyName == "Curve length")
 							{
 								activeObj->setScaleL(*propertyValue);
 							}
-							else if (it->first == "Curve height")
+							else if (propertyName == "Curve height")
 							{
 								if (*propertyValue < RIBBON_MIN_CURVE_HEIGHT) {
 									*propertyValue = static_cast<float>(RIBBON_MIN_CURVE_HEIGHT);
@@ -701,7 +744,7 @@ void GUI::buildLeftPanel()
 									*propertyValue = static_cast<float>(RIBBON_MAX_CURVE_HEIGHT);
 								}
 							}
-							else if (it->first == "Tail length")
+							else if (propertyName == "Tail length")
 							{
 								if (*propertyValue < RIBBON_MIN_CURVE_TAIL) {
 									*propertyValue = static_cast<float>(RIBBON_MIN_CURVE_TAIL);
@@ -710,7 +753,7 @@ void GUI::buildLeftPanel()
 									*propertyValue = static_cast<float>(RIBBON_MAX_CURVE_TAIL);
 								}
 							}
-							else if (it->first == "Thickness")
+							else if (propertyName == "Thickness")
 							{
 								if (*propertyValue < RIBBON_MIN_CURVE_THICKNESS) {
 									*propertyValue = static_cast<float>(RIBBON_MIN_CURVE_THICKNESS);
@@ -744,8 +787,11 @@ void GUI::buildLeftPanel()
 					ImGui::TableSetColumnIndex(1);
 					ImGui::SetNextItemWidth(-1); // Make the input field take the full width of the column
 					int* propertyValue = it->second;
-					if (ImGui::InputScalar(("##value" + it->first).c_str(), ImGuiDataType_S32, propertyValue, 
-						nullptr, nullptr, "%d", ImGuiInputTextFlags_EnterReturnsTrue)) {
+					const bool edited = it->first == "3D polarization"
+                        ? ImGui::Combo(("##value" + it->first).c_str(), propertyValue, "X\0Y\0Z\0")
+                        : ImGui::InputScalar(("##value" + it->first).c_str(), ImGuiDataType_S32, propertyValue,
+                            nullptr, nullptr, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+                    if (edited) {
 						// TODO only rebuild the object which property had been updated
 						if (it->first == "X number of pads" || it->first == "Z number of pads")
 						{
@@ -881,7 +927,7 @@ void GUI::buildLowerPanel() {
 	glm::vec3* currentSimSpace = _simulation_space->getDimensions();
 
 	ImGui::SetCursorPos(ImVec2(20, 54));
-	ImGui::Text("Cell size (mm):");
+	ImGui::Text("Cell size (%s):", LengthUnits::symbol(lengthUnit));
 
 	ImGui::SetCursorPos(ImVec2(126, 50));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
@@ -889,7 +935,7 @@ void GUI::buildLowerPanel() {
 	//ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 
 	ImGui::BeginDisabled(oldSimulationRunning);
-	if (ImGui::InputFloat("##number", cellSize, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	if (inputSceneLength("##number", cellSize))
 	{
 		float minCellSize1D = currentSimSpace->x;
 		float minCellSize2D = std::min({ currentSimSpace->x, currentSimSpace->z });
@@ -932,14 +978,14 @@ void GUI::buildLowerPanel() {
 	float finalSimSpaceX = currentSimSpaceX;
 
 	ImGui::SetCursorPos(ImVec2(20, 78));
-	ImGui::Text("Sim space X (mm):");
+	ImGui::Text("Sim space X (%s):", LengthUnits::symbol(lengthUnit));
 
 	ImGui::SetCursorPos(ImVec2(126, 74));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushItemWidth(50);
 
 	ImGui::BeginDisabled(oldSimulationRunning);
-	if (ImGui::InputFloat("##simSpaceX", &finalSimSpaceX, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	if (inputSceneLength("##simSpaceX", &finalSimSpaceX))
 	{
 		if (finalSimSpaceX <= 0.0f)
 		{
@@ -970,14 +1016,14 @@ void GUI::buildLowerPanel() {
 		float finalSimSpaceZ = currentSimSpaceZ;
 
 		ImGui::SetCursorPos(ImVec2(20, 102));
-		ImGui::Text("Sim space Z (mm):");
+		ImGui::Text("Sim space Z (%s):", LengthUnits::symbol(lengthUnit));
 
 		ImGui::SetCursorPos(ImVec2(126, 98));
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 		ImGui::PushItemWidth(50);
 
 		ImGui::BeginDisabled(oldSimulationRunning);
-		if (ImGui::InputFloat("##simSpaceZ", &finalSimSpaceZ, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		if (inputSceneLength("##simSpaceZ", &finalSimSpaceZ))
 		{
 			if (finalSimSpaceZ <= 0.0f)
 			{
@@ -1005,14 +1051,14 @@ void GUI::buildLowerPanel() {
 		float finalSimSpaceY = currentSimSpaceY;
 
 		ImGui::SetCursorPos(ImVec2(20, 126));
-		ImGui::Text("Sim space Y (mm):");
+		ImGui::Text("Sim space Y (%s):", LengthUnits::symbol(lengthUnit));
 
 		ImGui::SetCursorPos(ImVec2(126, 122));
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 		ImGui::PushItemWidth(50);
 
 		ImGui::BeginDisabled(oldSimulationRunning);
-		if (ImGui::InputFloat("##simSpaceY", &finalSimSpaceY, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		if (inputSceneLength("##simSpaceY", &finalSimSpaceY))
 		{
 			if (finalSimSpaceY <= 0.0f)
 			{
@@ -1073,10 +1119,10 @@ void GUI::buildLowerPanel() {
 	//ImGui::PopStyleColor();
 	////-
 
-	float wavelength = (float) SPEED_OF_LIGHT / (*freq * GHZ_TO_HZ) * 1000;
+	float wavelength = static_cast<float>(LengthUnits::fromMeters(SPEED_OF_LIGHT / (*freq * GHZ_TO_HZ), lengthUnit));
 
 	ImGui::SetCursorPos(ImVec2(190, 54));
-	ImGui::Text("Wavelength (mm):");
+	ImGui::Text("Wavelength (%s):", LengthUnits::symbol(lengthUnit));
 
 	ImGui::SetCursorPos(ImVec2(310, 50));
 	ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
@@ -1087,7 +1133,7 @@ void GUI::buildLowerPanel() {
 	ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.96f, 0.96f, 0.96f, 1.0f));
 
-	ImGui::SliderFloat("##wavelength slider", &wavelength, 5.0, 600.0);
+	ImGui::SliderFloat("##wavelength slider", &wavelength, static_cast<float>(LengthUnits::fromScene(5, lengthUnit)), static_cast<float>(LengthUnits::fromScene(600, lengthUnit)), "%.2f");
 
 	ImGui::PopStyleColor(4);
 	ImGui::PopItemWidth();
@@ -1361,87 +1407,132 @@ void GUI::buildCavityWindow()
 {
 	if (!cavityOpen)
 		return;
-	const auto cavityCells = CavityController::cells();
-	const double cavitySpacing = CavityController::spacing();
-	auto reset = [&] {
-		resetSceneCavity(cavity, *_scene_main,
-			{static_cast<CavityController::Material>(cavityMaterialMode), cavityPermittivity});
-	};
-	if (!cavity.ready())
-		reset();
-	const double now = glfwGetTime();
-	cavity.update(now - cavityLastFrame);
-	cavityLastFrame = now;
+    static SceneCoverage coverage;
+    // No implicit fallback solver: fields exist only after an explicit Apply.
+    CavityController::Settings requested{static_cast<CavityController::Material>(cavityMaterialMode), cavityPermittivity};
+    requested.excitation = static_cast<CavityController::Excitation>(cavityExcitation);
+    std::string gridError;
+    bool gridDimensionsValid = false;
+    try {
+        if (cavityGridSource == 0)
+            requested.grid = _simulation_space->gridSettings3D();
+        gridDimensionsValid = true;
+        requested.grid.validate(cavity.allocatedBytes());
+    } catch (const std::exception& e) { gridError = e.what(); }
+    const bool pending = !cavity.ready() || cavityGridSource != activeGridSource || !gridError.empty() || requested.grid != cavity.grid() ||
+        requested.material != cavity.settings().material || requested.permittivity != cavity.settings().permittivity || requested.excitation != cavity.settings().excitation;
+    if (pending) cavity.setRunning(false);
+    const double now = glfwGetTime();
+    cavity.update(now - cavityLastFrame);
+    cavityLastFrame = now;
 
-	ImGui::SetNextWindowSize(ImVec2(540, 470), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("3D vacuum cavity", &cavityOpen))
-	{
-		ImGui::TextWrapped("Solver validation example. A standing wave oscillates inside a closed metal box. "
-			"We compare its measured frequency with the calculated value to check the 3D solver.");
-		ImGui::TextWrapped("Red and blue show opposite electric-field directions. White is zero. "
-			"The initial mode is uniform along Z. Spatially varying materials can change its pattern.");
-		if (cavityMaterialMode < 2)
-			ImGui::Text("Analytical resonance %.3f GHz", cavity.analyticalFrequency() * 1e-9);
-		else
-			ImGui::TextWrapped("Scene substrates are sampled in mm inside the fixed box from (0,0,0). "
-				"Reset applies geometry edits. Traces and carriers become perfect conductors. Conductivity losses are excluded.");
-		ImGui::BeginDisabled(cavity.isRunning());
-		if (ImGui::Combo("Material", &cavityMaterialMode, "Vacuum\0Uniform dielectric\0Scene materials\0"))
-			reset();
-		if (cavityMaterialMode == 1 &&
-			ImGui::SliderFloat("Relative permittivity", &cavityPermittivity, 1.0f, 16.0f))
-			reset();
-		ImGui::EndDisabled();
-		if (!cavity.error().empty())
-			ImGui::TextWrapped("%s", cavity.error().c_str());
-		ImGui::TextUnformatted("12 x 10 x 8 mm | Conducting walls | 0.5 mm cells");
-        if (cavityMaterialMode == 2)
-            ImGui::Text("PEC electric samples: %zu (thin features may miss this grid)", cavity.conductorSamples());
-		ImGui::BeginDisabled(!cavity.error().empty());
-		if (ImGui::Button(cavity.isRunning() ? "Stop" : "Run"))
-		{
-			cavity.setRunning(!cavity.isRunning());
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Step Once"))
-		{
-			cavity.stepOnce();
-		}
-		ImGui::EndDisabled();
-		ImGui::SameLine();
-		if (ImGui::Button("Reset"))
-			reset();
+    ImGui::SetNextWindowSize(ImVec2(620, 600), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("3D vacuum cavity", &cavityOpen))
+    {
+        ImGui::TextWrapped("Grid and materials are independent. Configured domain uses the main Simulation controls. "
+            "The outlined box in the scene marks the ACTIVE solver boundary; the slice stays inside that box.");
+        bool selectionChanged = ImGui::Combo("Grid", &cavityGridSource, "Configured domain\0Fixed cavity validation preset\0");
+        if (cavityGridSource == 1)
+            ImGui::TextWrapped("Validation preset: 12000 x 10000 x 8000 um, 500 um cells. Main grid controls do not apply to this preset.");
+        selectionChanged |= ImGui::Combo("Material", &cavityMaterialMode, "Vacuum\0Uniform dielectric\0Scene materials\0");
+        if (cavityMaterialMode != 2)
+            ImGui::TextWrapped("Scene objects are ignored for this material choice. Choose Scene materials to include the PCB geometry.");
+        if (cavityMaterialMode == 1)
+            selectionChanged |= ImGui::SliderFloat("Relative permittivity", &cavityPermittivity, 1.0f, 16.0f);
+        if (ImGui::Combo("Excitation", &cavityExcitation, "Standing wave\0X pulse (both directions)\0Scene sources\0"))
+        {
+            selectionChanged = true;
+            if(cavityExcitation==2) cavityComponent=1;
+        }
+        if(cavityExcitation==2)
+            ImGui::TextWrapped("Source objects drive a smooth-start CW signal from zero fields. Use each Source's frequency, "
+                "3D drive amplitude and global polarization. Legacy dBm is not used. Edit placement, then Apply / Reset. "
+                "Place the drive in the dielectric gap, not inside PEC. Ey is selected by default.");
+        if (cavityExcitation == 1)
+            ImGui::TextWrapped("Localized Ez pulse near X = Lx/4; splits toward +X and -X. Walls reflect it. "
+                "Use XY or XZ to watch travel, YZ to inspect a cross-section. This is not a driven microstrip port.");
+        if (selectionChanged) cavity.setRunning(false);
+        if (!gridError.empty()) ImGui::TextWrapped("%s", gridError.c_str());
+        if (gridDimensionsValid && !selectionChanged)
+        {
+            const auto& g = requested.grid;
+            ImGui::Text("Proposed grid: %zu x %zu x %zu = %zu cells", g.cells[0],g.cells[1],g.cells[2],g.cellCount());
+            ImGui::Text("Solver memory: %.1f MiB | Reset peak estimate: %.1f MiB / 512 MiB",
+                g.residentBytes()/1048576.0, (g.resetBytes()+std::max(cavity.allocatedBytes(), g.residentBytes()))/1048576.0);
+            ImGui::TextWrapped("Whole cells fill the domain from (0,0,0); leftover fractions are omitted. "
+                "Apply / Reset uses the proposed grid. Outer walls remain PEC; copper losses and driven ports are not included.");
+            if (requested.material == CavityController::Material::Scene)
+                for (auto* object : _scene_main->getConductors())
+                    if (std::min({*object->getLength(), *object->getHeight(), *object->getWidth()})*1e-3 < g.spacing)
+                        ImGui::TextWrapped("Object %u has a dimension smaller than one cell. It may be missed or poorly resolved.", object->getId());
+        }
+        if (pending || selectionChanged) ImGui::TextUnformatted("Settings changed: apply them before running.");
+        ImGui::BeginDisabled(!gridError.empty() || selectionChanged);
+        if (ImGui::Button("Apply / Reset"))
+        {
+            resetSceneCavity(cavity, *_scene_main, requested, &coverage);
+            if (cavity.ready() && cavity.error().empty()) activeGridSource = cavityGridSource;
+        }
+        ImGui::EndDisabled();
+        ImGui::SameLine();
+        ImGui::BeginDisabled(pending || selectionChanged || !cavity.error().empty());
+        if (ImGui::Button(cavity.isRunning() ? "Stop" : "Run")) cavity.setRunning(!cavity.isRunning());
+        ImGui::SameLine();
+        if (ImGui::Button("Step Once")) cavity.stepOnce();
+        ImGui::EndDisabled();
+        if (!cavity.error().empty()) ImGui::TextWrapped("%s", cavity.error().c_str());
 
-		ImGui::SliderInt("Z slice", &cavitySlice, 0, static_cast<int>(cavityCells[2]) - 1);
-		ImGui::Text("Step %d | %.2f ps | Z = %.2f mm", cavity.stepCount(),
-			cavity.time() * 1e12, (cavitySlice + 0.5) * cavitySpacing * 1e3);
-		if (cavity.measuredFrequency() > 0)
-			ImGui::Text("Probe crossing estimate %.3f GHz", cavity.measuredFrequency() * 1e-9);
-		else
-			ImGui::TextUnformatted("Probe resonance appears after two rising zero crossings.");
-		ImGui::TextUnformatted("XY slice of normalized Ez | Blue negative | White zero | Red positive");
+        if (!cavity.ready())
+            ImGui::TextWrapped("No active 3D simulation. Choose a valid grid and click Apply / Reset. No field is available outside an active solver domain.");
+        else
+        {
+        ImGui::Text("Active grid: %s", activeGridSource == 0 ? "Configured domain" : "Fixed cavity validation preset");
+        if (pending || selectionChanged)
+            ImGui::TextWrapped("Plot and scene outline still show the last APPLIED domain. Pending edits have not moved the solver boundary.");
+        const auto cavityCells = cavity.cells();
+        const double cavitySpacing = cavity.spacing();
+        ImGui::Text("Active extent: %.2f x %.2f x %.2f %s | Cell: %.2f %s",
+            LengthUnits::fromMeters(cavityCells[0]*cavitySpacing, lengthUnit),
+            LengthUnits::fromMeters(cavityCells[1]*cavitySpacing, lengthUnit),
+            LengthUnits::fromMeters(cavityCells[2]*cavitySpacing, lengthUnit), LengthUnits::symbol(lengthUnit),
+            LengthUnits::fromMeters(cavitySpacing, lengthUnit), LengthUnits::symbol(lengthUnit));
+        if (cavity.analyticalFrequency() > 0)
+            ImGui::Text("Analytical resonance %.3f GHz", cavity.analyticalFrequency()*1e-9);
+        if (cavity.settings().material == CavityController::Material::Scene)
+        {
+            ImGui::Text("PEC electric samples: %zu | Conductor objects at Reset: %zu", cavity.conductorSamples(), coverage.size());
+            if (ImGui::TreeNode("Conductor coverage at last Reset"))
+            {
+                ImGui::TextWrapped("Positions and X/Y/Z sizes are in %s. Overlapping objects may share samples.", LengthUnits::symbol(lengthUnit));
+                for (const auto& item : coverage)
+                {
+                    ImGui::Text("Object %u: %zu samples", item.id, item.samples);
+                    ImGui::Text("  Position: %.2f, %.2f, %.2f | Size: %.2f, %.2f, %.2f",
+                        LengthUnits::fromScene(item.originMm.x, lengthUnit), LengthUnits::fromScene(item.originMm.y, lengthUnit),
+                        LengthUnits::fromScene(item.originMm.z, lengthUnit), LengthUnits::fromScene(item.sizeMm.x, lengthUnit),
+                        LengthUnits::fromScene(item.sizeMm.y, lengthUnit), LengthUnits::fromScene(item.sizeMm.z, lengthUnit));
+                }
+                ImGui::TreePop();
+            }
+            if (cavity.conductorSamples() == 0)
+                ImGui::TextWrapped("No electric samples are inside a Trace or Carrier. Check position and size, "
+                    "then Reset. The grid can miss thin features. This count excludes the outer PEC walls.");
 
-		const ImVec2 available = ImGui::GetContentRegionAvail();
-		const float pitch = std::min(available.x / (cavityCells[0] + 1),
-			available.y / (cavityCells[1] + 1));
-		if (pitch > 0)
-		{
-			const ImVec2 origin = ImGui::GetCursorScreenPos();
-			auto* draw = ImGui::GetWindowDrawList();
-			for (std::size_t y = 0; y <= cavityCells[1]; ++y)
-				for (std::size_t x = 0; x <= cavityCells[0]; ++x)
-				{
-					const float sample = cavity.sample(
-						{x, y, static_cast<std::size_t>(cavitySlice)});
-					const float value = std::max(-1.0f, std::min(sample, 1.0f));
-					const float fade = 1.0f - std::abs(value);
-					const ImU32 color = ImGui::GetColorU32(ImVec4(
-						value < 0 ? fade : 1.0f, fade, value > 0 ? fade : 1.0f, 1.0f));
-					const ImVec2 top(origin.x + pitch * x, origin.y + pitch * (cavityCells[1] - y));
-					draw->AddRectFilled(top, ImVec2(top.x + pitch, top.y + pitch), color);
-				}
-			ImGui::Dummy(ImVec2(pitch * (cavityCells[0] + 1), pitch * (cavityCells[1] + 1)));
-		}
+        }
+
+        ImGui::Text("Step %d | %.2f ps", cavity.stepCount(), cavity.time()*1e12);
+        if (cavity.settings().excitation == CavityController::Excitation::StandingWave)
+        {
+            if (cavity.measuredFrequency() > 0) ImGui::Text("Probe crossing estimate %.3f GHz", cavity.measuredFrequency()*1e-9);
+            else ImGui::TextUnformatted("Probe resonance appears after two rising zero crossings.");
+        }
+        if(cavity.settings().excitation==CavityController::Excitation::SceneSources)
+            for(const auto& drive : cavity.sources())
+                ImGui::Text("Source %u: E%c | %.3f GHz | A=%.3g | %zu driven, %zu PEC/wall excluded",
+                    drive.id, "xyz"[drive.axis],drive.frequencyHz*1e-9,drive.amplitude,drive.samples.size(),drive.excluded);
+        drawFieldSlice(cavity, cavityPlane, cavitySlice, lengthUnit, &cavityComponent);
+        }
+
 	}
 	ImGui::End();
 	if (!cavityOpen)
@@ -1459,12 +1550,17 @@ void GUI::buildTheoryWindow()
 		const char* file;
 	};
 	static constexpr Topic topics[] = {
+        {"Length units and grid coverage", "length_units.txt"},
+        {"3D grid settings", "3d_grid_settings.txt"},
+        {"3D slices and X pulse", "3d_slices_and_pulse.txt"},
+        {"3D scene sources", "3d_scene_sources.txt"},
 		{"Start a 1D run", "getting_started.txt"},
 		{"Scene editor", "scene_editor.txt"},
 		{"Simulation controls", "simulation_controls.txt"},
 		{"Yee fields and boundaries", "yee_fields.txt"},
 		{"3D cavity validation", "3d_vacuum_cavity.txt"},
 		{"3D dielectric materials", "3d_dielectrics.txt"},
+		{"3D perfect conductors", "3d_conductors.txt"},
 		{"Sources, probes, and display", "sources_and_display.txt"},
 		{"1D vacuum timing and playback", "1d_vacuum_timing.txt"},
 	};

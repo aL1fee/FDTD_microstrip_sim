@@ -10,3 +10,6 @@ Edit CW frequency on the source object. The simulation panel's CW slider calcula
 The field curves use different transverse directions to separate E and H visually. The curves share the same displayed X sample positions. Field helper lines show the amplitude relative to the axis. Cell Toggle controls the grid overlay. Use Execute > Toggle ON/OFF to show or hide the field curves.
 
 If Run displays a flat field, check that the selected mode is 1D, field drawing is enabled, and a power source intersects the grid. A Gaussian can take several steps to become visible. Try Step Once and watch the counter to confirm that the solver is advancing.
+
+* 3D source objects
+The 3D Scene sources excitation now uses Source-object positions, geometry, frequency, global polarization, and normalized drive amplitude. It does not use legacy dBm as calibrated delivered power. See 3D scene sources for setup and equations.

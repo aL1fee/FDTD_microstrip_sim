@@ -1,0 +1,35 @@
+3D field slices and X pulse
+
+* Slice plane
+XY displays X horizontally and Y vertically; move the cut along Z. XZ displays X horizontally and Z vertically; move along Y. YZ displays Z horizontally and Y vertically; move along X. Y is scene height, so a ground plane at low Y appears at the bottom. Use XY or XZ to watch travel along X. Use YZ to inspect a transverse cross-section at a chosen X. Changing the view does not change the simulation.
+
+* Electric components Ex, Ey and Ez
+The Electric component control selects global Ex, Ey, or Ez for any slice. The initial choice is Ez for the original examples and Ey when Scene sources is selected. These are signed components, not field magnitude, energy, or the component normal to each view. Blue means a negative selected component, white zero, red positive. Values are normalized and are not calibrated V/m. The fixed color scale saturates outside -1 to +1. Ez points out of an XY slice and along the vertical axis of XZ and the horizontal axis of YZ slices.
+
+* Yee sample position
+For the default Ez component, Ez has Nx+1 samples along X, Ny+1 along Y, and Nz along Z. Its physical locations are (i*dx, j*dx, (k+0.5)*dx). Consequently XY slices lie at half-cell Z offsets, whereas XZ and YZ slices lie at integer Y or X coordinates. Ex and Ey instead have their half-cell offset along X and Y respectively. The slider, scene observation plane, and coordinate label follow the selected component's actual locations. The image preserves physical axis proportions and clips endpoint tiles to the domain; a rectangular domain should not look square.
+
+* Geometry and location
+The locator sketch shows the selected cut within a normalized box; it is schematic, not a second field plot or the main scene camera. Dark outlines on the heatmap mark samples of the selected electric component held at zero by the conductor mask. These outlines show resolved conductor coverage, not exact geometric surfaces. White alone does not identify metal. The outer PEC walls are separate from the interior conductor mask.
+
+* X pulse initialization
+Choose Excitation > X pulse (both directions), Apply / Reset, then Run. The field starts as
+    Ez(i,j,k) = exp(-0.5*((i-Nx/4)/sigma)^2) * sin(pi*j/Ny)
+    sigma = max(1.5, Nx/40) cells
+inside the walls, with H initially zero. This packet is localized along X, spans the Y/Z cross-section, and initially has no Z variation. Conductors suppress occupied electric samples. It is an initial field condition, not an ongoing injected source.
+
+An electric-only initial packet splits into +X and -X traveling pulses. The closed PEC walls reflect both. The transverse profile, numerical dispersion, and scene materials can alter its speed and shape; it is not a calibrated one-way microstrip port. The uniform initial Z profile also means different Z slices can initially look identical. Resonance estimates are hidden in pulse mode because pulse transients are not a single cavity oscillation.
+
+* Using the views
+Choose Configured domain (or explicitly choose Fixed cavity validation preset), then Vacuum and X pulse. Apply / Reset and Run while viewing XY. Switch to YZ and move the X sample slider to inspect the field as it passes different cross-sections. Scene materials applies scene geometry to the separately selected grid. Vacuum and Uniform dielectric ignore scene objects. A cut exactly on a tangential PEC wall can be entirely white. Return to Standing wave and Apply / Reset for the original frequency-validation example.
+
+* Validation
+In a 160 x 128 x 2 grid, the right-going pulse peak moved from X index 40 to 60 after 40 steps in vacuum, and to 50 with uniform relative permittivity 4. Left-going peaks were symmetric before wall reflections returned. Tests cover every sample in all three slice orientations on a non-cubic grid, staggered positions, index clamping after grid changes, and PEC masking.
+
+* Observation plane in the scene
+The slice is a virtual observation plane, not a physical detector or material. Open Simulation > Settings > Observation plane, beside the cell settings, to show/hide it or adjust Opacity (0 transparent, 1 opaque). The translucent teal plane and border follow the slice orientation and sample position in the main 3D scene. The overlay uses the active solver grid, not unapplied settings, and spans its physical domain. It is independent of cell-grid visibility and remains visible when the field window is closed; use Show in scene to hide it.
+
+The plane is only a location guide; the red/blue field remains in the slice plot. It is depth-tested against the scene and can be hidden behind solid geometry or appear as a line when viewed edge-on. Rotate the camera to see it. It does not write depth, participate in object picking, inject fields, or change material mapping. Opacity changes affect display only. The scene uses millimeter coordinates internally; the plane converts the solver's meter coordinates to match, regardless of your chosen display units.
+
+* Active domain boundary
+A wireframe outlines the applied solver domain in the scene. Toggle it under Settings > Observation plane > Show active solver boundary. It is independent of plane opacity and visibility. Grid selection and material selection are separate. Outside this active boundary there are no computed fields; the slice slider cannot select an outside sample. Pending edits affect the main grid preview but not the solver until Apply / Reset.

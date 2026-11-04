@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Yee1D.h"
+#include "GridSettings.h"
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <iostream>
@@ -139,6 +140,11 @@ public:
 	}
 
 	glm::vec3* getDimensions() { return &simSpaceDimensions; }
+    GridSettings gridSettings3D() const
+    {
+        return GridSettings::fromDomain({simSpaceDimensions.x*1e-3,
+            simSpaceDimensions.y*1e-3, simSpaceDimensions.z*1e-3}, cellSize*1e-3);
+    }
 
 	void setCellSize(float f) { cellSize = f; updateFieldArraySizes(); }
 	float* getCellSize() { return &cellSize; }

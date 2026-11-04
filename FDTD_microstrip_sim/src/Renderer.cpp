@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Scene/ObservationPlaneRenderer.h"
 
 int testExecTimeInterval = 150;
 long testExecTimeCount = 0;
@@ -321,6 +322,7 @@ void Renderer::render() const
 	int nbFrames = 0;
 		
 	glfwMakeContextCurrent(window);
+    ObservationPlaneRenderer observationPlane;
 	while (!glfwWindowShouldClose(window)) {
 		if (threadSwitch.load()) {
 			if (_resizing) {
@@ -337,6 +339,7 @@ void Renderer::render() const
 			input->processInput();
 
 			gui->newFrame();
+            observationPlane.draw(gui->observationPlane(), _scene_main->getViewMatrix(), _scene_main->getProjMatrix());
 			gui->render();
 
 			glfwSwapBuffers(window);
@@ -353,5 +356,6 @@ void Renderer::render() const
 			threadSwitch.store(false);
 		}
 	}
+	observationPlane.release();
 	glfwMakeContextCurrent(nullptr);
 }

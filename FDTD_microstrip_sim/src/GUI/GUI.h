@@ -5,6 +5,7 @@
 #include <map>
 
 #include "../Simulation/CavityController.h"
+#include "../Simulation/ObservationPlane.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -41,10 +42,18 @@ private:
 	void buildCavityWindow();
 
 	int cavityMaterialMode = 0;
+    int cavityGridSource = 0; // 0: configured domain, 1: explicit validation preset
+    int activeGridSource = -1;
+    bool solverBoundaryVisible = true;
 	float cavityPermittivity = 4.0f;
 	CavityController cavity;
 	bool cavityOpen = false;
 	int cavitySlice = 8;
+    int cavityPlane = 0;
+    int cavityExcitation = 0;
+    int cavityComponent = 2;
+    bool observationPlaneVisible = true;
+    float observationPlaneOpacity = .2f;
 	double cavityLastFrame = 0;
 
 	bool theoryOpen = false;
@@ -68,7 +77,12 @@ public:
 	void render();
 	void terminate();
 
-	void newFrame();
+    ObservationPlane observationPlane() const
+    {
+        return {cavity.grid(), static_cast<FieldSlice::Plane>(cavityPlane), cavitySlice,
+            cavity.ready() && observationPlaneVisible, observationPlaneOpacity, cavity.ready() && solverBoundaryVisible, static_cast<Yee3D::Axis>(cavityComponent)};
+    }
+    void newFrame();
 
 
 

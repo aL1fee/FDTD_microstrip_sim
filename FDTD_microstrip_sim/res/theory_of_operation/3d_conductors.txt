@@ -1,0 +1,28 @@
+3D perfect conductors
+
+* Perfect electric conductor (PEC) - An ideal metal whose electric field is zero inside and whose tangential electric field vanishes at its surface.
+* Conductor mask - The electric sample locations that the solver holds at zero.
+* Reflection coefficient - Reflected electric amplitude divided by incident electric amplitude. At normal incidence on a PEC plane, its ideal value is -1.
+
+Using scene conductors
+
+Choose Scene materials in the 3D cavity window. Trace objects become ideal conducting volumes. Carrier objects also become conducting volumes and can represent a ground plane. Press Apply / Reset after editing, adding, or deleting these objects to rebuild the simulation.
+
+With Grid set to Configured domain, the box uses the main Simulation window dimensions and cell size, starting at the scene origin. The separate validation preset uses its own fixed box. See 3D grid settings. The mapper evaluates each electric sample against the object's transformed interior. Overlapping conductor objects form a union. At a sample occupied by both dielectric and conductor, the conductor mask holds the electric field at zero.
+
+The PEC electric samples readout counts masked components across the whole box. A count of zero means no conductor samples were found. A nonzero count confirms some geometry was sampled, but does not establish that every trace or narrow connection was resolved.
+
+Resolution and assumptions
+
+Thin traces can fall between sample locations and disappear from the simulation. In particular, the editor's thin default trace dimensions are often smaller than the selected grid spacing. Point sampling uses the strict interior of each cuboid, so positions exactly on its surface are excluded. Accurate PCB-scale conductors will require finer resolution or an explicit thin-sheet model with validation.
+
+The model assumes perfect conductivity. It does not calculate metal loss or skin depth. Housing, wire, ribbon, and tuning-pad objects are not yet mapped as conductors. The outer box walls also remain PEC.
+
+The initial standing-wave field is zeroed at conductor samples. This changes the excitation pattern and can excite several frequencies. The displayed zero-crossing estimate should not be interpreted as a calibrated microstrip port measurement.
+
+Validation
+
+A Gaussian electric pulse was reflected from a planar conducting slab for each of three coordinate orientations. Each measured amplitude reflection was -0.999432, compared with the ideal -1. Transmission was zero in the test's observation interval, before returning outer-wall reflections arrived. Masked samples stayed zero even when a source attempted to inject there.
+
+    tests/yee3d_conductors.cpp
+    tests/run_validation.cmd

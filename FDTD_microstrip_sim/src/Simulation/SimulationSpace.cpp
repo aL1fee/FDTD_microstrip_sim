@@ -190,34 +190,40 @@ void SimulationSpace::buildCellVAOs1D()
 
 void SimulationSpace::buildCellVertices3D()
 {
-	//cellVerts = new VertexVectorDS();
+	// Match solver rounding for valid 3D grids, including near-integer float ratios.
+    int counts[3] = {static_cast<int>(simSpaceDimensions.x/cellSize),
+        static_cast<int>(simSpaceDimensions.y/cellSize), static_cast<int>(simSpaceDimensions.z/cellSize)};
+    try {
+        const auto grid = gridSettings3D();
+        for(int axis=0;axis<3;++axis) counts[axis]=static_cast<int>(grid.cells[axis]);
+    } catch(const std::invalid_argument&) { /* Keep the legacy preview for non-3D domains. */ }
 
-    for (int i = 0; i <= static_cast<int>(simSpaceDimensions.x / cellSize); i++)
+    for (int i = 0; i <= counts[0]; i++)
     {
-        for (int j = 0; j <= static_cast<int>(simSpaceDimensions.y / cellSize); j++)
+        for (int j = 0; j <= counts[1]; j++)
         {
             cellVerts3D->pushToExistingArray(glm::vec3(i * cellSize, j * cellSize, 0));
             cellVerts3D->pushToExistingArray(glm::vec3(i * cellSize, j * cellSize,
-                cellSize * static_cast<int>((simSpaceDimensions.z / cellSize))));
+                cellSize * counts[2]));
         }
     }
-    for (int i = 0; i <= static_cast<int>(simSpaceDimensions.x / cellSize); i++)
+    for (int i = 0; i <= counts[0]; i++)
     {
-        for (int j = 0; j <= static_cast<int>(simSpaceDimensions.z / cellSize); j++)
+        for (int j = 0; j <= counts[2]; j++)
         {
             cellVerts3D->pushToExistingArray(glm::vec3(i * cellSize, 0.0f, j * cellSize));
             cellVerts3D->pushToExistingArray(glm::vec3(i * cellSize, cellSize *
-                static_cast<int>((simSpaceDimensions.y / cellSize)),
+                counts[1],
                 j * cellSize));
         }
     }
-    for (int i = 0; i <= static_cast<int>(simSpaceDimensions.y / cellSize); i++)
+    for (int i = 0; i <= counts[1]; i++)
     {
-        for (int j = 0; j <= static_cast<int>(simSpaceDimensions.z / cellSize); j++)
+        for (int j = 0; j <= counts[2]; j++)
         {
             cellVerts3D->pushToExistingArray(glm::vec3(0.0f, i * cellSize, j * cellSize));
             cellVerts3D->pushToExistingArray(glm::vec3(cellSize *
-                static_cast<int>((simSpaceDimensions.x / cellSize)), i * cellSize,
+                counts[0], i * cellSize,
                 j * cellSize));
         }
     }

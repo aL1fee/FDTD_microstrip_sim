@@ -1,0 +1,22 @@
+Length units and grid coverage
+
+* Display units
+Choose Tools > Length units > mil, mm, or um. The choice applies to geometry properties, simulation dimensions, wavelength, and cavity readouts for this session. The default is um. One mil is one thousandth of an inch: 1 mil = 0.0254 mm = 25.4 um. 1000 um = 1 mm; 1 um = 1e-6 m. Changing the display unit does not resize existing objects or change the simulation physics. Time remains in ps, frequency in GHz, and material properties retain their labeled units.
+
+* Physical calculations
+The Yee solver uses meters: Convert displayed cell size to meters: multiply mil by 25.4e-6, mm by 1e-3, or um by 1e-6. The timestep remains dt = S * dx / c0. Smaller physical cells require a smaller timestep; merely changing the unit label does not.
+
+* Scene storage
+The existing geometry and camera coordinates remain in millimeters for compatibility. The editor converts um to scene units by dividing by 1000, mil by multiplying by 0.0254, and mm directly. The scene-to-solver mapping converts meters back to these scene coordinates. Units are converted at these boundaries, not inside the field update equations.
+
+* PEC electric samples
+This is a count of staggered electric-field locations inside Trace or Carrier objects, not the electric-field value. Mapped PEC electric fields are held at zero. The count excludes the outer conducting walls. A zero count means no interior conductor has been resolved, even though the scene may visibly contain metal.
+
+* Grid coverage
+The fixed validation preset spans X 0..12000, Y 0..10000, Z 0..8000 um with 500 um cells. Configured domain uses the main Simulation window dimensions and cell size for every material choice. The fixed validation grid must be selected explicitly. Membership uses strict object interiors; samples exactly on a surface are excluded. Thin or out-of-box objects may map to zero samples. Displaying micrometers does not refine this grid or make thin traces resolvable.
+
+* Coverage check
+Choose um in Tools > Length units. Set the main Simulation window to 3D, X=12000, Y=10000, Z=8000 um and cell size=500 um. Insert a Trace with X=5000, Y=1000, Z=1000 um; Length=Width=Height=2000 um; rotation=0 degrees. Press Enter after editing each value. Select Configured domain and Scene materials in the cavity window and Apply / Reset. This block spans multiple cells and should have a nonzero PEC sample count. Length follows X, Height follows Y, and Width follows Z. Reset reapplies scene edits.
+
+* Mapping diagnostics
+Expand Conductor coverage at last Reset to inspect each detected object ID, mapped sample count, position, and X/Y/Z size in the selected display units. These values are a snapshot; scene edits apply on Reset. Counts for overlapping objects may share samples, while the total counts their union. The default Trace is 10 um thick and maps to zero on the 500 um test grid. A thick block checks the mapping but is not a physically equivalent replacement for a thin trace.

@@ -2,7 +2,7 @@ Start a 1D run
 
 * Step Once - Advance exactly one solver update.
 
-1. Choose 1D in the Simulation controls. Set the X length and cell size in millimeters before running.
+1. Choose 1D in the Simulation controls. Set the X length and cell size in the units selected under Tools > Length units (default um) before running.
 2. Insert a Power source. Place its cylinder across the X axis, with its injection endpoint inside the grid.
 3. Choose Execute > Run. Blue and red curves show the normalized electric and magnetic fields.
 4. Use Execute > Stop to pause, Run to continue, or Reset to return to the initial field state.

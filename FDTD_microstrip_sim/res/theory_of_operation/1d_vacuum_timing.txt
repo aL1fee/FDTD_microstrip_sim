@@ -10,7 +10,7 @@ Physical model
 The 1D Yee solver advances normalized electric and magnetic field samples
 in homogeneous vacuum. Source amplitudes and field values are normalized.
 
-    dx = cellSize * 1e-3        Grid spacing in meters (cellSize is in mm)
+    dx = cellSize * 1e-6        Grid spacing in meters (displayed cellSize is in um)
     c0 = 299792458 m/s          Vacuum wave speed
     S  = c0 * dt / dx = 0.5    Dimensionless Courant number
     dt = S * dx / c0            Physical time per accepted Yee step, in s
@@ -44,7 +44,7 @@ Vacuum crossing (s) is the target time on screen for a vacuum wave to
 travel from the first to the last electric sample. Its default is 2 s
 and the slider spans 0.5 to 10 s.
 
-    N = trunc(domain length in mm / cellSize)
+    N = trunc(domain length in um / cellSize)
     L = (N - 1) * dx             Distance between endpoint samples
     T_vac = L / c0               Ideal vacuum transit time in physical s
     crossing_steps = T_vac / dt = (N - 1) / S
@@ -58,7 +58,7 @@ frame at 0.25 s to limit catch-up after a stall, and uploads the field
 display once after a batch. The slider affects the step budget. At equal
 accepted step counts, the field values depend on the simulation setup.
 
-With a 4.5 mm domain and 0.02 mm cells, N = 225 and L = 4.48 mm.
+With a 4500 um domain and 20 um cells, N = 225 and L = 4480 um.
 The timestep is about 33.36 fs, and the ideal transit takes about
 14.94 ps or 448 steps. A 2 s screen crossing gives 224 steps/s.
 The screen crossing is a reference based on c0. Finite-grid dispersion
@@ -67,9 +67,9 @@ can shift the observed pulse peak.
 Verification
 ------------
 A standalone vacuum test measured the delay between Gaussian pulse peaks
-at probes 1 mm apart, before reflected signals could reach the probes.
+at probes 1000 um apart, before reflected signals could reach the probes.
 The ideal delay was 3.335641 ps. The measured delays were 3.354599 ps at
-0.020 mm spacing and 3.340551 ps at 0.010 mm spacing.
+20 um spacing and 3.340551 ps at 10 um spacing.
 
 A separate harness produced byte-identical electric and magnetic traces
 at equal accepted steps with 0.5 s crossing at 60 FPS and 4 s crossing

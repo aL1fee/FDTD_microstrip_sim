@@ -172,6 +172,13 @@
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Setup\Shader.h" />
     <ClInclude Include="src\Simulation\CavityController.h" />
+    <ClInclude Include="src\Simulation\GridSettings.h" />
+    <ClInclude Include="src\Simulation\ElectricDrive.h" />
+    <ClInclude Include="src\Simulation\FieldSlice.h" />
+    <ClInclude Include="src\Simulation\ObservationPlane.h" />
+    <ClInclude Include="src\Scene\ObservationPlaneRenderer.h" />
+    <ClInclude Include="src\GUI\FieldSliceView.h" />
+    <ClInclude Include="src\GUI\LengthUnits.h" />
     <ClInclude Include="src\Simulation\SceneCavitySetup.h" />
     <ClInclude Include="src\Simulation\Yee3D.h" />
     <ClInclude Include="src\Simulation\Yee1D.h" />

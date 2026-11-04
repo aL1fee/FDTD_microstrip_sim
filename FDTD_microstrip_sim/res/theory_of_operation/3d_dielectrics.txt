@@ -4,15 +4,15 @@
 * Dielectric wave speed - c0 / sqrt(epsilon_r) for a uniform nonmagnetic material.
 * Material sampling - Evaluate the material at each staggered electric-field location before stepping.
 
-In the 3D cavity window, choose Vacuum, Uniform dielectric, or Scene substrates while stopped. Changing the selection resets the example. Uniform dielectric exposes a relative-permittivity slider. A value of 4 should approximately halve the vacuum resonance.
+In the 3D cavity window, choose Vacuum, Uniform dielectric, or Scene materials while stopped. Click Apply / Reset to apply a changed selection. Uniform dielectric exposes a relative-permittivity slider. A value of 4 should approximately halve the vacuum resonance.
 
 The solver assumes lossless, isotropic, frequency-independent dielectrics with relative permittivity at least 1 and relative permeability 1. The electric curl coefficient is S / epsilon_r. The magnetic coefficient remains S because stored magnetic samples represent Z0 * H. The vacuum timestep remains a safe choice as epsilon_r increases.
 
 Scene mapping
 
-Scene substrates samples Substrate objects in the fixed 12 x 10 x 8 mm cavity starting at the scene origin. Edit Relative permittivity (3D) in each substrate's property panel. Its default is 4. The legacy F/m field is retained separately. Conductivity, traces, housings, and other scene objects are outside this material mapping.
+Scene materials samples Substrate objects in the selected grid (Configured domain or the explicit validation preset) starting at the scene origin. Edit Relative permittivity (3D) in each substrate's property panel. Its default is 4. The legacy F/m field is retained separately. Trace and Carrier objects also map to perfect conductors. Conductivity losses, housings, and other object types are outside this mapping. See 3D perfect conductors for details.
 
-Reset rebuilds the mapping from current geometry and material values. Every component is sampled at its own Yee location. The object's existing transformed intersection test determines membership. Outside substrates the material is vacuum. The highest scene object ID wins where substrates overlap. Only sample points inside the box are considered. Thin objects can miss all sample points at the fixed 0.5 mm spacing.
+Reset rebuilds the mapping from current geometry and material values. Every component is sampled at its own Yee location. The object's existing transformed intersection test determines membership. Outside substrates the material is vacuum. The highest scene object ID wins where substrates overlap. Only sample points inside the box are considered. Thin objects can miss all sample points at the chosen cell spacing.
 
 This is point sampling with staircased interfaces. Interface averaging and finer geometric resolution will be needed for accurate arbitrary microstrip structures. Invalid relative permittivity pauses the example and shows an error.
 
@@ -20,7 +20,7 @@ Verification
 
 For a uniformly filled cavity, f = f_vacuum / sqrt(epsilon_r).
 For epsilon_r = 4, the Z-polarized reference frequency is 9.756058 GHz.
-The solver measured 9.725204 GHz with 1 mm cells and 9.748346 GHz with 0.5 mm cells. All three polarizations showed approximately fourfold error reduction on refinement.
+The solver measured 9.725204 GHz with 1000 um cells and 9.748346 GHz with 500 um cells. All three polarizations showed approximately fourfold error reduction on refinement.
 
 A plane pulse test crossing from vacuum to epsilon_r = 4 measured electric amplitude reflection -0.337952 and transmission 0.665601. The analytical values are -1/3 and 2/3. The probes are sampled before returning wall reflections. These are electric amplitude ratios, with the sign indicating phase reversal. Power transmission also includes the impedance ratio.
 

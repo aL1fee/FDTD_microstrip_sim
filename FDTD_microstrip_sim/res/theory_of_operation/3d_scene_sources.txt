@@ -1,0 +1,32 @@
+3D scene sources
+
+* Purpose
+Excitation > Scene sources connects existing Source objects to the 3D solver. Apply / Reset starts with E=H=0, then Run or Step Once advances time and drives the source regions. No standing wave or X pulse is initialized in this mode. Sources work with every grid and material choice; choose Scene materials to include the PCB conductors and substrates.
+
+* Source controls
+Select a Source in the scene editor. Set its position, Radius, Length, CW Freq. (GHz), 3D drive amplitude (normalized), and 3D polarization (X/Y/Z). The default polarization is global Y, appropriate for exploring electric excitation across a trace/ground gap when Y is height. Rotation moves the cylinder geometry; polarization is an independent GLOBAL axis. All sources begin with the same zero phase. Overlapping drives add linearly.
+
+The existing Legacy power (dBm) setting does not set 3D delivered power. The wavelength property belongs to the legacy object and is not used to drive the 3D solver. Use CW Freq. for the actual driving frequency. A normalized amplitude is not a voltage, current, wattage, or guaranteed field amplitude. Zero amplitude disables energy injection without removing the mapping. Valid amplitude is 0..100.
+
+* Placement and mapping
+The displayed transformed cylinder defines a volumetric source region. The mapper evaluates the chosen electric component at its own staggered Yee locations. It excludes interior PEC samples and tangential electric samples on the outer PEC walls. The readout gives each object's ID, component, frequency, amplitude, driven count, and excluded count. No eligible samples is an error: move the source into the domain and dielectric gap, refine the grid, or enlarge its region enough to resolve it. Do not place the drive wholly inside the trace or ground metal. This is a sampled volume drive, not a terminal-to-terminal port.
+
+Apply / Reset takes a snapshot. Moving, deleting, resizing, rotating, or changing a Source affects the simulation only after another Apply / Reset. The controller retains sample indices and scalar settings, not scene-object pointers. A failed setup pauses and retains the previous simulation; its displayed counts still describe that previous successful setup.
+
+* Driving equation
+Let f be the source frequency in Hz, A the normalized drive scale, omega=2*pi*f, and dt the solver timestep. At the electric update from n to n+1, evaluate t=(n+0.5)*dt:
+    ramp(t) = 0.5 * (1 - cos(pi * min(1, f*t/2)))
+    driveRate(t) = A * omega * ramp(t) * sin(omega*t)
+    E_component += dt * driveRate(t) / epsilon_r
+The normal Yee curl update occurs first, then this additive electric drive. The two-cycle ramp reduces abrupt turn-on transients. The dielectric factor follows the electric update's local coefficient. This is a normalized impressed electric drive; it is not a prescribed voltage or a calibrated RF power source. Its effect depends on the spatial region, mesh, and surrounding structure.
+
+At least 20 timesteps per RF cycle are required by the setup check. This temporal criterion alone does not guarantee adequate spatial resolution. At 2 GHz the period is 500 ps and the ramp lasts 1000 ps. At the fixed validation spacing, the ramp takes about 1200 steps (about 15 screen seconds at the nominal 80 steps/s). A large grid may run slower. Use the physical-time readout to judge progress.
+
+* Seeing the driven field
+Selecting Scene sources initially selects Ey in the viewer. Choose Ex, Ey, or Ez explicitly to inspect a component. Color is its signed normalized value, not total field magnitude. The observation plane moves by a half cell when needed to follow that component's true sample locations. The color scale remains fixed at -1..+1; small fields look pale and larger values saturate. At reset the plot is white because there is no field yet. A source polarized in one direction can generate other components as the field evolves.
+
+* Practical limits
+A local drive can radiate in several directions and excite many cavity modes. The enclosing PEC walls reflect energy; a continuously driven lossless cavity can accumulate energy, especially near resonance. A growing signal is not a calibrated power measurement. This source is the next step toward a microstrip feed, not validation of a complete transmission-line model. A calibrated port, voltage/current integration, matched termination or open boundaries, and convergence tests remain separate work.
+
+* Verification
+Tests verify zero-field initialization; midpoint waveform timing; periodic RF frequency after the ramp; amplitude and overlapping-source linearity; 1/epsilon_r scaling; frame-rate-independent stepping; failed-setup preservation; PEC and out-of-domain rejection; and real Source-object translation/rotation. The existing standing-wave, X-pulse, dielectric-interface and conductor-reflection tests still pass.

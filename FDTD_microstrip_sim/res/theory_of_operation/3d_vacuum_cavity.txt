@@ -7,7 +7,7 @@
 
 Open the example
 
-Select 3D, then Execute > Open 3D vacuum cavity. The example has its own Run, Stop, Step Once, and Reset controls. It uses a fixed 12 x 10 x 8 mm vacuum box with perfectly conducting walls and 0.5 mm cubic cells. It advances at 80 steps per screen second. The displayed physical time advances by dt = 0.5 * dx / c0 per step, about 0.834 ps here.
+Select 3D, then Execute > Open 3D vacuum cavity. The example has its own Run, Stop, Step Once, and Apply / Reset controls. Select Grid > Fixed cavity validation preset, Material > Vacuum, and Excitation > Standing wave, then Apply / Reset. This explicit preset uses a fixed 12000 x 10000 x 8000 um vacuum box with perfectly conducting walls and 500 um cubic cells. It advances at 80 steps per screen second. The displayed physical time advances by dt = 0.5 * dx / c0 per step, about 0.834 ps here.
 
 The preset initializes a standing electric field along Z, with zero magnetic field. It is a controlled validation case for the solver. The editable scene geometry does not define this box.
 
@@ -27,8 +27,8 @@ Measured frequency and error
 
 The viewer samples Ez at a fixed central grid location. It interpolates the times at which the probe crosses zero in the positive direction. After two such crossings, it estimates frequency as the number of complete periods divided by their total duration. More crossings improve the averaging.
 
-    1.0 mm cells    19.475719 GHz    0.1865% relative error
-    0.5 mm cells    19.503052 GHz    0.0465% relative error
+    1000 um cells    19.475719 GHz    0.1865% relative error
+    500 um cells    19.503052 GHz    0.0465% relative error
 
 The analytical result describes continuous Maxwell equations. The solver uses finite differences in space and time. Numerical dispersion shifts the measured frequency slightly. Halving the cell size reduced this error by about four, consistent with second-order convergence for this smooth vacuum mode. The displayed frequency is measured from the evolving field.
 

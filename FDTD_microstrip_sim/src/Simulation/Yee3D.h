@@ -105,6 +105,12 @@ public:
         return electric[axis].checked(index);
     }
 
+    bool isConductor(Axis axis, Index index) const
+    {
+        electric[axis].checked(index);
+        return conductor[axis][electric[axis].offset(index)];
+    }
+
     float sampleMagnetic(Axis axis, Index index) const
     {
         return magnetic[axis].checked(index);
@@ -119,6 +125,14 @@ public:
                 throw std::invalid_argument("Electric source on a PEC wall");
         if (!conductor[axis][grid.offset(index)])
             sample += amplitude;
+    }
+
+    // Impressed normalized electric drive rate (1/s), integrated over one step.
+    // The local dielectric coefficient supplies 1/epsilon_r, as in Ampere's law.
+    void driveElectric(Axis axis, Index index, double rate)
+    {
+        const double inverseEpsilon = electricCoefficient[axis].checked(index) / coefficient;
+        injectElectric(axis,index,static_cast<float>(dt * inverseEpsilon * rate));
     }
 
     void step()

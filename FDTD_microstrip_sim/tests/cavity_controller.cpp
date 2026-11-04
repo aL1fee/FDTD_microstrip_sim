@@ -46,5 +46,17 @@ int main()
         require(controller.reset(settings));
         require(controller.stepCount()==0 && controller.time()==0 && controller.measuredFrequency()==0);
     }
+    CavityController scene;
+    require(scene.reset({CavityController::Material::Scene, 4},
+        [](const auto&) { return 4.0; },
+        [](const auto& p) { return p[0] > 0.004 && p[0] < 0.008; }));
+    require(scene.conductorSamples() > 0);
+    for (int step = 0; step < 100; ++step)
+    {
+        scene.stepOnce();
+        require(scene.sample({12,10,8}) == 0);
+    }
+    require(scene.reset({CavityController::Material::Vacuum, 1}));
+    require(scene.conductorSamples() == 0 && scene.sample({12,10,8}) == 1);
     std::puts("Controller matches legacy initialization and stepping exactly; pause, step, reset and failed setup passed.");
 }
