@@ -1,6 +1,7 @@
 #include "GUI.h"
 #include "LengthUnits.h"
 #include "FieldSliceView.h"
+#include "FieldProbeView.h"
 #include "../Simulation/SceneCavitySetup.h"
 
 #include <algorithm>
@@ -497,11 +498,16 @@ void GUI::buildMenuLowerPanel()
             if (ImGui::BeginMenu("Observation plane"))
             {
                 ImGui::Checkbox("Show in scene", &observationPlaneVisible);
+                ImGui::Checkbox("Color plane by field", &observationPlaneField);
                 ImGui::Checkbox("Show active solver boundary", &solverBoundaryVisible);
                 ImGui::SliderFloat("Opacity", &observationPlaneOpacity, 0.0f, 1.0f, "%.2f");
                 ImGui::TextUnformatted("0 = transparent, 1 = opaque");
-                ImGui::TextWrapped("Follows the active 3D field slice. It does not affect the simulation.");
+                ImGui::TextWrapped("Follows the active slice and electric component. Red/blue uses the same normalized +/-1 scale as the plot. It does not affect the simulation.");
                 if (!cavity.ready()) ImGui::TextUnformatted("Open slice controls and Apply / Reset to initialize a slice.");
+                ImGui::BeginDisabled(!canRun3D());
+                if(ImGui::MenuItem(cavity.isRunning() ? "Pause 3D fields" : "Run 3D fields")) cavity.setRunning(!cavity.isRunning());
+                if(ImGui::MenuItem("Step 3D once")) cavity.stepOnce();
+                ImGui::EndDisabled();
                 if (ImGui::MenuItem("Open slice controls")) cavityOpen = true;
                 ImGui::EndMenu();
             }
@@ -1403,28 +1409,42 @@ void GUI::buildRightPanels()
 
 
 
+CavityController::Settings GUI::requested3DSettings() const
+{
+    CavityController::Settings settings{static_cast<CavityController::Material>(cavityMaterialMode),cavityPermittivity};
+    settings.excitation=static_cast<CavityController::Excitation>(cavityExcitation);
+    if(cavityGridSource==0) settings.grid=_simulation_space->gridSettings3D();
+    return settings;
+}
+
+bool GUI::canRun3D() const
+{
+    if(!cavity.ready() || !cavity.error().empty() || cavityGridSource!=activeGridSource) return false;
+    try {
+        const auto requested=requested3DSettings();
+        const auto& active=cavity.settings();
+        return requested.grid==active.grid && requested.material==active.material &&
+            requested.permittivity==active.permittivity && requested.excitation==active.excitation;
+    } catch(const std::exception&) { return false; }
+}
+
 void GUI::buildCavityWindow()
 {
 	if (!cavityOpen)
 		return;
     static SceneCoverage coverage;
     // No implicit fallback solver: fields exist only after an explicit Apply.
-    CavityController::Settings requested{static_cast<CavityController::Material>(cavityMaterialMode), cavityPermittivity};
-    requested.excitation = static_cast<CavityController::Excitation>(cavityExcitation);
+    CavityController::Settings requested;
     std::string gridError;
     bool gridDimensionsValid = false;
     try {
-        if (cavityGridSource == 0)
-            requested.grid = _simulation_space->gridSettings3D();
+        requested = requested3DSettings();
         gridDimensionsValid = true;
         requested.grid.validate(cavity.allocatedBytes());
     } catch (const std::exception& e) { gridError = e.what(); }
     const bool pending = !cavity.ready() || cavityGridSource != activeGridSource || !gridError.empty() || requested.grid != cavity.grid() ||
         requested.material != cavity.settings().material || requested.permittivity != cavity.settings().permittivity || requested.excitation != cavity.settings().excitation;
     if (pending) cavity.setRunning(false);
-    const double now = glfwGetTime();
-    cavity.update(now - cavityLastFrame);
-    cavityLastFrame = now;
 
     ImGui::SetNextWindowSize(ImVec2(620, 600), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("3D vacuum cavity", &cavityOpen))
@@ -1482,6 +1502,8 @@ void GUI::buildCavityWindow()
         ImGui::EndDisabled();
         if (!cavity.error().empty()) ImGui::TextWrapped("%s", cavity.error().c_str());
 
+        drawFieldProbes(cavity, lengthUnit);
+        drawPropagationValidation(propagationValidation);
         if (!cavity.ready())
             ImGui::TextWrapped("No active 3D simulation. Choose a valid grid and click Apply / Reset. No field is available outside an active solver domain.");
         else
@@ -1535,8 +1557,7 @@ void GUI::buildCavityWindow()
 
 	}
 	ImGui::End();
-	if (!cavityOpen)
-		cavity.setRunning(false);
+
 }
 
 void GUI::buildTheoryWindow()
@@ -1554,6 +1575,7 @@ void GUI::buildTheoryWindow()
         {"3D grid settings", "3d_grid_settings.txt"},
         {"3D slices and X pulse", "3d_slices_and_pulse.txt"},
         {"3D scene sources", "3d_scene_sources.txt"},
+        {"3D field probes", "3d_field_probes.txt"},
 		{"Start a 1D run", "getting_started.txt"},
 		{"Scene editor", "scene_editor.txt"},
 		{"Simulation controls", "simulation_controls.txt"},
@@ -1695,7 +1717,11 @@ void GUI::newFrame()
 	buildLowerPanel();
 	buildRightPanels();
 	buildTheoryWindow();
-	buildCavityWindow();
+    const double now=glfwGetTime();
+    if(!canRun3D()) cavity.setRunning(false);
+    cavity.update(now-cavityLastFrame);
+    cavityLastFrame=now;
+    buildCavityWindow();
 
 	ImGui::PopStyleColor();
 }

@@ -155,6 +155,9 @@
     </ClInclude>
     <ClInclude Include="src\Simulation\CavityController.h" />
     <ClInclude Include="src\Simulation\GridSettings.h" />
+    <ClInclude Include="src\Simulation\FieldProbes.h" />
+    <ClInclude Include="src\Simulation\PropagationValidation.h" />
+    <ClInclude Include="src\GUI\FieldProbeView.h" />
     <ClInclude Include="src\Simulation\ElectricDrive.h" />
     <ClInclude Include="src\Simulation\FieldSlice.h" />
     <ClInclude Include="src\Simulation\ObservationPlane.h" />

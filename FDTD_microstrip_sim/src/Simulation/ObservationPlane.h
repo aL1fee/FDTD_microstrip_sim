@@ -12,6 +12,7 @@ struct ObservationPlane
     float opacity = .2f;
     bool domainVisible = false;
     Yee3D::Axis component = Yee3D::Z;
+    bool colorByField = false;
     std::array<std::array<double,3>,4> cornersMeters() const
     {
         FieldSlice slice(grid.cells, orientation, layer, component);

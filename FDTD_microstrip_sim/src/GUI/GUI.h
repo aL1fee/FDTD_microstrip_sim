@@ -5,6 +5,7 @@
 #include <map>
 
 #include "../Simulation/CavityController.h"
+#include "../Simulation/PropagationValidation.h"
 #include "../Simulation/ObservationPlane.h"
 
 #include <glad/glad.h>
@@ -40,6 +41,8 @@ private:
 	void buildMainMenuPanel();
 	void buildTheoryWindow();
 	void buildCavityWindow();
+    CavityController::Settings requested3DSettings() const;
+    bool canRun3D() const;
 
 	int cavityMaterialMode = 0;
     int cavityGridSource = 0; // 0: configured domain, 1: explicit validation preset
@@ -47,12 +50,14 @@ private:
     bool solverBoundaryVisible = true;
 	float cavityPermittivity = 4.0f;
 	CavityController cavity;
+    PropagationValidation propagationValidation;
 	bool cavityOpen = false;
 	int cavitySlice = 8;
     int cavityPlane = 0;
     int cavityExcitation = 0;
     int cavityComponent = 2;
     bool observationPlaneVisible = true;
+    bool observationPlaneField = true;
     float observationPlaneOpacity = .2f;
 	double cavityLastFrame = 0;
 
@@ -77,10 +82,11 @@ public:
 	void render();
 	void terminate();
 
+    const CavityController& fieldSimulation() const { return cavity; }
     ObservationPlane observationPlane() const
     {
         return {cavity.grid(), static_cast<FieldSlice::Plane>(cavityPlane), cavitySlice,
-            cavity.ready() && observationPlaneVisible, observationPlaneOpacity, cavity.ready() && solverBoundaryVisible, static_cast<Yee3D::Axis>(cavityComponent)};
+            cavity.ready() && observationPlaneVisible, observationPlaneOpacity, cavity.ready() && solverBoundaryVisible, static_cast<Yee3D::Axis>(cavityComponent), observationPlaneField};
     }
     void newFrame();
 

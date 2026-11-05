@@ -2,10 +2,12 @@
 
 #include "GridSettings.h"
 #include "ElectricDrive.h"
+#include "FieldProbes.h"
 #include <algorithm>
 #include <functional>
 #include <memory>
 #include <string>
+#include <cstdint>
 
 class CavityController
 {
@@ -106,6 +108,9 @@ public:
             crossings = 0;
             firstCrossing = lastCrossing = 0;
             previous = field->sampleElectric(Yee3D::Z, probe());
+            configureProbes(drives.empty() ? Yee3D::Z : drives.front().axis,
+                {count[0]/3,count[1]/2,count[2]/2}, {2*count[0]/3,count[1]/2,count[2]/2});
+            ++revision;
             errorText.clear();
             return true;
         }
@@ -138,6 +143,17 @@ public:
         for (int i = 0; i < due; ++i) advance();
     }
 
+    const std::array<FieldProbe,2>& probes() const { return fieldProbes; }
+    double timestep() const { return field ? field->timestep() : 0; }
+    void configureProbes(Yee3D::Axis axis,Yee3D::Index first,Yee3D::Index second)
+    {
+        if(!field || axis<Yee3D::X || axis>Yee3D::Z) throw std::invalid_argument("Invalid probe component");
+        // Validate both before changing either history.
+        field->sampleElectric(axis,first); field->sampleElectric(axis,second);
+        fieldProbes[0].index=first; fieldProbes[1].index=second;
+        for(auto& p : fieldProbes) { p.component=axis; p.clear(); p.record(steps,field->sampleElectric(axis,p.index)); }
+    }
+    std::uint64_t fieldRevision() const { return revision; }
     bool ready() const { return static_cast<bool>(field); }
     bool isRunning() const { return running; }
     std::size_t conductorSamples() const { return field ? field->conductorSamples() : 0; }
@@ -168,6 +184,8 @@ private:
             for(const auto& index : drive.samples) field->driveElectric(drive.axis,index,rate);
         }
         ++steps;
+        ++revision;
+        for(auto& p : fieldProbes) p.record(steps,field->sampleElectric(p.component,p.index));
         const double value = field->sampleElectric(Yee3D::Z, probe());
         if (previous < 0 && value >= 0)
         {
@@ -177,6 +195,8 @@ private:
         previous = value;
     }
 
+    std::uint64_t revision=0;
+    std::array<FieldProbe,2> fieldProbes;
     std::vector<ElectricDrive> drives;
     std::unique_ptr<Yee3D> field;
     Settings active;

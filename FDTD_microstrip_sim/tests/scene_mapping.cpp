@@ -2,6 +2,7 @@
 #include "../src/Renderer.h"
 #include "../src/Simulation/SceneCavitySetup.h"
 #include "../src/GUI/FieldSliceView.h"
+#include "../src/GUI/FieldProbeView.h"
 #include "../src/Scene/ObservationPlaneRenderer.h"
 #include <stdexcept>
 Renderer* renderer = nullptr;
@@ -87,17 +88,41 @@ int main()
     resetSceneCavity(cavity,*scene,drivenSettings,&coverage);
     require(cavity.error().empty());
     std::cout << "Real Source object: normalized Ey drive, zero initialization, translation, rotation and outside rejection passed." << std::endl;
+    PropagationValidation referenceCheck;
+    const auto sceneStep=cavity.stepCount();
+    referenceCheck.start();
+    while(referenceCheck.running() && referenceCheck.completed().empty()) referenceCheck.advance(20);
+    referenceCheck.cancel();
+    require(referenceCheck.error().empty() && referenceCheck.completed().size()==1 && cavity.stepCount()==sceneStep);
     ImGui::CreateContext();
     auto& io=ImGui::GetIO(); io.DisplaySize=ImVec2(800,900); io.DeltaTime=1.0f/60;
     io.IniFilename=nullptr;
     unsigned char* pixels; int fontWidth,fontHeight;
     io.Fonts->GetTexDataAsRGBA32(&pixels,&fontWidth,&fontHeight);
+    // The probe section must render safely before setup, including after failure.
+    CavityController uninitialized;
+    for(int attempt=0;attempt<2;++attempt)
+    {
+        if(attempt) require(!uninitialized.reset({CavityController::Material::Uniform,0}));
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(780,880));
+        ImGui::Begin("Uninitialized probe panel");
+        ImGui::SetNextItemOpen(true,ImGuiCond_Always);
+        drawFieldProbes(uninitialized,LengthUnits::Unit::Micrometer);
+        ImGui::End(); ImGui::Render();
+        require(!uninitialized.ready());
+    }
+    std::cout << "Uninitialized and failed-setup probe sections render safely." << std::endl;
     for(int plane=0;plane<3;++plane)
     {
         int chosen=plane, layer=10000; // clamp stale slices after grid resize
         ImGui::NewFrame();
         ImGui::SetNextWindowPos(ImVec2(0,0)); ImGui::SetNextWindowSize(ImVec2(780,880));
         ImGui::Begin("Slice rendering validation");
+        ImGui::SetNextItemOpen(true,ImGuiCond_Always);
+        drawFieldProbes(cavity,LengthUnits::Unit::Micrometer);
+        ImGui::SetNextItemOpen(true,ImGuiCond_Always);
+        drawPropagationValidation(referenceCheck);
         int component=plane;
         drawFieldSlice(cavity,chosen,layer,LengthUnits::Unit::Micrometer,&component);
         ImGui::End(); ImGui::Render();
@@ -107,6 +132,7 @@ int main()
                 require(std::isfinite(vertex.pos.x) && std::isfinite(vertex.pos.y));
     }
     ImGui::DestroyContext();
+    std::cout << "Field-probe panels and independent reference result plots rendered." << std::endl;
     {
         ObservationPlane plane{GridSettings{{8,6,4},.001},FieldSlice::XY,1,true,.5f};
         ObservationPlaneRenderer overlay;
@@ -145,6 +171,64 @@ int main()
         require(colored>100 && colored<5000 && glGetError()==GL_NO_ERROR);
         std::cout << "Active solver wireframe rendered with slice hidden." << std::endl;
         std::cout << "Observation plane GPU pixels: alpha, hide, depth occlusion and GL-state restoration passed." << std::endl;
+    }
+    {
+        CavityController field;
+        CavityController::Settings fieldSettings{CavityController::Material::Vacuum,1,GridSettings{{8,6,4},.001}};
+        require(field.reset(fieldSettings));
+        ObservationPlaneRenderer overlay;
+        glClearColor(1,1,1,1); glClearDepth(1); glViewport(0,0,320,240);
+        GLuint oldTexture,oldSampler,oldUnpack;
+        glGenTextures(1,&oldTexture); glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D,oldTexture);
+        glGenSamplers(1,&oldSampler); glBindSampler(0,oldSampler);
+        glGenBuffers(1,&oldUnpack); glBindBuffer(GL_PIXEL_UNPACK_BUFFER,oldUnpack);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER,64,nullptr,GL_STATIC_DRAW);
+        glPixelStorei(GL_UNPACK_ALIGNMENT,8); glPixelStorei(GL_UNPACK_ROW_LENGTH,3);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS,1); glPixelStorei(GL_UNPACK_SKIP_PIXELS,1);
+        glActiveTexture(GL_TEXTURE3);
+        auto verify=[&](FieldSlice::Plane orientation,Yee3D::Axis component,int layer) {
+            ObservationPlane plane{field.grid(),orientation,layer,true,.7f,false,component,true};
+            FieldSlice slice(field.cells(),orientation,layer,component);
+            glm::mat4 view(0.f);
+            view[slice.horizontal][0]=1; view[slice.vertical][1]=1; view[slice.normal][2]=1; view[3][3]=1;
+            const auto projection=glm::ortho(0.f,static_cast<float>(field.cells()[slice.horizontal]*field.spacing()*1000),
+                0.f,static_cast<float>(field.cells()[slice.vertical]*field.spacing()*1000),-100.f,100.f);
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+            overlay.draw(plane,view,projection,&field);
+            for(int py : {40,100,180}) for(int px : {40,120,250})
+            {
+                const auto u=static_cast<std::size_t>(std::floor((px+.5)/320*field.cells()[slice.horizontal]+(slice.horizontal==component ? 0:.5)));
+                const auto v=static_cast<std::size_t>(std::floor((py+.5)/240*field.cells()[slice.vertical]+(slice.vertical==component ? 0:.5)));
+                const float value=std::max(-1.f,std::min(field.sample(slice.index(u,v),component),1.f));
+                const float fade=1-std::abs(value);
+                const float expected[3]={value<0 ? fade:1,fade,value>0 ? fade:1};
+                float pixel[4]; glReadPixels(px,py,1,1,GL_RGBA,GL_FLOAT,pixel);
+                for(int c=0;c<3;++c) require(std::abs(pixel[c]-(.3f+.7f*expected[c]))<.02f);
+            }
+            GLint state; glGetIntegerv(GL_ACTIVE_TEXTURE,&state); require(state==GL_TEXTURE3);
+            glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING,&state); require(static_cast<GLuint>(state)==oldUnpack);
+            glGetIntegerv(GL_UNPACK_ALIGNMENT,&state); require(state==8);
+            glGetIntegerv(GL_UNPACK_ROW_LENGTH,&state); require(state==3);
+            glGetIntegerv(GL_UNPACK_SKIP_ROWS,&state); require(state==1);
+            glGetIntegerv(GL_UNPACK_SKIP_PIXELS,&state); require(state==1);
+            glActiveTexture(GL_TEXTURE0); glGetIntegerv(GL_TEXTURE_BINDING_2D,&state); require(static_cast<GLuint>(state)==oldTexture);
+            glGetIntegerv(GL_SAMPLER_BINDING,&state); require(static_cast<GLuint>(state)==oldSampler); glActiveTexture(GL_TEXTURE3);
+            require(glGetError()==GL_NO_ERROR);
+        };
+        for(auto plane : {FieldSlice::XY,FieldSlice::XZ,FieldSlice::YZ})
+            for(auto component : {Yee3D::X,Yee3D::Y,Yee3D::Z}) verify(plane,component,1);
+        verify(FieldSlice::YZ,Yee3D::Z,1); // cached paused frame
+        for(int n=0;n<30;++n) field.stepOnce();
+        verify(FieldSlice::YZ,Yee3D::Z,1); // changed values after stepping
+        verify(FieldSlice::YZ,Yee3D::Z,3); // moved plane
+        require(field.reset(fieldSettings)); verify(FieldSlice::XY,Yee3D::Z,1);
+        fieldSettings.excitation=CavityController::Excitation::XPulse;
+        require(field.reset(fieldSettings)); verify(FieldSlice::XY,Yee3D::Z,1); // reset at the same step and grid
+        fieldSettings.grid={{6,4,2},.001}; require(field.reset(fieldSettings)); verify(FieldSlice::XY,Yee3D::Z,1);
+        glDeleteTextures(1,&oldTexture); glDeleteSamplers(1,&oldSampler); glDeleteBuffers(1,&oldUnpack);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0); glPixelStorei(GL_UNPACK_ALIGNMENT,4); glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS,0); glPixelStorei(GL_UNPACK_SKIP_PIXELS,0); glActiveTexture(GL_TEXTURE0);
+        std::cout << "Scene field texture matches solver pixels: all planes/components, pause, step, move, reset, resize and texture-state restoration passed." << std::endl;
     }
     std::cout << "XY, XZ, YZ ImGui render lists and stale-slice clamping passed." << std::endl;
     glfwDestroyWindow(window);

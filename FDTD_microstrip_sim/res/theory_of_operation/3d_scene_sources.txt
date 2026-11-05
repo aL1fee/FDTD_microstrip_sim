@@ -30,3 +30,6 @@ A local drive can radiate in several directions and excite many cavity modes. Th
 
 * Verification
 Tests verify zero-field initialization; midpoint waveform timing; periodic RF frequency after the ramp; amplitude and overlapping-source linearity; 1/epsilon_r scaling; frame-rate-independent stepping; failed-setup preservation; PEC and out-of-domain rejection; and real Source-object translation/rotation. The existing standing-wave, X-pulse, dielectric-interface and conductor-reflection tests still pass.
+
+* Measuring your run
+Expand Field probes in the 3D window to record two local electric-field histories on each solver step. Position probes in the intended signal path and use the source polarization as a starting component. See 3D field probes for the independent propagation reference and its limits.

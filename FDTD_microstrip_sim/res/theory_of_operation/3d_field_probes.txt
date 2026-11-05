@@ -1,0 +1,32 @@
+3D field probes and propagation verification
+
+* Field probes (this simulation)
+Field probes is always shown above Propagation reference check in the 3D window. Expand it; before a successful Apply / Reset it displays setup instructions. Its measurement controls become available once the main simulation is initialized. Running the reference check alone does not initialize the main simulation. Two probes record the selected global electric component at fixed Yee sample indices (i,j,k). Their displayed physical positions include that component's half-cell offset. The default locations are near one-third and two-thirds of the active X extent at the transverse center. The default component is the first scene source's polarization when driven sources are active, otherwise Ez. A default position is not guaranteed to lie in your signal path; choose positions that make sense for your geometry.
+
+Edit the probe component or indices and press Enter to commit numeric changes. Out-of-range indices are clamped to valid component samples. Editing a probe clears both histories and begins a new record at the current simulation time; it does not reset or alter fields. Apply / Reset restores default probes and restarts the history at step zero. A failed solver setup retains the previous histories. PEC probes are identified; probes on tangential outer-wall samples will also read zero.
+
+* History and scale
+Each accepted solver step adds one sample, including Step Once. Pausing adds no samples. Recording occurs in the controller, not once per display frame. Each probe retains the latest 2048 steps in a bounded ring buffer. The displayed time range is physical simulation time in ps. Both graphs share a symmetric, automatically fitted vertical scale; field values remain normalized, not voltage or RF power. The trace plots are autoscaled; the colored field-slice plot retains its separate fixed color scale.
+
+* Propagation reference check
+Expand Propagation reference check and click Run reference check. It uses an independent solver and does not modify scene objects, the active simulation, its probes, or its observation plane. Work advances in small batches while the 3D window is open. Cancel stops the check; completed results remain visible. Closing the window suspends further reference work until it is reopened.
+
+The reference box is 80000 x 64000 x 1000 um. A Gaussian electric packet is initially centered at X=20000 um with standard deviation 2000 um, uniform across the transverse interior; H starts at zero. The packet splits in both X directions. Two centerline Ez probes at X=30000 and 40000 um measure the right-going pulse. The 10000 um separation and physical initial pulse remain unchanged when refining from 500 to 250 um cells. The sampling window ends before the main wall disturbances reach the probes.
+
+* Arrival delay and speed
+The reference locates each positive pulse maximum and uses a parabola through its neighboring samples to estimate its sub-step arrival time. It reports:
+    measured delay = arrival time at probe 2 - arrival time at probe 1
+    measured speed = probe separation / measured delay
+    expected speed = c0 / sqrt(epsilon_r)
+    expected delay = probe separation * sqrt(epsilon_r) / c0
+    relative delay error = abs(measured delay / expected delay - 1)
+Only the controlled reference uses this peak estimator. It is not automatically applied to arbitrary scene signals: multiple modes, continuous-wave phase ambiguity, near fields and reflections can make a single travel-time interpretation misleading.
+
+* Acceptance and convergence
+The four cases are vacuum and uniform epsilon_r=4 at both cell sizes. Each must have less than 2 percent delay error, and the finer grid should reduce error in both materials. Current reference results are approximately:
+    Vacuum: expected 33.3564 ps; measured 33.5499 ps (500 um), 33.4053 ps (250 um).
+    epsilon_r=4: expected 66.7128 ps; measured 67.1936 ps (500 um), 66.8349 ps (250 um).
+Halving spacing reduces the measured errors by approximately four, consistent with the solver's second-order behavior for this smooth pulse. The last completed case's two waveforms are shown below the results.
+
+* Scope of this check
+This verifies propagation in uniform media and the probe measurement path. It does not validate a user-built microstrip, calibrate Source-object delivered power, or establish a port impedance. Scene-source timing and placement have separate tests. A real microstrip still needs a known trace/substrate/ground setup, a defined feed and termination, field-shape checks, and mesh convergence for its own geometry.

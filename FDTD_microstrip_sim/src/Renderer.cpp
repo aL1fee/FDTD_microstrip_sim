@@ -339,7 +339,7 @@ void Renderer::render() const
 			input->processInput();
 
 			gui->newFrame();
-            observationPlane.draw(gui->observationPlane(), _scene_main->getViewMatrix(), _scene_main->getProjMatrix());
+            observationPlane.draw(gui->observationPlane(), _scene_main->getViewMatrix(), _scene_main->getProjMatrix(), &gui->fieldSimulation());
 			gui->render();
 
 			glfwSwapBuffers(window);
