@@ -99,6 +99,8 @@ public:
     }
 
     double timestep() const { return dt; }
+    const std::vector<float>& electricSamples(Axis axis) const { return electric[axis].samples; }
+    const std::vector<bool>& conductorMask(Axis axis) const { return conductor[axis]; }
 
     float sampleElectric(Axis axis, Index index) const
     {

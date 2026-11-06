@@ -13,7 +13,8 @@ struct ConductorCoverage
 using SceneCoverage = std::vector<ConductorCoverage>;
 
 // Borrow scene objects only during reset. The controller retains coefficients.
-inline void resetSceneCavity(CavityController& controller, MainScene& scene,
+template<class Controller>
+inline void resetSceneCavity(Controller& controller, MainScene& scene,
                             CavityController::Settings settings, SceneCoverage* coverage = nullptr)
 {
     std::vector<ElectricDriveDefinition> sources;

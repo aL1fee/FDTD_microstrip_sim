@@ -164,30 +164,15 @@ void Renderer::testPerformanceStop() const
 }
 
 
-std::atomic<bool> threadSwitch(false);
-
-
+// GLFW callbacks and OpenGL now share the main/UI thread.
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	if (!threadSwitch.load()) {
-		//int width, height;
-		//glfwGetWindowSize(window, &width, &height);
-		//std::cout << "HEYWIDTH: " << width << std::endl;
-		//std::cout << "HEYHEIGHT: " << height << std::endl;
-		//glViewport(10, 10, 10, 10);
-
-		//_projMatrixChanged = true;
-
-		//glViewport(0, 0, width, height);
-
-
-		glfwGetWindowSize(window, &_currentWindowWidth, &_currentWindowHeight);
-		_resizing = true;
-		threadSwitch.store(true);
-	}
-
+    glfwGetWindowSize(window, &_currentWindowWidth, &_currentWindowHeight);
+    glViewport(0,0,width,height);
+    _resizing = true;
 }
 	
+
 void window_size_callback(GLFWwindow* window, int width, int height) {
 	//if (threadSwitch.load()) {
 	//	threadSwitch.store(false);
@@ -252,19 +237,10 @@ void Renderer::run() const
 	_scene_main = new MainScene(window);
 	_simulation_space = new SimulationSpace(window, _scene_main);
 
-	glfwMakeContextCurrent(nullptr); // Release context from main thread
-	std::thread renderThread(&Renderer::render, this);
+    // Input, ImGui, scene editing and GL remain on one thread. Only numerical
+    // stepping runs in AsyncCavity; no event/render flag spin loops are needed.
+    render();
 
-
-	while (!glfwWindowShouldClose(window)) {
-		if (!threadSwitch.load()) {
-			glfwPollEvents();
-			_resizing = false;
-			threadSwitch.store(true);
-		}
-
-	}
-	renderThread.join();
 }
 
 void Renderer::centeredViewportResize() const {
@@ -318,44 +294,22 @@ void Renderer::disableDepthTest() const
 
 void Renderer::render() const
 {
-	double lastTime = glfwGetTime();
-	int nbFrames = 0;
-		
-	glfwMakeContextCurrent(window);
     ObservationPlaneRenderer observationPlane;
-	while (!glfwWindowShouldClose(window)) {
-		if (threadSwitch.load()) {
-			if (_resizing) {
-			}
-			//testPerformanceStart();
-			updateDeltaTime();
-			updateFrameBackgroundColor();
-			clearDepthBuffer();
-
-			_scene_main->render();
-
-			_simulation_space->render();
-
-			input->processInput();
-
-			gui->newFrame();
-            observationPlane.draw(gui->observationPlane(), _scene_main->getViewMatrix(), _scene_main->getProjMatrix(), &gui->fieldSimulation());
-			gui->render();
-
-			glfwSwapBuffers(window);
-
-			//testPerformanceStop();
-
-			double currentTime = glfwGetTime();
-			nbFrames++;
-			if (currentTime - lastTime >= 1.0) {
-				std::cout << "# of frames: " << nbFrames << std::endl;
-				nbFrames = 0;
-				lastTime += 1.0;
-			}
-			threadSwitch.store(false);
-		}
-	}
-	observationPlane.release();
-	glfwMakeContextCurrent(nullptr);
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        if(glfwWindowShouldClose(window)) break;
+        updateDeltaTime();
+        updateFrameBackgroundColor();
+        clearDepthBuffer();
+        _scene_main->render();
+        _simulation_space->render();
+        input->processInput();
+        gui->newFrame();
+        observationPlane.draw(gui->observationPlane(), _scene_main->getViewMatrix(), _scene_main->getProjMatrix(), &gui->fieldSimulation());
+        gui->render();
+        glfwSwapBuffers(window); // vsync enabled in run(); yields between frames
+        _resizing = false;
+    }
+    observationPlane.release();
+    gui->terminate(); // join worker and release ImGui while GL context is current
 }

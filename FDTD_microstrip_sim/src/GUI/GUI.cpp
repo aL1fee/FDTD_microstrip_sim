@@ -3,6 +3,7 @@
 #include "FieldSliceView.h"
 #include "FieldProbeView.h"
 #include "../Simulation/SceneCavitySetup.h"
+#include "../Simulation/Microstrip5880Preset.h"
 
 #include <algorithm>
 #include <fstream>
@@ -301,6 +302,20 @@ void GUI::buildMenuUpperPanel()
 					glm::vec3(.88f, .88f, .88f), 10.0f, 50);
 
 			}
+			if (ImGui::MenuItem("System #3 (Microstrip on Duroid 5880)"))
+            {
+                cavity.setRunning(false);
+                Microstrip5880Preset::add(*_scene_main, *_simulation_space);
+                lengthUnit = LengthUnits::Unit::Mil;
+                cavityGridSource = 0;
+                cavityMaterialMode = 2;
+                cavityExcitation = 2;
+                cavityComponent = 1;
+                cavityPlane = 0; // XY through trace center, at Z = 50 mil
+                cavitySlice = 50;
+                observationPlaneVisible = observationPlaneField = true;
+                s = "> Added System #3. Apply / Reset to map the scene (600,000 cells).";
+            }
 			statusWindow->setMessage(s);
 			ImGui::EndMenu();
 		}
@@ -507,6 +522,8 @@ void GUI::buildMenuLowerPanel()
                 ImGui::BeginDisabled(!canRun3D());
                 if(ImGui::MenuItem(cavity.isRunning() ? "Pause 3D fields" : "Run 3D fields")) cavity.setRunning(!cavity.isRunning());
                 if(ImGui::MenuItem("Step 3D once")) cavity.stepOnce();
+                int rate=cavity.stepRate();
+                if(ImGui::SliderInt("3D steps/s limit", &rate, 1, 80)) cavity.setStepRate(rate);
                 ImGui::EndDisabled();
                 if (ImGui::MenuItem("Open slice controls")) cavityOpen = true;
                 ImGui::EndMenu();
@@ -1477,8 +1494,7 @@ void GUI::buildCavityWindow()
         {
             const auto& g = requested.grid;
             ImGui::Text("Proposed grid: %zu x %zu x %zu = %zu cells", g.cells[0],g.cells[1],g.cells[2],g.cellCount());
-            ImGui::Text("Solver memory: %.1f MiB | Reset peak estimate: %.1f MiB / 512 MiB",
-                g.residentBytes()/1048576.0, (g.resetBytes()+std::max(cavity.allocatedBytes(), g.residentBytes()))/1048576.0);
+            ImGui::Text("Solver memory: %.1f MiB", g.residentBytes()/1048576.0);
             ImGui::TextWrapped("Whole cells fill the domain from (0,0,0); leftover fractions are omitted. "
                 "Apply / Reset uses the proposed grid. Outer walls remain PEC; copper losses and driven ports are not included.");
             if (requested.material == CavityController::Material::Scene)
@@ -1499,6 +1515,9 @@ void GUI::buildCavityWindow()
         if (ImGui::Button(cavity.isRunning() ? "Stop" : "Run")) cavity.setRunning(!cavity.isRunning());
         ImGui::SameLine();
         if (ImGui::Button("Step Once")) cavity.stepOnce();
+        int rate=cavity.stepRate();
+        if(ImGui::SliderInt("Steps/s limit", &rate, 1, 80)) cavity.setStepRate(rate);
+        ImGui::Text("Worker: %.1f ms/step incl. snapshot | CPU duty capped at 50%%", cavity.stepMilliseconds());
         ImGui::EndDisabled();
         if (!cavity.error().empty()) ImGui::TextWrapped("%s", cavity.error().c_str());
 
@@ -1574,6 +1593,7 @@ void GUI::buildTheoryWindow()
         {"Length units and grid coverage", "length_units.txt"},
         {"3D grid settings", "3d_grid_settings.txt"},
         {"3D slices and X pulse", "3d_slices_and_pulse.txt"},
+        {"System #3: Duroid 5880 microstrip", "system3_duroid5880.txt"},
         {"3D scene sources", "3d_scene_sources.txt"},
         {"3D field probes", "3d_field_probes.txt"},
 		{"Start a 1D run", "getting_started.txt"},
@@ -1698,6 +1718,7 @@ void GUI::render()
 
 void GUI::terminate()
 {
+    cavity.shutdown();
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
@@ -1705,6 +1726,7 @@ void GUI::terminate()
 
 void GUI::newFrame()
 {
+    cavity.poll();
 	ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, ImVec4(0.81f, 0.81f, 0.81f, 1.0f)); // Background color of selected text
 
 	ImGui_ImplGlfw_NewFrame();
@@ -1717,10 +1739,7 @@ void GUI::newFrame()
 	buildLowerPanel();
 	buildRightPanels();
 	buildTheoryWindow();
-    const double now=glfwGetTime();
     if(!canRun3D()) cavity.setRunning(false);
-    cavity.update(now-cavityLastFrame);
-    cavityLastFrame=now;
     buildCavityWindow();
 
 	ImGui::PopStyleColor();

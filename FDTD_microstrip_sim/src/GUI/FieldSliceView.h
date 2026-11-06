@@ -4,7 +4,8 @@
 #include "../Simulation/CavityController.h"
 #include "../vendor/imgui/imgui.h"
 
-inline void drawFieldSlice(CavityController& controller, int& plane, int& layer, LengthUnits::Unit unit, int* selectedComponent = nullptr)
+template<class Controller>
+inline void drawFieldSlice(Controller& controller, int& plane, int& layer, LengthUnits::Unit unit, int* selectedComponent = nullptr)
 {
     const auto cells = controller.cells();
     const double dx = controller.spacing();

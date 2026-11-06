@@ -4,6 +4,7 @@
 #include "../src/GUI/FieldSliceView.h"
 #include "../src/GUI/FieldProbeView.h"
 #include "../src/Scene/ObservationPlaneRenderer.h"
+#include "../src/Simulation/Microstrip5880Preset.h"
 #include <stdexcept>
 Renderer* renderer = nullptr;
 static void require(bool ok) { if (!ok) throw std::runtime_error("Scene mapping integration failed"); }
@@ -231,6 +232,46 @@ int main()
         std::cout << "Scene field texture matches solver pixels: all planes/components, pause, step, move, reset, resize and texture-state restoration passed." << std::endl;
     }
     std::cout << "XY, XZ, YZ ImGui render lists and stale-slice clamping passed." << std::endl;
+    {
+        auto* pcbScene = new MainScene(window);
+        auto* pcbSimulation = new SimulationSpace(window,pcbScene);
+        Microstrip5880Preset::add(*pcbScene,*pcbSimulation);
+        require(pcbScene->getConductors().size()==2 && pcbScene->getSubstrates().size()==1 && pcbScene->getPowerSources().size()==1);
+        const auto mil=Microstrip5880Preset::mil;
+        auto closeValue=[](float a,float b) { return std::abs(a-b)<1e-6f; };
+        auto conductors=pcbScene->getConductors();
+        require(closeValue(*conductors[0]->getLength(),200*mil) && closeValue(*conductors[0]->getWidth(),100*mil) && closeValue(*conductors[0]->getHeight(),5*mil));
+        require(closeValue(*conductors[1]->getOriginY(),10*mil) && closeValue(*conductors[1]->getOriginZ(),43*mil));
+        require(closeValue(*conductors[1]->getLength(),200*mil) && closeValue(*conductors[1]->getWidth(),14*mil) && closeValue(*conductors[1]->getHeight(),1.4f*mil));
+        auto* dielectric=pcbScene->getSubstrates()[0];
+        require(closeValue(dielectric->getRelativePermittivity(),2.2f) && closeValue(*dielectric->getOriginY(),5*mil) && closeValue(*dielectric->getOriginZ(),20*mil));
+        require(closeValue(*dielectric->getLength(),200*mil) && closeValue(*dielectric->getWidth(),60*mil) && closeValue(*dielectric->getHeight(),5*mil));
+        auto grid=pcbSimulation->gridSettings3D();
+        require(grid.cells==Yee3D::Index{200,30,100} && grid.cellCount()==600000);
+        require(std::abs(grid.spacing-25.4e-6)<1e-12);
+        grid.validate();
+        std::cout << "System #3 grid: " << grid.cellCount() << " cells; resident " << grid.residentBytes()/1048576.0
+            << " MiB; conservative reset " << (grid.resetBytes()+grid.residentBytes())/1048576.0 << " MiB" << std::endl;
+        CavityController pcb;
+        SceneCoverage pcbCoverage;
+        CavityController::Settings setup{CavityController::Material::Scene,2.2f,grid,CavityController::Excitation::SceneSources};
+        resetSceneCavity(pcb,*pcbScene,setup,&pcbCoverage);
+        if(!pcb.error().empty()) throw std::runtime_error(pcb.error());
+        require(pcbCoverage.size()==2 && pcbCoverage[0].samples>0 && pcbCoverage[1].samples>0);
+        require(pcb.sources().size()==1 && !pcb.sources()[0].samples.empty());
+        auto* pcbSource=pcbScene->getPowerSources()[0];
+        const float traceTop=*conductors[1]->getOriginY()+*conductors[1]->getHeight();
+        require(closeValue(*pcbSource->getOriginY()-*pcbSource->getRadius(),traceTop));
+        require(pcb.sources()[0].excluded==0 && pcb.sources()[0].axis==Yee3D::Y);
+        for(const auto& sample : pcb.sources()[0].samples)
+            require((sample[1]+.5)*grid.spacing > traceTop*1e-3);
+        const auto point=pcb.sources()[0].samples.front();
+        require(pcb.sample(point,Yee3D::Y)==0);
+        pcb.stepOnce();
+        require(std::isfinite(pcb.sample(point,Yee3D::Y)) && pcb.sample(point,Yee3D::Y)>0);
+        std::cout << "System #3 full-resolution reset and step passed: carrier " << pcbCoverage[0].samples
+            << ", trace " << pcbCoverage[1].samples << ", driven source " << pcb.sources()[0].samples.size() << " samples." << std::endl;
+    }
     glfwDestroyWindow(window);
     glfwTerminate();
 }

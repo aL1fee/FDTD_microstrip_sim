@@ -80,7 +80,7 @@ public:
                         if(wall || next->isConductor(source.axis,index)) { ++drive.excluded; continue; }
                         // Bound vector growth conservatively, including reset replacement storage.
                         mappingBytes+=4*sizeof(Yee3D::Index);
-                        if(settings.grid.resetBytes()+std::max(allocatedBytes(),settings.grid.residentBytes())+mappingBytes>GridSettings::memoryBudget())
+                        if(settings.grid.resetBytes()+std::max(allocatedBytes(),settings.grid.residentBytes())+mappingBytes>settings.grid.memoryBudget())
                             throw std::invalid_argument("Source mapping exceeds the solver memory budget.");
                         drive.samples.push_back(index);
                     }
@@ -100,6 +100,7 @@ public:
                             ? std::sin(pi*x/count[0]) : std::exp(-0.5*u*u);
                         next->injectElectric(Yee3D::Z, {x,y,z}, static_cast<float>(profile * std::sin(pi*y/count[1])));
                     }
+            mappedConductorCount = next->conductorSamples();
             field = std::move(next);
             drives = std::move(nextDrives);
             active = settings;
@@ -154,9 +155,11 @@ public:
         for(auto& p : fieldProbes) { p.component=axis; p.clear(); p.record(steps,field->sampleElectric(axis,p.index)); }
     }
     std::uint64_t fieldRevision() const { return revision; }
+    const std::vector<float>& electricSamples(Yee3D::Axis axis) const { return field->electricSamples(axis); }
+    const std::vector<bool>& conductorMask(Yee3D::Axis axis) const { return field->conductorMask(axis); }
     bool ready() const { return static_cast<bool>(field); }
     bool isRunning() const { return running; }
-    std::size_t conductorSamples() const { return field ? field->conductorSamples() : 0; }
+    std::size_t conductorSamples() const { return mappedConductorCount; }
     int stepCount() const { return steps; }
     double time() const { return field ? steps * field->timestep() : 0; }
     const std::string& error() const { return errorText; }
@@ -196,6 +199,7 @@ private:
     }
 
     std::uint64_t revision=0;
+    std::size_t mappedConductorCount=0;
     std::array<FieldProbe,2> fieldProbes;
     std::vector<ElectricDrive> drives;
     std::unique_ptr<Yee3D> field;

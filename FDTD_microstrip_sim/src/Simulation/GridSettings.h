@@ -39,7 +39,7 @@ struct GridSettings
         if (!std::isfinite(spacing) || spacing <= 0) throw std::invalid_argument("Cell size must be finite and positive.");
         for (auto n : cells) if (n<2 || n>1000) throw std::invalid_argument("3D grid needs 2 to 1000 cells per axis.");
         if (resetBytes() + std::max(previousBytes, residentBytes()) > memoryBudget())
-            throw std::invalid_argument("Grid exceeds the 512 MiB solver reset budget. Increase cell size or reduce the domain.");
+            throw std::invalid_argument("Grid exceeds the internal memory limit. Increase cell size or reduce the domain.");
     }
     bool operator==(const GridSettings& other) const { return cells==other.cells && spacing==other.spacing; }
     bool operator!=(const GridSettings& other) const { return !(*this==other); }

@@ -9,6 +9,8 @@ class Substrate_PO : public Cuboid_POT
 {
 private:
 	float relativePermittivity = 4.0f;
+    float referenceLossTangent = 0;
+    float lossReferenceGHz = 10;
 
 
 public:
@@ -16,5 +18,7 @@ public:
 		Cuboid_POT(o, l, w, h, col, perm, cond, sh) {}
 
 	float getRelativePermittivity() const { return relativePermittivity; }
+    void setRelativePermittivity(float value) { relativePermittivity = value; }
+    void setReferenceLossTangent(float value, float GHz) { referenceLossTangent=value; lossReferenceGHz=GHz; }
 	void updatePropertyMap() override;
 };

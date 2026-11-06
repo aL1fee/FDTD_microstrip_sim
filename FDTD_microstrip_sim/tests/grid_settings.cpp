@@ -8,6 +8,10 @@ int main()
     auto g = GridSettings::fromDomain({.0045,.002,.007}, static_cast<double>(.02f)*1e-3);
     require(g.cells == Yee3D::Index{225,100,350});
     rejects([&] { g.validate(); }); // includes room for an atomic replacement
+    auto microstrip=GridSettings::fromDomain({200*25.4e-6,30*25.4e-6,100*25.4e-6},1*25.4e-6);
+    microstrip.validate();
+    require(microstrip.cells==Yee3D::Index{200,30,100});
+    rejects([&] { microstrip.validate(microstrip.memoryBudget()); });
     const auto screenshotGrid=GridSettings::fromDomain({4.5e-3,2e-3,7e-3},static_cast<double>(.15f)*1e-3);
     require(screenshotGrid.cells==Yee3D::Index{30,13,46});
     auto rounded = GridSettings::fromDomain({.0046,.0022,.0031}, .0005);

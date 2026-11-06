@@ -13,7 +13,7 @@ class ObservationPlaneRenderer
     std::vector<float> pixels;
     bool textureValid=false;
     std::uint64_t lastRevision=0;
-    const CavityController* lastField=nullptr;
+    const void* lastField=nullptr;
     FieldSlice::Plane lastOrientation=FieldSlice::XY;
     Yee3D::Axis lastComponent=Yee3D::Z;
     std::size_t lastLayer=0, textureWidth=0, textureHeight=0;
@@ -74,7 +74,8 @@ public:
         if(program) glDeleteProgram(program);
         vbo=vao=program=0;
     }
-    void draw(const ObservationPlane& plane,const glm::mat4& view,const glm::mat4& projection,const CavityController* field=nullptr)
+    template<class Field = CavityController>
+    void draw(const ObservationPlane& plane,const glm::mat4& view,const glm::mat4& projection,const Field* field=nullptr)
     {
         if((!plane.visible || plane.opacity<=0) && !plane.domainVisible) return;
         const bool showField=plane.visible && plane.opacity>0 && plane.colorByField && field && field->ready() && field->grid()==plane.grid;

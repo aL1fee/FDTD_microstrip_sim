@@ -1,0 +1,25 @@
+* System #3: Microstrip on RT/duroid 5880
+Add > System #3 inserts a carrier, substrate, trace and Source. Like the other Add examples, it retains existing scene objects. Use an empty scene for an isolated example. Adding the model does not open the cavity window. Display units switch to mil. Internal scene coordinates remain mm; 1 mil = 0.0254 mm.
+
+* Dimensions (mil)
+Positions below are X, Y, Z; sizes are length (X), height (Y), width (Z).
+Carrier: position (0,0,0), size (200,5,100).
+Substrate: position (0,5,20), size (200,5,60).
+Trace: position (0,10,43), size (200,1.4,14).
+The 1.4 mil trace is 35.56 um thick, the specified nominal 1 oz copper thickness. Gold plating is not added to this total thickness.
+
+* Materials and model limits
+RT/duroid 5880 uses relative permittivity 2.2. Its reference loss tangent is 0.0009 at 10 GHz (Rogers data sheet); the current solver uses a lossless dielectric, so that loss tangent is metadata only. Space outside substrates is vacuum, relative permittivity 1.
+Carrier conductivity is stored as nominal gold conductivity, 4.1e7 S/m; trace conductivity is nominal bulk copper, 5.8e7 S/m. These are reference values, not an effective conductivity for a plated stack. Carrier base metal and gold thickness are unspecified. Both objects currently map to perfect conductors: finite conductivity, plating, skin effect and dielectric losses are NOT simulated.
+Rogers reference: https://www.rogerscorp.com/-/media/project/rogerscorp/documents/advanced-electronics-solutions/english/data-sheets/rt-duroid-5870---5880-data-sheet.pdf
+
+* Source
+The existing cylindrical Source is placed at (2,16.4,50) mil, with radius 5 mil and length 3 mil along +X. Its bottom touches the trace top at Y=11.4 mil without embedding the cylinder in metal. Its volume imposes an Ey drive in the air above the trace at 1 GHz with normalized amplitude 1. Geometric contact does not impose a terminal voltage or a trace-to-ground feed; the source remains a volume field drive. This is an impressed local field drive, not a calibrated 50-ohm port or a specified input power. The legacy dBm property does not set the 3D amplitude.
+
+* Domain and resolution
+Configured domain: X=200, Y=30, Z=100 mil, with 1 mil cubic cells. The trace top is Y=11.4 mil, leaving 18.6 mil above the trace. The source top is Y=21.4 mil and fits inside the domain.
+Grid: 200 x 30 x 100 = 600,000 cells. An internal memory limit reserves temporary material storage and an atomic replacement. Other application and driver memory is additional. Allocation failure preserves the previous solver.
+The 1.4 mil trace is sampled on a 1 mil grid, not represented with exact curved or subcell boundaries. No extra side or end clearance is added. The domain's outer walls remain PEC, including the trace ends; this is a closed-box experiment, not an open or matched microstrip transmission measurement.
+
+* Running
+The preset selects Configured domain, Scene materials, Scene sources, and the Ey XY slice through Z=50 mil. Open Settings > Observation plane > Open slice controls when needed. Click Apply / Reset to map geometry, then Run or Step Once. Mapping can take time at this resolution. Geometry and source edits require another Apply / Reset. Check conductor coverage and source sample counts before interpreting the fields.

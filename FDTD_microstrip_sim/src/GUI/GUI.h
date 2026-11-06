@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "../Simulation/CavityController.h"
+#include "../Simulation/AsyncCavity.h"
 #include "../Simulation/PropagationValidation.h"
 #include "../Simulation/ObservationPlane.h"
 
@@ -49,7 +49,7 @@ private:
     int activeGridSource = -1;
     bool solverBoundaryVisible = true;
 	float cavityPermittivity = 4.0f;
-	CavityController cavity;
+	AsyncCavity cavity;
     PropagationValidation propagationValidation;
 	bool cavityOpen = false;
 	int cavitySlice = 8;
@@ -59,7 +59,6 @@ private:
     bool observationPlaneVisible = true;
     bool observationPlaneField = true;
     float observationPlaneOpacity = .2f;
-	double cavityLastFrame = 0;
 
 	bool theoryOpen = false;
 	int theoryTopic = -1;
@@ -82,7 +81,7 @@ public:
 	void render();
 	void terminate();
 
-    const CavityController& fieldSimulation() const { return cavity; }
+    const AsyncCavity& fieldSimulation() const { return cavity; }
     ObservationPlane observationPlane() const
     {
         return {cavity.grid(), static_cast<FieldSlice::Plane>(cavityPlane), cavitySlice,

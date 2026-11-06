@@ -10,6 +10,8 @@ void Substrate_PO::updatePropertyMap()
 	propertyMap->push_back(std::make_pair("Height (mm)", getHeight()));
 	propertyMap->push_back(std::make_pair("Rotation angle (deg)", getRotationAngle()));
 	propertyMap->push_back(std::make_pair("Relative permittivity (3D)", &relativePermittivity));
+    propertyMap->push_back(std::make_pair("Loss tangent (reference only)", &referenceLossTangent));
+    propertyMap->push_back(std::make_pair("Loss reference frequency (GHz)", &lossReferenceGHz));
 	propertyMap->push_back(std::make_pair("Legacy permittivity (F/m)", &permittivity));
 	propertyMap->push_back(std::make_pair("Conductivity (S/m)", &conductivity));
 }

@@ -3,7 +3,8 @@
 #include "../Simulation/PropagationValidation.h"
 #include "../vendor/imgui/imgui.h"
 
-inline void drawFieldProbes(CavityController& controller,LengthUnits::Unit unit)
+template<class Controller>
+inline void drawFieldProbes(Controller& controller,LengthUnits::Unit unit)
 {
     if(!ImGui::TreeNode("Field probes (this simulation)")) return;
     if(!controller.ready())
