@@ -407,6 +407,36 @@ void MainScene::generateRay(glm::vec3 pos, glm::vec3 dir)
 }
 
 // TODO inefficient ray picking
+std::vector<PhysicalObject*> MainScene::getSceneObjects() const
+{
+    std::vector<PhysicalObject*> objects;
+    for(const auto& entry : *physicalObjectBuffer)
+        if(entry.second != modifyingVectors && entry.second->interactable())
+            objects.push_back(entry.second);
+    return objects;
+}
+
+bool MainScene::selectObjectById(unsigned int id)
+{
+    const auto found=physicalObjectBuffer->find(id);
+    if(found==physicalObjectBuffer->end() || found->second==modifyingVectors || !found->second->interactable()) return false;
+    auto* obj=found->second;
+    _modifyingVectorsActivated=false;
+    highestClickedObjPoint=*obj->getOrigin()+glm::vec3(0,*obj->getHeight(),0);
+    propertyWindow->addPropertyMap(obj->getPropertyMap());
+    propertyWindow->addPropertyMapInt(obj->getPropertyMapInt());
+    propertyWindow->updateActiveObject(obj);
+    activeObject=obj;
+    extern bool _propertyWindowOn;
+    _propertyWindowOn=true;
+    if(modifyingVectors) {
+        modifyingVectors->setRotationAngle(*obj->getRotationAngle());
+        modifyingVectors->setOrigin(obj->getCenterLocation());
+        modifyingVectors->setRebuiltExpected(true);
+    }
+    return true;
+}
+
 void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 {
 	glm::vec3 rayPos = pos;
@@ -441,24 +471,8 @@ void MainScene::selectObject(glm::vec3 pos, glm::vec3 dir)
 			if (obj == modifyingVectors) {
 				continue;
 			}
-			if (obj->intersectionCheck(rayPos)) {
-				std::cout << "object selected!" << std::endl;
-				highestClickedObjPoint = *obj->getOrigin() +
-					glm::vec3(0.0f, *obj->getHeight(), 0.0f);
-				propertyWindow->addPropertyMap(obj->getPropertyMap());
-				propertyWindow->addPropertyMapInt(obj->getPropertyMapInt());
-				propertyWindow->updateActiveObject(obj);
-				activeObject = obj;
-				extern bool _propertyWindowOn;
-				_propertyWindowOn = true;
-				if (modifyingVectors != nullptr)
-				{
-					modifyingVectors->setRotationAngle(*activeObject->getRotationAngle());
-					modifyingVectors->setOrigin(activeObject->getCenterLocation());
-					modifyingVectors->setRebuiltExpected(true);
-				}
-				return;
-			}
+            if (obj->intersectionCheck(rayPos) && selectObjectById(obj->getId())) return;
+
 		}
 		rayPos += dir * SELECTING_OBJECT_PRECISION;
 		count += SELECTING_OBJECT_PRECISION;

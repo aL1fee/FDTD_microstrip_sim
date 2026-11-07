@@ -1,5 +1,6 @@
 #pragma once
 #include "CavityController.h"
+#include "PhysicalPlayback.h"
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -62,6 +63,10 @@ public:
             { std::lock_guard<std::mutex> lock(mutex);
                 ++generation; replacement=std::move(next); published.reset(); queuedSteps=0; probeChange=false;
                 front=std::move(display); errorText.clear(); workerError.clear(); ++displayRevision;
+                // Reference is a playback conversion only, not a source edit.
+                playback.referenceHz=!front->sources.empty() ? front->sources.front().frequencyHz :
+                    (front->analytical>0 ? front->analytical : 1e9);
+                restartMeter();
             }
             changed.notify_all();
             return true;
@@ -73,22 +78,35 @@ public:
         if(!workerError.empty()) errorText=workerError;
     }
     void setRunning(bool value) {
-        { std::lock_guard<std::mutex> lock(mutex); running=value && ready() && errorText.empty() && !stopping; }
+        { std::lock_guard<std::mutex> lock(mutex);
+            const bool next=value && ready() && errorText.empty() && !stopping;
+            if(next!=running) { running=next; restartMeter(); }
+        }
         changed.notify_all();
     }
     bool isRunning() const { std::lock_guard<std::mutex> lock(mutex); return running; }
     void stepOnce() {
         { std::lock_guard<std::mutex> lock(mutex);
-            running=false;
+            running=false; restartMeter();
             if(ready() && errorText.empty() && !stopping && queuedSteps<1) ++queuedSteps;
         }
         changed.notify_all();
     }
-    void setStepRate(int value) {
-        { std::lock_guard<std::mutex> lock(mutex); rate=std::max(1,std::min(value,80)); }
+    void setPlayback(const PhysicalPlayback& value) {
+        value.stepsPerSecond(ready() ? timestep() : 1);
+        { std::lock_guard<std::mutex> lock(mutex); playback=value; restartMeter(); }
         changed.notify_all();
     }
-    int stepRate() const { std::lock_guard<std::mutex> lock(mutex); return rate; }
+    PhysicalPlayback playbackSettings() const { std::lock_guard<std::mutex> lock(mutex); return playback; }
+    double achievedStepsPerSecond() const {
+        std::lock_guard<std::mutex> lock(mutex);
+        const double seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-meterStart).count();
+        return running && seconds>0 ? completedPlaybackSteps/seconds : 0;
+    }
+    double playbackElapsed() const {
+        std::lock_guard<std::mutex> lock(mutex);
+        return running ? std::chrono::duration<double>(std::chrono::steady_clock::now()-meterStart).count() : 0;
+    }
     void configureProbes(Yee3D::Axis axis,Yee3D::Index first,Yee3D::Index second) {
         sample(first,axis); sample(second,axis); // validate against current display
         { std::lock_guard<std::mutex> lock(mutex); probeAxis=axis; probeFirst=first; probeSecond=second; probeChange=true; }
@@ -119,6 +137,8 @@ public:
     }
 
 private:
+    // Called only with mutex held. A new schedule interrupts a long wait.
+    void restartMeter() { ++schedule; completedPlaybackSteps=0; meterStart=std::chrono::steady_clock::now(); }
     std::size_t offset(Yee3D::Index p,Yee3D::Axis a) const {
         if(!ready() || a<Yee3D::X || a>Yee3D::Z) throw std::out_of_range("Invalid display sample");
         auto size=cells(); for(int i=0;i<3;++i) if(i!=a) ++size[i];
@@ -129,22 +149,32 @@ private:
         using Clock=std::chrono::steady_clock;
         std::unique_ptr<CavityController> solver;
         std::uint64_t solverGeneration=0;
-        auto deadline=Clock::now();
+        std::uint64_t workerSchedule=0;
+        auto delayStart=Clock::now();
+        double delaySeconds=0;
         std::unique_lock<std::mutex> lock(mutex);
         while(!stopping) {
             changed.wait(lock,[&] { return stopping || replacement || probeChange || queuedSteps || running; });
             if(stopping) break;
-            if(replacement) { solver=std::move(replacement); solverGeneration=generation; deadline=Clock::now(); }
+            if(replacement) { solver=std::move(replacement); solverGeneration=generation; delaySeconds=0; }
+            if(workerSchedule!=schedule) { workerSchedule=schedule; delaySeconds=0; }
             if(!solver) continue;
-            if(running && !queuedSteps && !probeChange && Clock::now()<deadline) {
-                changed.wait_until(lock,deadline); continue;
+            const auto now=Clock::now();
+            delaySeconds=std::max(0.0,delaySeconds-std::chrono::duration<double>(now-delayStart).count());
+            delayStart=now;
+            if(running && !queuedSteps && !probeChange && delaySeconds>0) {
+                // Bounded waits avoid chrono overflow for extremely slow requests;
+                // unused delay is retained, not converted into an early step.
+                changed.wait_for(lock,std::chrono::duration<double>(std::min(60.0,delaySeconds))); continue;
             }
             const bool doProbe=probeChange;
             const auto axis=probeAxis; const auto first=probeFirst, second=probeSecond;
             probeChange=false;
             const bool doStep=queuedSteps || (running && !doProbe);
             if(queuedSteps) --queuedSteps;
-            const int targetRate=rate;
+            const double targetRate=playback.stepsPerSecond(solver->timestep());
+            const auto stepSchedule=schedule;
+            const bool automatic=running && doStep;
             lock.unlock();
             try {
                 const auto start=Clock::now();
@@ -154,9 +184,11 @@ private:
                 const auto finished=Clock::now();
                 display->stepMilliseconds=std::chrono::duration<double,std::milli>(finished-start).count();
                 // At most 50% worker duty cycle, and no missed-step catch-up.
-                const auto rest=std::max(finished-start,std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(1.0/targetRate))-(finished-start));
-                deadline=finished+rest;
+                const double workSeconds=std::chrono::duration<double>(finished-start).count();
+                delaySeconds=std::max(workSeconds,1.0/targetRate-workSeconds);
+                delayStart=finished;
                 lock.lock();
+                if(automatic && running && stepSchedule==schedule && solverGeneration==generation) ++completedPlaybackSteps;
                 if(solverGeneration==generation) { published=std::move(display); publishedGeneration=solverGeneration; }
             } catch(const std::exception& e) {
                 lock.lock();
@@ -169,7 +201,10 @@ private:
     mutable std::mutex mutex;
     std::condition_variable changed;
     bool stopping=false, running=false, probeChange=false;
-    int rate=20, queuedSteps=0;
+    int queuedSteps=0;
+    PhysicalPlayback playback;
+    std::uint64_t schedule=0, completedPlaybackSteps=0;
+    std::chrono::steady_clock::time_point meterStart=std::chrono::steady_clock::now();
     Yee3D::Axis probeAxis=Yee3D::Z;
     Yee3D::Index probeFirst{},probeSecond{};
     std::uint64_t generation=0, publishedGeneration=0, displayRevision=0;

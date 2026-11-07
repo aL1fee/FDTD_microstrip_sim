@@ -2,6 +2,9 @@
 #include "LengthUnits.h"
 #include "FieldSliceView.h"
 #include "FieldProbeView.h"
+#include "PhysicalPlaybackView.h"
+#include "SceneHierarchyView.h"
+#include "../Scene/SceneViewport.h"
 #include "../Simulation/SceneCavitySetup.h"
 #include "../Simulation/Microstrip5880Preset.h"
 
@@ -522,8 +525,10 @@ void GUI::buildMenuLowerPanel()
                 ImGui::BeginDisabled(!canRun3D());
                 if(ImGui::MenuItem(cavity.isRunning() ? "Pause 3D fields" : "Run 3D fields")) cavity.setRunning(!cavity.isRunning());
                 if(ImGui::MenuItem("Step 3D once")) cavity.stepOnce();
-                int rate=cavity.stepRate();
-                if(ImGui::SliderInt("3D steps/s limit", &rate, 1, 80)) cavity.setStepRate(rate);
+                if(ImGui::BeginMenu("Physical-time playback")) {
+                    drawPhysicalPlayback(cavity);
+                    ImGui::EndMenu();
+                }
                 ImGui::EndDisabled();
                 if (ImGui::MenuItem("Open slice controls")) cavityOpen = true;
                 ImGui::EndMenu();
@@ -582,31 +587,6 @@ void GUI::buildMenuLowerPanel()
 
 
 
-		if (ImGui::BeginMenu("3"))
-		{
-			if (ImGui::MenuItem("Open", "Ctrl+O")) { /* Open action */ }
-			if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Save action */ }
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("4"))
-		{
-			if (ImGui::MenuItem("Undo", "Ctrl+Z")) { /* Undo action */ }
-			if (ImGui::MenuItem("Redo", "Ctrl+Y")) { /* Redo action */ }
-			ImGui::EndMenu();
-		}
-		ImGui::Separator();
-		if (ImGui::BeginMenu("5"))
-		{
-			if (ImGui::MenuItem("Open", "Ctrl+O")) { /* Open action */ }
-			if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Save action */ }
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("6"))
-		{
-			if (ImGui::MenuItem("Undo", "Ctrl+Z")) { /* Undo action */ }
-			if (ImGui::MenuItem("Redo", "Ctrl+Y")) { /* Redo action */ }
-			ImGui::EndMenu();
-		}
 		ImGui::EndMenuBar();
 	}
 	ImGui::End();
@@ -618,18 +598,9 @@ void GUI::buildMenuLowerPanel()
 void GUI::buildLeftPanel()
 {
 	float windowHeight = ImGui::GetIO().DisplaySize.y;
-	ImGui::SetNextWindowPos(ImVec2(0, 85));
-	ImGui::SetNextWindowSize(ImVec2(256, windowHeight));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.976f, 0.976f, 0.976f, 1.0f));
-
-	ImGui::Begin("LeftPanel", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
-	ImGui::End();
-	ImGui::PopStyleColor();
-
 	// Scene hierarchy
-	ImGui::SetNextWindowPos(ImVec2(4, 89));
-	ImGui::SetNextWindowSize(ImVec2(248, (windowHeight - 85 - 12) / 2));
+	ImGui::SetNextWindowPos(ImVec2(4, 89), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(248, (windowHeight - 85 - 12) / 2), ImGuiCond_FirstUseEver);
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4)); // Adjust the second value to reduce height
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 4));  // Adjust the second value to reduce spacing
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -637,30 +608,19 @@ void GUI::buildLeftPanel()
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 	
-	ImGui::Begin("Scene hierarchy", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove);
+	ImGui::Begin("Scene hierarchy");
 
-	ImGui::Text("Scene hierarchy");
 
-	if (ImGui::TreeNode("Root Node")) {
-		if (ImGui::TreeNode("Child Node 1")) {
-			ImGui::Text("This is Child Node 1");
-			ImGui::TreePop();
-		}
-		if (ImGui::TreeNode("Child Node 2")) {
-			ImGui::Text("This is Child Node 2");
-			ImGui::TreePop();
-		}
-		ImGui::TreePop();
-	}
+
+    drawSceneHierarchy(*_scene_main,hierarchyState);
 
 	ImGui::End();
 	ImGui::PopStyleColor(4);
 	ImGui::PopStyleVar(2);
 
 	// Property
-	ImGui::SetNextWindowPos(ImVec2(4, 89 + 5 + (windowHeight - 85 - 12) / 2));
-	ImGui::SetNextWindowSize(ImVec2(248, (windowHeight - 85 - 12) / 2));
+	ImGui::SetNextWindowPos(ImVec2(4, 89 + 5 + (windowHeight - 85 - 12) / 2), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(248, (windowHeight - 85 - 12) / 2), ImGuiCond_FirstUseEver);
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4)); // Adjust the second value to reduce height
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 4));  // Adjust the second value to reduce spacing
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -668,8 +628,7 @@ void GUI::buildLeftPanel()
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 
-	ImGui::Begin("Property window", nullptr, ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove);
+	ImGui::Begin("Property window");
 	// removed ImGuiWindowFlags_NoTitleBar
 
 	if (_propertyWindowOn)
@@ -885,15 +844,9 @@ void GUI::buildLowerPanel() {
 	if (windowHeight < 300) {
 		return;
 	}
-	ImGui::SetNextWindowPos(ImVec2(255, windowHeight - 160));
-	ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.976f, 0.976f, 0.976f, 1.0f));
-
-	ImGui::Begin("LowerPanel", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus);
-
-	ImGui::SetNextWindowPos(ImVec2(259, windowHeight - 156));
-	ImGui::SetNextWindowSize(ImVec2(windowWidth - 259 - 3, 153));
+    ImGui::SetNextWindowPos(ImVec2(259, windowHeight-210),ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(std::max(350.f,windowWidth-262),205),ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowContentSize(ImVec2(760,170));
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4)); 
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 4)); 
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -901,10 +854,9 @@ void GUI::buildLowerPanel() {
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
 
-	ImGui::Begin("Simulation window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove);
+	ImGui::Begin("Simulation window", nullptr, ImGuiWindowFlags_HorizontalScrollbar);
 
-	ImGui::Text("Simulation window");
+
 
 	// simulation window starts here
 
@@ -1365,66 +1317,24 @@ void GUI::buildLowerPanel() {
 	//ImGui::Text("> Loading..");
 	//ImGui::Text("> Loading..");
 
-	ImGui::End();
-	ImGui::PopStyleColor();
 }
 
-void GUI::buildRightPanels()
+void GUI::buildSceneWindow(GLuint texture)
 {
-	float windowWidth = ImGui::GetIO().DisplaySize.x;
-	float windowHeight = ImGui::GetIO().DisplaySize.y;
-	if (windowWidth < 800 || windowHeight < 400) {
-		return;
-	}
-
-	ImGui::SetNextWindowPos(ImVec2(windowWidth - 400, 85));
-	ImGui::SetNextWindowSize(ImVec2(windowWidth, (windowHeight - 160 - 83) / 2));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.97f, 0.97f, 0.97f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
-
-	ImGui::SetNextWindowCollapsed(true, ImGuiCond_Once);
-	ImGui::Begin("S21", nullptr,ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-
-	_windowS1On = false;
-	_windowS2On = false;
-
-	firstRightPanelMinimized = ImGui::IsWindowCollapsed();
-
-	ImGui::End();
-	ImGui::PopStyleColor(4);
-
-	int secondRightPanelY = 17;
-	if (!firstRightPanelMinimized) {
-		_windowS1On = true;
-		secondRightPanelY = (int) (windowHeight - 160 - 83) / 2 - 1;
-	}
-
-	ImGui::SetNextWindowPos(ImVec2(windowWidth - 400, 85 + (float) secondRightPanelY));
-	ImGui::SetNextWindowSize(ImVec2(windowWidth, (float) (windowHeight - 160 - 83) / 2));
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.97f, 0.97f, 0.97f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
-	ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.93f, 0.93f, 0.93f, 1.0f));
-
-	ImGui::SetNextWindowCollapsed(true, ImGuiCond_Once);
-	ImGui::Begin("S11, S22", nullptr, ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-
-	if (!ImGui::IsWindowCollapsed()) {
-		_windowS2On = true;
-	}
-
-	ImGui::End();
-	ImGui::PopStyleColor(4);
-
+    const auto size=ImGui::GetIO().DisplaySize;
+    ImGui::SetNextWindowPos(ImVec2(259,89),ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(std::max(320.f,size.x-263),std::max(180.f,size.y-305)),ImGuiCond_FirstUseEver);
+    auto& viewport=sceneViewport(); viewport.visible=false; viewport.hovered=false;
+    if(ImGui::Begin("Scene",nullptr,ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+        const auto pos=ImGui::GetCursorScreenPos();
+        auto available=ImGui::GetContentRegionAvail();
+        if(available.x>1 && available.y>1) {
+            ImGui::Image(reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture)),available,ImVec2(0,1),ImVec2(1,0));
+            viewport={pos.x,pos.y,available.x,available.y,true,ImGui::IsItemHovered()};
+        }
+    }
+    ImGui::End();
 }
-
-
-
-
 
 CavityController::Settings GUI::requested3DSettings() const
 {
@@ -1515,8 +1425,8 @@ void GUI::buildCavityWindow()
         if (ImGui::Button(cavity.isRunning() ? "Stop" : "Run")) cavity.setRunning(!cavity.isRunning());
         ImGui::SameLine();
         if (ImGui::Button("Step Once")) cavity.stepOnce();
-        int rate=cavity.stepRate();
-        if(ImGui::SliderInt("Steps/s limit", &rate, 1, 80)) cavity.setStepRate(rate);
+        if(ImGui::CollapsingHeader("Physical-time playback", ImGuiTreeNodeFlags_DefaultOpen))
+            drawPhysicalPlayback(cavity);
         ImGui::Text("Worker: %.1f ms/step incl. snapshot | CPU duty capped at 50%%", cavity.stepMilliseconds());
         ImGui::EndDisabled();
         if (!cavity.error().empty()) ImGui::TextWrapped("%s", cavity.error().c_str());
@@ -1596,6 +1506,7 @@ void GUI::buildTheoryWindow()
         {"System #3: Duroid 5880 microstrip", "system3_duroid5880.txt"},
         {"3D scene sources", "3d_scene_sources.txt"},
         {"3D field probes", "3d_field_probes.txt"},
+        {"Physical-time playback", "physical_time_playback.txt"},
 		{"Start a 1D run", "getting_started.txt"},
 		{"Scene editor", "scene_editor.txt"},
 		{"Simulation controls", "simulation_controls.txt"},
@@ -1674,6 +1585,7 @@ void GUI::buildTheoryWindow()
 void GUI::init()
 {
 	ImGui::CreateContext();
+    ImGui::GetIO().ConfigWindowsMoveFromTitleBarOnly=true;
 	ImGuiIO& io = ImGui::GetIO();
 
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -1724,7 +1636,7 @@ void GUI::terminate()
 	ImGui::DestroyContext();
 }
 
-void GUI::newFrame()
+void GUI::newFrame(GLuint sceneTexture)
 {
     cavity.poll();
 	ImGui::PushStyleColor(ImGuiCol_TextSelectedBg, ImVec4(0.81f, 0.81f, 0.81f, 1.0f)); // Background color of selected text
@@ -1737,7 +1649,7 @@ void GUI::newFrame()
 	buildMenuLowerPanel();
 	buildLeftPanel();
 	buildLowerPanel();
-	buildRightPanels();
+    buildSceneWindow(sceneTexture);
 	buildTheoryWindow();
     if(!canRun3D()) cavity.setRunning(false);
     buildCavityWindow();

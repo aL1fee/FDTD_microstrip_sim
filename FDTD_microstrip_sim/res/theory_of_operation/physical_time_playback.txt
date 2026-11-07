@@ -1,0 +1,19 @@
+* Physical-time playback
+Use Physical-time playback in the 3D controls or Settings > Observation plane. Playback determines how quickly simulated time advances on screen. It never changes the physical speed of light, material properties, source waveform, or stable FDTD timestep.
+
+* Requested RF cycles per screen second
+For playback reference frequency f (Hz), requested rate R (cycles per real second) advances R/f simulated seconds per real second. Required solver steps per real second = R/(f*dt), where dt is the fixed solver timestep in seconds. The default request is 1 cycle per screen second.
+The reference defaults at Apply / Reset to the first applied Source frequency, the analytical frequency for a uniform standing-wave cavity, or 1 GHz if neither exists. You may edit the reference for playback comparisons. Editing it does not change any Source. With multiple source frequencies, the cycle readout refers only to this one reference frequency.
+
+* Requested simulated picoseconds per screen second
+For request P (ps per real second), required solver steps per real second = P*1e-12/dt. This mode does not depend on the playback reference frequency. The reference is still used to express the equivalent cycle rate in the readouts.
+
+* Achieved speed
+Achieved steps/s = completed automatic playback steps divided by elapsed wall-clock time since Run or the last playback edit. Achieved ps/s = achieved steps/s * dt * 1e12. Achieved cycles/s = achieved steps/s * dt * f. These are measured averages, not estimates from the duration of a single step. Pausing reports zero; manual Step Once is excluded. The first half-second is labeled as measuring. Reset starts fresh statistics and discards old in-flight results.
+
+* Performance limits
+The worker retains its approximately 50% duty limit for one CPU core, including field-snapshot construction. The old 80 steps/s ceiling is removed. If computation, OS scheduling, or the duty limit prevents the requested speed, achieved speed is lower and the controls report it. There is no backlog of catch-up steps. Lowering the requested rate can reduce CPU use; raising it beyond available throughput cannot make the solver run faster.
+Steps, source phase and probe samples remain sequential. Rendering may show only the latest completed snapshot while probes still record each timestep. Release x64 is substantially faster than Debug. Apply / Reset still maps geometry synchronously.
+
+* System #3 example
+With 1 mil (25.4 um) cells and Courant number 0.5, dt = 0.5*25.4e-6/299792458 seconds = approximately 0.04236 ps. A 1 GHz cycle lasts 1000 ps and needs approximately 23606 steps. Requesting one RF cycle per screen second therefore requests approximately 23606 steps/s, not one step/s. This may far exceed CPU throughput. The stable timestep remains unchanged regardless of playback settings.

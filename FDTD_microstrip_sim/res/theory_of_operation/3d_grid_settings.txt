@@ -18,7 +18,7 @@ The estimate includes all six field arrays, three electric coefficient arrays, a
 The original 4500 x 2000 x 7000 um scene with 20 um cells has 225 x 100 x 350 = 7875000 cells and exceeds this reset budget. With 50 um cells it has 90 x 40 x 140 = 504000 cells. These are allocation examples, not claims of sufficient accuracy for a particular trace.
 
 * Physical timestep
-The solver uses dt = 0.5 * dx / c0, with dx in meters. Changing cell size changes the physical time per step. Playback still targets 80 steps per screen second and can slow down on large grids. The standing-wave initial condition and center probe scale with grid dimensions.
+The solver uses dt = 0.5 * dx / c0, with dx in meters. Changing cell size changes the physical time per step. Physical-time playback converts the requested RF cycles or simulated picoseconds per screen second into a step rate using this dt. Requested and achieved speed are shown separately; see Physical-time playback. The standing-wave initial condition and center probe scale with grid dimensions.
 
 * Unresolved geometry
 A conductor dimension smaller than one cell produces a warning before applying. Zero mapped samples after applying means the conductor is absent from the discrete model. A nonzero count is not proof of geometric accuracy. Real thin copper still needs resolution studies or a validated thin-sheet model.

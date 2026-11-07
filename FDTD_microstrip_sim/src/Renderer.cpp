@@ -1,5 +1,7 @@
 #include "Renderer.h"
 #include "Scene/ObservationPlaneRenderer.h"
+#include "Scene/SceneViewport.h"
+#include "Scene/SceneRenderTarget.h"
 
 int testExecTimeInterval = 150;
 long testExecTimeCount = 0;
@@ -295,21 +297,36 @@ void Renderer::disableDepthTest() const
 void Renderer::render() const
 {
     ObservationPlaneRenderer observationPlane;
+    SceneRenderTarget target;
+    target.resize(1,1);
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         if(glfwWindowShouldClose(window)) break;
         updateDeltaTime();
-        updateFrameBackgroundColor();
-        clearDepthBuffer();
-        _scene_main->render();
-        _simulation_space->render();
-        input->processInput();
-        gui->newFrame();
-        observationPlane.draw(gui->observationPlane(), _scene_main->getViewMatrix(), _scene_main->getProjMatrix(), &gui->fieldSimulation());
+        gui->newFrame(target.texture);
+        const auto viewport=sceneViewport();
+        if(viewport.visible) {
+            const auto scale=ImGui::GetIO().DisplayFramebufferScale;
+            const int w=std::max(1,static_cast<int>(viewport.width*scale.x));
+            const int h=std::max(1,static_cast<int>(viewport.height*scale.y));
+            target.resize(w,h);
+            _scene_main->setViewportAspect(viewport.width/viewport.height);
+            input->processInput();
+            glBindFramebuffer(GL_FRAMEBUFFER,target.framebuffer);
+            glViewport(0,0,w,h);
+            glDisable(GL_SCISSOR_TEST); glDepthMask(GL_TRUE);
+            updateFrameBackgroundColor(); clearDepthBuffer();
+            _scene_main->render();
+            _simulation_space->render();
+            observationPlane.draw(gui->observationPlane(),_scene_main->getViewMatrix(),_scene_main->getProjMatrix(),&gui->fieldSimulation());
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER,0);
+        int w,h; glfwGetFramebufferSize(window,&w,&h); glViewport(0,0,w,h);
+        glDisable(GL_SCISSOR_TEST); glClearColor(.94f,.94f,.94f,1); glClear(GL_COLOR_BUFFER_BIT);
         gui->render();
-        glfwSwapBuffers(window); // vsync enabled in run(); yields between frames
-        _resizing = false;
+        glfwSwapBuffers(window);
+        _resizing=false;
     }
-    observationPlane.release();
-    gui->terminate(); // join worker and release ImGui while GL context is current
+    target.release(); observationPlane.release();
+    gui->terminate();
 }

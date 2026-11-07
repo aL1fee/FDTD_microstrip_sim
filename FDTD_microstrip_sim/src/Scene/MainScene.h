@@ -108,6 +108,8 @@ public:
 
 	void generateRay(glm::vec3 pos, glm::vec3 dir);
 	void selectObject(glm::vec3 pos, glm::vec3 dir);
+    std::vector<PhysicalObject*> getSceneObjects() const;
+    bool selectObjectById(unsigned int id);
 
 	PropertyWindow* getPropertyWindow() { return propertyWindow; }
 
@@ -117,6 +119,13 @@ public:
 	float* getFarPlaneValue() { return &farPlaneValue; }
 
 	void updateProjMatrix() { _projMatrixChanged = true; }
+    void setViewportAspect(float value) {
+        if(value>0 && aspect!=value) {
+            aspect=value;
+            projMatrix=glm::perspective(glm::radians(cam->getZoom()),aspect,nearPlaneValue,farPlaneValue);
+            updateProjMatrix();
+        }
+    }
 
 	void showModifyingVectors(PhysicalObject* obj, ModyfingVectorType type);
 	void deleteModifyingVectors();

@@ -1,4 +1,5 @@
 #include "Utility.h"
+#include "Scene/SceneViewport.h"
 
 void window_reshape_callback(GLFWwindow* window, int newWidth, int newHeight)
 {
@@ -21,15 +22,12 @@ void Utility::checkGLError(const char* function)
 // handling resizing by shortening the displayed NDC when resized down from the full-screen mode
 glm::vec3 Utility::screenToNDC(GLFWwindow* window, float x, float y, float z)
 {
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
-    extern int _initialWindowWidth;
-    extern int _initialWindowHeight;
-    float y_delta_ndc_scaled = (float) height / _initialWindowHeight * 2.0f;
-    return glm::vec3(((float) width / _initialWindowWidth) * (2.0f * x) / width - 1.0f, 
-        -1.0f + (height - y) * y_delta_ndc_scaled / height,
-        z);
-    //return glm::vec3((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height, z);
+    const auto& viewport=sceneViewport();
+    if(viewport.visible && viewport.width>0 && viewport.height>0)
+        return glm::vec3(2*(x-viewport.x)/viewport.width-1,1-2*(y-viewport.y)/viewport.height,z);
+    int width,height; glfwGetWindowSize(window,&width,&height);
+    return glm::vec3(2*x/std::max(1,width)-1,1-2*y/std::max(1,height),z);
+
 }
 
 glm::vec4 Utility::NDCToHCC(glm::vec3 v)

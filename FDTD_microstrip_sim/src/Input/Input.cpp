@@ -1,5 +1,6 @@
 #include "../vendor/imgui/imgui.h"
 #include "Input.h"
+#include "../Scene/SceneViewport.h"
 #include <mutex>
 
 extern Camera* cam;
@@ -79,7 +80,7 @@ void Input::processInput()
 
     inputBuffer->processKeyStates();
     const ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+    if (!sceneViewport().hovered || io.WantTextInput)
         return;
 
     // process keyboard movement (runs in render thread)
@@ -356,37 +357,13 @@ void Input::processInput()
         _selectingObjectExpected = false;
         double mouseX, mouseY;
         glfwGetCursorPos(window, &mouseX, &mouseY);
-        glfwGetWindowSize(window, &screenWidth, &screenHeight);
-        if (mouseX > 260 && mouseY > 83 && mouseY < screenHeight - 160) 
-        {
-            int rightPaneCheckY = 115;
-            if (_windowS1On || _windowS2On)
-            {
-                rightPaneCheckY = (screenHeight - 160 - 83 - 16) / 2 + 115;
-            }
-            if (_windowS1On && _windowS2On)
-            {
-                rightPaneCheckY = screenHeight;
-            }
-            if (mouseX < screenWidth - 400 || mouseY > rightPaneCheckY)
-            {
-                glm::vec3 rayNDC = Utility::screenToNDC(window,
-                    static_cast<float>(mouseX), static_cast<float>(mouseY), 1.0f);
-                glm::vec4 rayClip = Utility::NDCToHCC(rayNDC);
-                glm::vec4 rayEye = Utility::clipToEyeC(rayClip);
-                glm::vec3 rayWorld = Utility::eyeToWorldC(rayEye);
-                _scene_main->selectObject(cam->getPos(), rayWorld);
-            }
-            else {
-                //_scene_main->deleteModifyingVectors();
-                _scene_main->hideModifyingVectors();
-            }
-        }
-        else {
-            //_scene_main->deleteModifyingVectors();
-            _scene_main->hideModifyingVectors();
+        if(sceneViewport().contains(mouseX,mouseY)) {
+            const auto ndc=Utility::screenToNDC(window,static_cast<float>(mouseX),static_cast<float>(mouseY),1);
+            const auto ray=Utility::eyeToWorldC(Utility::clipToEyeC(Utility::NDCToHCC(ndc)));
+            _scene_main->selectObject(cam->getPos(),ray);
         }
     }
+
 }
 
 float lastScaleValue = 0.0f;
@@ -394,7 +371,7 @@ float previousAngle = 0.0f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (ImGui::GetIO().WantCaptureMouse)
+    if (!sceneViewport().hovered || !sceneViewport().contains(xpos,ypos))
     {
         _firstMouseMovement = true;
         return;
@@ -409,7 +386,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     glfwGetWindowSize(window, &screenWidth, &screenHeight);
 
-    if (posXF < INITIAL_OPENGL_CONTEXT_POSITION_X || posYF < INITIAL_OPENGL_CONTEXT_POSITION_Y || posYF > (screenHeight - 160)) {
+    if (!sceneViewport().contains(posXF,posYF)) {
         _firstMouseMovement = true;
         return;
     }
@@ -766,14 +743,14 @@ void Input::updateModifyingVectors(GLFWwindow* window, double xpos, double ypos)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (ImGui::GetIO().WantCaptureMouse)
+    if (!sceneViewport().hovered)
         return;
 
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
     glfwGetWindowSize(window, &screenWidth, &screenHeight);
 
-    if (mouseX < INITIAL_OPENGL_CONTEXT_POSITION_X || mouseY < INITIAL_OPENGL_CONTEXT_POSITION_Y || mouseY >(screenHeight - 160)) {
+    if (!sceneViewport().contains(mouseX,mouseY)) {
         return;
     }
 
@@ -790,7 +767,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     extern bool _mouseRightButtonPressed;
-    if (!ImGui::GetIO().WantCaptureMouse &&
+    if (sceneViewport().hovered &&
         glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         _mouseRightButtonPressed = true;
     } else {

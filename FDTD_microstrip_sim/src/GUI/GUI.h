@@ -21,6 +21,7 @@
 
 #include "StatusWindow.h"
 #include "PropertyWindow.h"
+#include "SceneHierarchyView.h"
 
 #include "../Scene/MainScene.h"
 #include "../Simulation/SimulationSpace.h"
@@ -34,6 +35,7 @@ class GUI
 private:
 	GLFWwindow* window;
 	StatusWindow* statusWindow;
+    SceneHierarchyState hierarchyState;
 	
 	float firstRightPanelMinimized;
 	float propertyWindowMinimized;
@@ -67,7 +69,7 @@ private:
 	void buildMenuLowerPanel();
 	void buildLeftPanel();
 	void buildLowerPanel();
-	void buildRightPanels();
+    void buildSceneWindow(GLuint texture);
 
 	ImFont* customFont;
 
@@ -87,7 +89,7 @@ public:
         return {cavity.grid(), static_cast<FieldSlice::Plane>(cavityPlane), cavitySlice,
             cavity.ready() && observationPlaneVisible, observationPlaneOpacity, cavity.ready() && solverBoundaryVisible, static_cast<Yee3D::Axis>(cavityComponent), observationPlaneField};
     }
-    void newFrame();
+    void newFrame(GLuint sceneTexture=0);
 
 
 

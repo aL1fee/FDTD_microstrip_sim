@@ -53,6 +53,7 @@ protected:
 	std::vector<std::pair<std::string, float*>>* propertyMap;
 	std::vector<std::pair<std::string, int*>>* propertyMapInt;
 	unsigned int id;
+    std::string displayName;
 
 	bool beingRendered;
 
@@ -76,6 +77,10 @@ public:
 
 	std::string getShaderName() const { return shader->getName(); }
 	unsigned int getId() const { return id; }
+    std::string getDisplayName() const {
+        return displayName.empty() ? getShaderName()+" #"+std::to_string(id) : displayName;
+    }
+    void setDisplayName(const std::string& name) { displayName=name; }
 
 	virtual glm::vec3 getCenterLocation() const;
 	glm::vec3* getOrigin() { return &origin; }

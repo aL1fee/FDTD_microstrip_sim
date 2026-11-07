@@ -7,7 +7,7 @@
 
 Open the example
 
-Select 3D, then Execute > Open 3D vacuum cavity. The example has its own Run, Stop, Step Once, and Apply / Reset controls. Select Grid > Fixed cavity validation preset, Material > Vacuum, and Excitation > Standing wave, then Apply / Reset. This explicit preset uses a fixed 12000 x 10000 x 8000 um vacuum box with perfectly conducting walls and 500 um cubic cells. It advances at 80 steps per screen second. The displayed physical time advances by dt = 0.5 * dx / c0 per step, about 0.834 ps here.
+Select 3D, then Execute > Open 3D vacuum cavity. The example has its own Run, Stop, Step Once, and Apply / Reset controls. Select Grid > Fixed cavity validation preset, Material > Vacuum, and Excitation > Standing wave, then Apply / Reset. This explicit preset uses a fixed 12000 x 10000 x 8000 um vacuum box with perfectly conducting walls and 500 um cubic cells. Physical-time playback requests a speed in RF cycles or simulated picoseconds per screen second; actual throughput is shown as achieved speed. The displayed physical time advances by dt = 0.5 * dx / c0 per step, about 0.834 ps here.
 
 The preset initializes a standing electric field along Z, with zero magnetic field. It is a controlled validation case for the solver. The editable scene geometry does not define this box.
 

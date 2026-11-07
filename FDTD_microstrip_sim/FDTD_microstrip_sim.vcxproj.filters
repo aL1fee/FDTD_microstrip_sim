@@ -157,6 +157,11 @@
     <ClInclude Include="src\Simulation\GridSettings.h" />
     <ClInclude Include="src\Simulation\Microstrip5880Preset.h" />
     <ClInclude Include="src\Simulation\AsyncCavity.h" />
+    <ClInclude Include="src\Simulation\PhysicalPlayback.h" />
+    <ClInclude Include="src\GUI\PhysicalPlaybackView.h" />
+    <ClInclude Include="src\GUI\SceneHierarchyView.h" />
+    <ClInclude Include="src\Scene\SceneViewport.h" />
+    <ClInclude Include="src\Scene\SceneRenderTarget.h" />
     <ClInclude Include="src\Simulation\FieldProbes.h" />
     <ClInclude Include="src\Simulation\PropagationValidation.h" />
     <ClInclude Include="src\GUI\FieldProbeView.h" />

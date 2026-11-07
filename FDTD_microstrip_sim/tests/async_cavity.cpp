@@ -35,17 +35,32 @@ int main() {
     async.configureProbes(Yee3D::X,{2,3,4},{5,3,4});
     waitFor(async,[&] { return async.probes()[0].component==Yee3D::X; });
     require(async.stepCount()==40 && async.probes()[0].count==1);
-    async.setStepRate(20); async.setRunning(true);
+    auto playback=async.playbackSettings();
+    playback.mode=PhysicalPlayback::PhysicalTime;
+    playback.picosecondsPerSecond=20*async.timestep()*1e12;
+    async.setPlayback(playback); async.setRunning(true);
     const auto frozenStep=async.stepCount(); const auto frozenSample=async.sample({6,4,4},Yee3D::Y);
     std::this_thread::sleep_for(std::chrono::milliseconds(120));
     // No poll: worker must not mutate the display being read by a frame.
     require(async.stepCount()==frozenStep && async.sample({6,4,4},Yee3D::Y)==frozenSample);
     waitFor(async,[&] { return async.stepCount()>frozenStep; });
+    require(async.achievedStepsPerSecond()>0);
     async.setRunning(false);
+    require(async.achievedStepsPerSecond()==0);
     std::this_thread::sleep_for(std::chrono::milliseconds(80)); async.poll();
     const auto paused=async.stepCount();
     std::this_thread::sleep_for(std::chrono::milliseconds(80)); async.poll();
     require(async.stepCount()==paused);
+    const auto unchangedDt=async.timestep();
+    playback.picosecondsPerSecond=async.timestep()*1e12/1000; // long, interruptible wait
+    async.setPlayback(playback); async.setRunning(true);
+    waitFor(async,[&] { return async.stepCount()>paused; });
+    const auto slowStep=async.stepCount();
+    playback.picosecondsPerSecond=20*async.timestep()*1e12;
+    async.setPlayback(playback);
+    waitFor(async,[&] { return async.stepCount()>slowStep; });
+    require(async.timestep()==unchangedDt && async.achievedStepsPerSecond()>0);
+    async.setRunning(false);
     // Replacement generations discard any old in-flight publication.
     async.setRunning(true);
     CavityController::Settings replacement; replacement.grid={{7,6,5},.001};

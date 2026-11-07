@@ -3,6 +3,8 @@
 #include "../src/Simulation/SceneCavitySetup.h"
 #include "../src/GUI/FieldSliceView.h"
 #include "../src/GUI/FieldProbeView.h"
+#include "../src/GUI/PhysicalPlaybackView.h"
+#include "../src/GUI/SceneHierarchyView.h"
 #include "../src/Scene/ObservationPlaneRenderer.h"
 #include "../src/Simulation/Microstrip5880Preset.h"
 #include <stdexcept>
@@ -131,6 +133,82 @@ int main()
         for(int list=0;list<ImGui::GetDrawData()->CmdListsCount;++list)
             for(const auto& vertex : ImGui::GetDrawData()->CmdLists[list]->VtxBuffer)
                 require(std::isfinite(vertex.pos.x) && std::isfinite(vertex.pos.y));
+    }
+    {
+        AsyncCavity playback;
+        for(int state=0;state<3;++state) {
+            if(state==1) require(playback.reset({}));
+            if(state==2) {
+                auto config=playback.playbackSettings(); config.mode=PhysicalPlayback::PhysicalTime;
+                playback.setPlayback(config); playback.setRunning(true);
+            }
+            playback.poll();
+            ImGui::NewFrame();
+            ImGui::SetNextWindowSize(ImVec2(780,880));
+            ImGui::Begin("Physical playback validation");
+            drawPhysicalPlayback(playback);
+            ImGui::End(); ImGui::Render();
+            require(ImGui::GetDrawData()->TotalVtxCount>0);
+            for(int list=0;list<ImGui::GetDrawData()->CmdListsCount;++list)
+                for(const auto& vertex : ImGui::GetDrawData()->CmdLists[list]->VtxBuffer)
+                    require(std::isfinite(vertex.pos.x) && std::isfinite(vertex.pos.y));
+        }
+        playback.setRunning(false);
+        std::cout << "Physical-time controls render before setup, paused, and running in both unit modes." << std::endl;
+    }
+    {
+        auto* selected=scene->getSceneObjects().front();
+        require(scene->selectObjectById(selected->getId()));
+        const auto originalShader=selected->getShaderName();
+        selected->setDisplayName("Feed trace ## 1");
+        require(selected->getDisplayName()=="Feed trace ## 1" && selected->getShaderName()==originalShader);
+        SceneHierarchyState hierarchy;
+        ImVec2 firstRow;
+        auto frame=[&](ImGuiKey key,bool down,bool typing) {
+            if(key!=ImGuiKey_None) io.AddKeyEvent(key,down);
+            ImGui::NewFrame();
+            ImGui::SetNextWindowSize(ImVec2(248,500)); ImGui::SetNextWindowFocus();
+            ImGui::Begin("Hierarchy keyboard validation");
+            const auto cursor=ImGui::GetCursorScreenPos();
+            firstRow=ImVec2(cursor.x+40,cursor.y+ImGui::GetTextLineHeightWithSpacing()+3);
+            io.WantTextInput=typing;
+            drawSceneHierarchy(*scene,hierarchy);
+            ImGui::End(); ImGui::Render();
+        };
+        frame(ImGuiKey_None,false,false);
+        for(auto key : {ImGuiKey_R,ImGuiKey_T,ImGuiKey_Y}) {
+            frame(key,true,false);
+            const auto expected=key==ImGuiKey_R ? Rotation : key==ImGuiKey_T ? Translation : Scaling;
+            require(scene->getModifyingVectors()->getType()==expected);
+            require(scene->getModifyingVectors()->isBeingRendered());
+            frame(key,false,false);
+        }
+        frame(ImGuiKey_R,true,true); // typing 'r' must not activate rotation
+        require(scene->getModifyingVectors()->getType()==Scaling);
+        frame(ImGuiKey_R,false,false);
+        require(scene->getActiveObject()==selected);
+        auto mouse=[&](bool down) {
+            io.AddMousePosEvent(firstRow.x,firstRow.y);
+            io.AddMouseButtonEvent(ImGuiMouseButton_Left,down);
+            frame(ImGuiKey_None,false,false);
+        };
+        mouse(true); mouse(false); mouse(true); mouse(false);
+        require(hierarchy.editing && hierarchy.objectId==selected->getId());
+        frame(ImGuiKey_None,false,true); // editor focus and auto-selection
+        io.AddInputCharactersUTF8("Renamed trace"); frame(ImGuiKey_None,false,true);
+        frame(ImGuiKey_Enter,true,true); frame(ImGuiKey_Enter,false,false);
+        require(!hierarchy.editing && selected->getDisplayName()=="Renamed trace");
+        // Start another edit and cancel it: model name must not change.
+        hierarchy.editing=true; hierarchy.focusEditor=true; hierarchy.objectId=selected->getId();
+        std::snprintf(hierarchy.name,sizeof(hierarchy.name),"%s",selected->getDisplayName().c_str());
+        frame(ImGuiKey_None,false,true); frame(ImGuiKey_None,false,true);
+        io.AddInputCharactersUTF8("Cancelled name"); frame(ImGuiKey_None,false,true);
+        frame(ImGuiKey_Escape,true,true); frame(ImGuiKey_Escape,false,false);
+        require(!hierarchy.editing && selected->getDisplayName()=="Renamed trace");
+        selected->setDisplayName("");
+        require(selected->getDisplayName()==originalShader+" #"+std::to_string(selected->getId()));
+        std::cout << "Hierarchy R/T/Y, typing guard, literal editable names and stable selection identity passed." << std::endl;
+        std::cout << "Double-click inline rename, Enter commit and Escape cancel passed." << std::endl;
     }
     ImGui::DestroyContext();
     std::cout << "Field-probe panels and independent reference result plots rendered." << std::endl;
@@ -271,6 +349,27 @@ int main()
         require(std::isfinite(pcb.sample(point,Yee3D::Y)) && pcb.sample(point,Yee3D::Y)>0);
         std::cout << "System #3 full-resolution reset and step passed: carrier " << pcbCoverage[0].samples
             << ", trace " << pcbCoverage[1].samples << ", driven source " << pcb.sources()[0].samples.size() << " samples." << std::endl;
+        const auto objects=pcbScene->getSceneObjects();
+        require(objects.size()==4); // carrier, substrate, trace, source; no editor helpers
+        for(auto* object : objects) {
+            require(pcbScene->selectObjectById(object->getId()));
+            require(pcbScene->getActiveObject()==object);
+            require(pcbScene->getPropertyWindow()->getActiveObject()==object);
+            require(pcbScene->getPropertyWindow()->getProperties()==object->getPropertyMap());
+            require(pcbScene->getPropertyWindow()->getPropertiesInt()==object->getPropertyMapInt());
+            require(*pcbScene->getModifyingVectors()->getOrigin()==object->getCenterLocation());
+        }
+        std::string extra="Trace";
+        pcbScene->addTrace(extra,glm::vec3(0),mil,mil,mil,glm::vec3(1),1,1);
+        require(pcbScene->getSceneObjects().size()==5);
+        const auto extraId=pcbScene->getSceneObjects().back()->getId();
+        require(pcbScene->selectObjectById(extraId));
+        pcbScene->deleteActiveObject();
+        require(pcbScene->getSceneObjects().size()==4 && !pcbScene->getActiveObject());
+        require(!pcbScene->getPropertyWindow()->getActiveObject());
+        require(!pcbScene->selectObjectById(extraId));
+        require(!pcbScene->selectObjectById(pcbScene->getModifyingVectors()->getId()));
+        std::cout << "Hierarchy enumeration, selection/property binding, gizmo placement, insertion and deletion passed." << std::endl;
     }
     glfwDestroyWindow(window);
     glfwTerminate();
